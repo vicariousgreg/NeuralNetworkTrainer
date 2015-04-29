@@ -12,6 +12,7 @@
 
 <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.TrainController">
    <children>
+      <ColorPicker fx:id="colorPicker" layoutX="41.0" layoutY="314.0" onAction="#setColor" />
       <Rectangle fx:id="colorBox" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="200.0" layoutX="39.0" layoutY="100.0" stroke="BLACK" strokeType="INSIDE" width="242.0" />
       <Text layoutX="39.0" layoutY="62.0" strokeType="OUTSIDE" strokeWidth="0.0" text="What color is this?" />
       <Button layoutX="338.0" layoutY="325.0" mnemonicParsing="false" onAction="#randomizeColor" prefHeight="25.0" prefWidth="100.0" text="Skip" />

@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
@@ -13,6 +14,7 @@ import java.util.Random;
 import java.util.ResourceBundle;
 
 public class TrainController implements Initializable {
+   @FXML ColorPicker colorPicker;
    @FXML Rectangle colorBox;
    @FXML Button redbutton;
    @FXML Button orangebutton;
@@ -22,19 +24,19 @@ public class TrainController implements Initializable {
    @FXML Button purplebutton;
 
    private Random rand = new Random();
-   private double r;
-   private double g;
-   private double b;
 
    public void initialize(URL location, ResourceBundle resources) {
       randomizeColor();
    }
 
+   public void setColor() {
+      Color color = colorPicker.getValue();
+      colorBox.setFill(color);
+   }
+
    public void randomizeColor() {
-      r = rand.nextDouble();
-      g = rand.nextDouble();
-      b = rand.nextDouble();
-      colorBox.setFill(new Color(r, g, b, 1));
+      colorBox.setFill(new Color(
+         rand.nextDouble(), rand.nextDouble(), rand.nextDouble(), 1));
    }
 
    public void clickRed() {

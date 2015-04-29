@@ -16,7 +16,14 @@
       <ColorPicker fx:id="colorPicker" layoutX="46.0" layoutY="54.0" onAction="#setColor" />
       <Rectangle fx:id="rectangle" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="200.0" layoutX="46.0" layoutY="106.0" stroke="BLACK" strokeType="INSIDE" width="303.0" />
       <Button layoutX="252.0" layoutY="54.0" mnemonicParsing="false" onAction="#randomize" text="Randomize" />
-      <Button fx:id="guess" layoutX="418.0" layoutY="106.0" mnemonicParsing="false" onAction="#guessColor" text="Guess!" />
-      <Text fx:id="answer" layoutX="376.0" layoutY="212.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="177.7294921875" />
+      <Text fx:id="answer" layoutX="385.0" layoutY="118.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="177.7294921875" />
+
+      <Button fx:id="correctbutton" layoutX="426.0" layoutY="148.0" mnemonicParsing="false" onAction="#clickCorrect" prefHeight="25.0" prefWidth="100.0" text="Correct!" />
+      <Button fx:id="redbutton" layoutX="364.0" layoutY="194.0" mnemonicParsing="false" onAction="#clickRed" prefHeight="25.0" prefWidth="100.0" text="Red" />
+      <Button fx:id="orangebutton" layoutX="362.0" layoutY="234.0" mnemonicParsing="false" onAction="#clickOrange" prefHeight="25.0" prefWidth="100.0" text="Orange" />
+      <Button fx:id="yellowbutton" layoutX="364.0" layoutY="271.0" mnemonicParsing="false" onAction="#clickYellow" prefHeight="25.0" prefWidth="100.0" text="Yellow" />
+      <Button fx:id="greenbutton" layoutX="487.0" layoutY="195.0" mnemonicParsing="false" onAction="#clickGreen" prefHeight="25.0" prefWidth="100.0" text="Green" />
+      <Button fx:id="bluebutton" layoutX="487.0" layoutY="234.0" mnemonicParsing="false" onAction="#clickBlue" prefHeight="25.0" prefWidth="100.0" text="Blue" />
+      <Button fx:id="purplebutton" layoutX="487.0" layoutY="270.0" mnemonicParsing="false" onAction="#clickPurple" prefHeight="25.0" prefWidth="100.0" text="Purple" />
    </children>
 </Pane>
