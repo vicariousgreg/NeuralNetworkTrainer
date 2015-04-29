@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+
+
+<Pane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.MainController">
+   <children>
+      <MenuBar prefHeight="29.0" prefWidth="600.0">
+        <menus>
+          <Menu mnemonicParsing="false" text="Mode">
+            <items>
+              <MenuItem mnemonicParsing="false" onAction="#onTrainClick" text="Train" />
+                  <MenuItem mnemonicParsing="false" onAction="#onInteractClick" text="Interact" />
+                  <MenuItem mnemonicParsing="false" onAction="#onExamineClick" text="Examine" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+      <AnchorPane layoutY="29.0" prefHeight="371.0" prefWidth="600.0">
+         <children>
+             <fx:include fx:id="train" source="train.fxml" />
+             <fx:include fx:id="interact" source="interact.fxml" />
+             <fx:include fx:id="examine" source="examine.fxml" />
+         </children>
+      </AnchorPane>
+   </children>
+</Pane>
