@@ -8,6 +8,8 @@ import java.util.Random;
  * Represents a neural network neuron.
  */
 public class Neuron implements Serializable {
+   /** Activation function. */
+   private ActivationFunction activationFunction;
    /** Number of inputs. */
    private int numInputs;
    /** Array of weight values. */
@@ -24,10 +26,12 @@ public class Neuron implements Serializable {
     * Randomized constructor.
     * Randomizes weights and bias.
     *
-    * @param numInputs number of node inputs.
+    * @param activ activation function
+    * @param numInputs number of node inputs
     */
-   public Neuron(int numInputs) {
+   public Neuron(ActivationFunction activ, int numInputs) {
       this.numInputs = numInputs;
+      this.activationFunction = activ;
       this.weights = new double[numInputs];
       this.weightDeltas = new double[numInputs];
       randomize();
@@ -38,10 +42,12 @@ public class Neuron implements Serializable {
     * Initializes weights and bias, deep copying weights.
     * Useful for copying.
     *
+    * @param activ activation function
     * @param weights initial weights
     * @param bias initial bias
     */
-   private Neuron(double[] weights, double bias) {
+   private Neuron(ActivationFunction activ, double[] weights, double bias) {
+      this.activationFunction = activ;
       this.numInputs = weights.length;
       this.bias = bias;
       this.weightDeltas = new double[weights.length];
@@ -83,7 +89,7 @@ public class Neuron implements Serializable {
       x += bias;
 
       // Calculate signal output.
-      return Sigmoid.calculate(x);
+      return activationFunction.calculate(x);
    }
 
    /**
@@ -136,7 +142,7 @@ public class Neuron implements Serializable {
     * @return clone
     */
    public Neuron clone() {
-      return new Neuron(this.weights, this.bias);
+      return new Neuron(this.activationFunction, this.weights, this.bias);
    }
 
    /**

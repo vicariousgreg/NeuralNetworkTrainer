@@ -13,9 +13,6 @@ public class Network implements Serializable {
    /** Network learning parameters. */
    private NetworkParameters parameters;
 
-   /** Layer sizes. */
-   private int[] layerSizes;
-
    /** Network neuron layers. */
    private ArrayList<Neuron[]> layers;
 
@@ -40,7 +37,7 @@ public class Network implements Serializable {
       this.schema = schema;
       this.parameters = params;
       this.memory = new ArrayList<Experience>();
-      layerSizes = new int[parameters.hiddenLayerDepths.length + 2];
+      int[] layerSizes = new int[parameters.hiddenLayerDepths.length + 2];
       layers = new ArrayList<Neuron[]>();
 
       // Set up layer sizes array.
@@ -56,7 +53,7 @@ public class Network implements Serializable {
 
          // Initialize neurons using previous layer size.
          for (int j = 0; j < layer.length; ++j) {
-            layer[j] = new Neuron(layerSizes[i-1]);
+            layer[j] = new Neuron(parameters.activationFunction, layerSizes[i-1]);
          }
 
          layers.add(layer);
@@ -154,6 +151,8 @@ public class Network implements Serializable {
       Neuron[] currLayer = layers.get(layerIndex);
       double[][] weights = new double[previousLayer.length][currLayer.length];
 
+      // For each neuron in the layer, extract its weight for each
+      // neuron in the previous layer.
       for (int c = 0; c < currLayer.length; ++c) {
          Neuron neuron = currLayer[c];
          double[] currWeights = neuron.getWeights();
@@ -212,7 +211,7 @@ public class Network implements Serializable {
     * @param test test to calculate error for
     * @return total error
     */
-   public double calcTestError(Experience test) {
+   private double calcTestError(Experience test) {
       // Get quadratic deviations for each output neuron
       double[] errors = calcError(fire(test.inputs), test.outputs);
 
@@ -231,7 +230,7 @@ public class Network implements Serializable {
     * @param expected expected output
     * @return errors
     */
-   public double[] calcError(double[] actual, double[] expected) {
+   private double[] calcError(double[] actual, double[] expected) {
       double[] errors = new double[actual.length];
 
       // Calculate test error for each output neuron.
@@ -254,9 +253,8 @@ public class Network implements Serializable {
 
       // Calculate backpropagated error for each output neuron.
       for (int i = 0; i < actual.length; ++i) {
-         errors[i] = actual[i] *
-                     (1 - actual[i]) *
-                     (expected[i] - actual[i]);
+         errors[i] = (expected[i] - actual[i]) *
+            parameters.activationFunction.calculateDerivative(actual[i]);
       }
       return errors;
    }
@@ -321,9 +319,8 @@ public class Network implements Serializable {
             }
 
             // Set the new error.
-            newErrors[prevIndex] = output[prevIndex] *
-                                  (1 - output[prevIndex]) *
-                                  sigma;
+            newErrors[prevIndex] = sigma *
+               parameters.activationFunction.calculateDerivative(output[prevIndex]);
          }
 
          // Move new errors over for next iteration.

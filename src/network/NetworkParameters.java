@@ -15,6 +15,9 @@ public class NetworkParameters implements Serializable {
     */
    public int[] hiddenLayerDepths;
 
+   /** Neuron activation function. */
+   public ActivationFunction activationFunction;
+
    /**
     * The error threshold for network regression.
     * If the network's error increases by this much, it is reset.
@@ -34,10 +37,13 @@ public class NetworkParameters implements Serializable {
    /**
     * Constructor.
     */
-   public NetworkParameters(double learningConstant, int[] hidden, int staleThresh,
-         double regressionThresh, double acceptableError, double acceptablePercentage) {
+   public NetworkParameters(double learningConstant, int[] hidden,
+         ActivationFunction activation, int staleThresh,
+         double regressionThresh, double acceptableError,
+         double acceptablePercentage) {
       this.learningConstant = learningConstant;
       this.hiddenLayerDepths = hidden;
+      this.activationFunction = new SigmoidEstimate(1, 1000, 10);
       this.regressionThreshold = regressionThresh;
       this.staleThreshold = staleThresh;
       this.acceptableTestError = acceptableError;
@@ -48,11 +54,6 @@ public class NetworkParameters implements Serializable {
     * Default constructor.
     */
    public NetworkParameters() {
-      this.learningConstant = 0.1;
-      this.hiddenLayerDepths = new int[] { 5 };
-      this.regressionThreshold = 50;
-      this.staleThreshold = 1000;
-      this.acceptableTestError = 100;
-      this.acceptablePercentCorrect = 60;
+      this(0.1, new int[] { 5 }, new SigmoidEstimate(1, 1000, 10), 50, 1000, 100, 60);
    }
 }
