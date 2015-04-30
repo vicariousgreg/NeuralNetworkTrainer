@@ -23,6 +23,7 @@ public class ExamineController implements Initializable {
    public void initialize(URL location, ResourceBundle resources) { }
 
    public void extractMemories(Network network) {
+      memoryList.getChildren().clear();
       ArrayList<Experience> memory = network.getMemory();
       Schema schema = network.schema;
 
@@ -32,7 +33,7 @@ public class ExamineController implements Initializable {
             Rectangle rect = new Rectangle(25, 25);
             rect.setFill((Color) schema.translateInput(exp.inputs));
             memoryBox.getChildren().add(rect);
-            memoryBox.getChildren().add(new Text(schema.translateOutput(exp.outputs)));
+            memoryBox.getChildren().add(new Text(schema.translateOutput(exp.outputs).toString()));
             memoryList.getChildren().add(memoryBox);
          } catch (Exception e) {
             System.out.println("Error loading memory!");

@@ -54,7 +54,7 @@ public class Main {
          }
 
          @Override
-         public double[] convertOutput(String out) throws Exception {
+         public double[] convertOutput(Object out) throws Exception {
             if (out.equals("greater")) return new double[] {1.0, 0.0 };
             if (out.equals("less")) return new double[] {1.0, 0.0 };
             throw new Exception("Invalid output classification!");
@@ -66,7 +66,7 @@ public class Main {
                throw new Exception ("Invalid input vector size!");
             return in;
          }
-      }, layerSizes);
+      });
 
       for (Experience test : tests) {
          network.addExperience(test);

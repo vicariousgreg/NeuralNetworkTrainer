@@ -3,7 +3,8 @@ package network;
 import javafx.scene.paint.Color;
 
 /**
- * Created by gpdavis on 4/29/15.
+ * A Neural Network schema for color identification.
+ * Includes primary and secondary colors.
  */
 public class ColorSchema extends Schema {
    /**
@@ -27,13 +28,15 @@ public class ColorSchema extends Schema {
    }
 
    @Override
-   public double[] convertOutput(String out) throws Exception {
+   public double[] convertOutput(Object out) throws Exception {
       int expIndex = -1;
 
+      // Find the index of the classification.
       for (int index = 0; index < classifications.length; ++index) {
          if (out.equals(classifications[index])) expIndex = index;
       }
 
+      // If not found, the output to convert was invalid.
       if (expIndex == -1)
          throw new Exception(
                "Output string does not represent a classification!");

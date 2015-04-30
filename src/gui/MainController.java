@@ -19,7 +19,7 @@ import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
    private Stage stage;
-   public static Network network = new Network(new ColorSchema(), new int[] {3, 5, 6});
+   public static Network network = new Network(new ColorSchema());
    public static final ArrayList<Experience> tests = new ArrayList<Experience>();
 
    @FXML Pane train;
@@ -47,6 +47,8 @@ public class MainController implements Initializable {
             FileInputStream fin = new FileInputStream(file);
             ObjectInputStream ois = new ObjectInputStream(fin);
             network = (Network) ois.readObject();
+            trainController.setNetwork(network);
+            interactController.setNetwork(network);
             ois.close();
          } catch (Exception e) {
             System.out.println("Could not load newtork!");

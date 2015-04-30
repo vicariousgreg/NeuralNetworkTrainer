@@ -7,35 +7,50 @@ import java.util.ArrayList;
  * Represents a neural network.
  */
 public class Network implements Serializable {
+   /** Network schema. */
+   public final Schema schema;
+
+   /** Network learning parameters. */
+   private NetworkParameters parameters;
+
    /** Layer sizes. */
    private int[] layerSizes;
 
    /** Network neuron layers. */
    private ArrayList<Neuron[]> layers;
 
-   /** Number of inputs to the network. */
-   private int numInputs;
-
-   /** Network learning/testing parameters. */
-   private NetworkParameters parameters = new NetworkParameters();
-
-   /** Network schema. */
-   public final Schema schema;
-
    /** Memory of inputs and output test cases. */
-   private ArrayList<Experience> memory = new ArrayList<Experience>();
+   private ArrayList<Experience> memory;
 
    /**
     * Constructor.
-    * @param layerSizes number of neurons per layer (index 0 is input size)
+    * Uses default parameters.
+    * @param schema network schema
     */
-   public Network(Schema schema, int[] layerSizes) {
+   public Network(Schema schema) {
+      this(schema, new NetworkParameters());
+   }
+
+   /**
+    * Constructor.
+    * @param schema network schema
+    * @param params network parameters
+    */
+   public Network(Schema schema, NetworkParameters params) {
       this.schema = schema;
-      this.layerSizes = layerSizes;
-      this.numInputs = layerSizes[0];
+      this.parameters = params;
+      this.memory = new ArrayList<Experience>();
+      layerSizes = new int[parameters.hiddenLayerDepths.length + 2];
       layers = new ArrayList<Neuron[]>();
 
-      // Create each layer
+      // Set up layer sizes array.
+      layerSizes[0] = schema.inputSize;
+      for (int i = 0; i < parameters.hiddenLayerDepths.length; ++i) {
+         layerSizes[i+1] = parameters.hiddenLayerDepths[i];
+      }
+      layerSizes[layerSizes.length-1] = schema.outputSize;
+
+      // Set up layers.
       for (int i = 1; i < layerSizes.length; ++i) {
          Neuron[] layer = new Neuron[layerSizes[i]];
 
@@ -46,32 +61,17 @@ public class Network implements Serializable {
 
          layers.add(layer);
       }
-   }
-
-   /**
-    * Default unsafe constructor for cloning.
-    * @param schema schema
-    */
-   private Network(Schema schema) {
-      this.schema = schema;
+ 
    }
 
    /**
     * Resets the network.
     */
    public void reset() {
-      layers = new ArrayList<Neuron[]>();
-
-      // Create each layer
-      for (int i = 1; i < layerSizes.length; ++i) {
-         Neuron[] layer = new Neuron[layerSizes[i]];
-
-         // Initialize neurons using previous layer size.
-         for (int j = 0; j < layer.length; ++j) {
-            layer[j] = new Neuron(layerSizes[i-1]);
+      for (Neuron[] layer : layers) {
+         for (int index = 0; index < layer.length; ++index) {
+            layer[index].randomize();
          }
-
-         layers.add(layer);
       }
    }
 
@@ -87,7 +87,7 @@ public class Network implements Serializable {
     * Wipes the network's memory.
     */
    public void wipeMemory() {
-      memory = new ArrayList<Experience>();
+      memory.clear();
    }
 
    /**
@@ -110,9 +110,9 @@ public class Network implements Serializable {
    /**
     * Queries the network given an input object.
     * @param in input object
-    * @return output string
+    * @return output object
     */
-   public String query(Object in) throws Exception {
+   public Object query(Object in) throws Exception {
       return schema.translateOutput(fire(schema.convertInput(in)));
    }
 
@@ -123,7 +123,7 @@ public class Network implements Serializable {
     */
    public double[] fire(double[] input) {
       // Validate input size.
-      if (input.length != numInputs)
+      if (input.length != schema.inputSize)
          throw new RuntimeException("Network fired with improper input!");
 
       double[] output = null;
@@ -171,7 +171,7 @@ public class Network implements Serializable {
     */
    public ArrayList<double[]> getOutputs(double[] input) {
       // Validate input size.
-      if (input.length != numInputs)
+      if (input.length != schema.inputSize)
          throw new RuntimeException("Network fired with improper input!");
 
       ArrayList<double[]> outputs = new ArrayList<double[]>();
@@ -342,14 +342,18 @@ public class Network implements Serializable {
     * Trains the network with its memory.
     */
    public void train() {
+      final boolean print = false;
+
       if (memory.size() == 0) {
          System.out.println("No memory!");
          return;
       }
 
+      // Split up memories into training and test sets.
       ArrayList<Experience> trainingMemory = new ArrayList<Experience>();
       ArrayList<Experience> testMemory = new ArrayList<Experience>();
 
+      // Use a 2/3rds cutoff.
       int cutoffIndex = (int) (memory.size() * 2 / 3);
       for (int index = 0; index < cutoffIndex; ++index) {
          trainingMemory.add(memory.get(index));
@@ -362,15 +366,15 @@ public class Network implements Serializable {
       int staleCounter = 0;
 
       // Test Errors.
-      double testError = calcTotalTestError(memory);
-      double prevTestError = 10000.0;
+      double testError = 0.0;
+      double prevTestError = calcTotalTestError(testMemory);
 
       // Percentage of tests passed.
-      double percentCorrect = calcPercentCorrect(memory);
-      double prevPercentCorrect = 0;
+      double percentCorrect = 0;
+      double prevPercentCorrect = calcPercentCorrect(testMemory);
 
-      System.out.println("Total test error before learning: " + testError);
-      System.out.println("Passing percentage: %" + percentCorrect);
+      System.out.println("Total test error before learning: " + prevTestError);
+      System.out.println("Passing percentage: %" + prevPercentCorrect);
 
       // Teach the network until the error is acceptable.
       // Loop is broken when conditions are met.
@@ -395,9 +399,9 @@ public class Network implements Serializable {
              testError - prevTestError > parameters.regressionThreshold) {
             reset();
             staleCounter = 0;
-            System.out.println("====================");
-            System.out.println("Resetting network...");
-            System.out.println("====================");
+            if (print) System.out.println("====================");
+            if (print) System.out.println("Resetting network...");
+            if (print) System.out.println("====================");
          // If the error and percentage correct have not changed significantly,
          //   increase the stale counter.
          } else if ((Double.compare(testError, 100) != 0 && 
@@ -405,8 +409,8 @@ public class Network implements Serializable {
                     Double.compare(percentCorrect, prevPercentCorrect) == 0) {
             ++staleCounter;
          } else {
-            System.out.printf("Percent Correct: %.6f%%  |  ", percentCorrect);
-            System.out.printf("Test error: %.6f\n", testError);
+            if (print) System.out.printf("Percent Correct: %.6f%%  |  ", percentCorrect);
+            if (print) System.out.printf("Test error: %.6f\n", testError);
             staleCounter = 0;
          }
          prevTestError = testError;
@@ -419,37 +423,23 @@ public class Network implements Serializable {
          calcPercentCorrect(testMemory));
       System.out.println();
 
-      System.out.println(toString());
+      if (print) System.out.println(toString());
    }
 
    /**
     * Calculates the percentage of test cases passed.
-    * @return percenage of tests passed
+    * @return percentage of tests passed
     */
    public double calcPercentCorrect(ArrayList<Experience> tests) {
       int correct = 0;
 
       // Run each test.
       for (int i = 0; i < tests.size(); ++i) {
-         Experience test = tests.get(i);
-         double[] output = fire(test.inputs);
-
-         int outputMaxIndex = 0;
-         double outputMax = output[0];
-
-         int answerMaxIndex = 0;
-         double answerMax = test.outputs[0];
-
-         // Determine if network guessed correctly.
-         for (int j = 0; j < output.length; ++j) {
-            double out = output[j];
-            double ans = test.outputs[j];
-
-            if (out > outputMax) outputMaxIndex = j;
-            if (ans > answerMax) answerMaxIndex = j;
-         }
-         boolean passed = outputMaxIndex == answerMaxIndex;
-         if (passed) ++correct;
+         try {
+            Experience test = tests.get(i);
+            Object out = query(schema.translateInput(test.inputs));
+            if (out.equals(schema.translateOutput(test.outputs))) ++correct;
+         } catch (Exception e) { e.printStackTrace(); }
       }
       return 100.0 * (double) correct / tests.size();
    }
@@ -472,7 +462,7 @@ public class Network implements Serializable {
          newLayers.add(newLayer);
       }
 
-      Network cloned = new Network(this.schema);
+      Network cloned = new Network(this.schema, this.parameters);
       cloned.layers = newLayers;
       cloned.memory = new ArrayList<Experience>();
       for (Experience exp : memory) {

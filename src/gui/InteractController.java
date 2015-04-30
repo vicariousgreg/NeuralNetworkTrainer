@@ -56,7 +56,7 @@ public class InteractController implements Initializable {
 
       String guess = "";
       try {
-         guess = network.query(color);
+         guess = (String) network.query(color);
          System.out.println("Guess: " + guess);
       } catch (Exception e) {
          System.out.println("Invalid network input!");

@@ -10,6 +10,12 @@ public class NetworkParameters implements Serializable {
    public double learningConstant;
 
    /**
+    * The depths of the hidden layers.
+    * The length corresponds to the number of hidden layers.
+    */
+   public int[] hiddenLayerDepths;
+
+   /**
     * The error threshold for network regression.
     * If the network's error increases by this much, it is reset.
     */
@@ -28,9 +34,10 @@ public class NetworkParameters implements Serializable {
    /**
     * Constructor.
     */
-   public NetworkParameters(double learningConstant, int staleThresh,
+   public NetworkParameters(double learningConstant, int[] hidden, int staleThresh,
          double regressionThresh, double acceptableError, double acceptablePercentage) {
       this.learningConstant = learningConstant;
+      this.hiddenLayerDepths = hidden;
       this.regressionThreshold = regressionThresh;
       this.staleThreshold = staleThresh;
       this.acceptableTestError = acceptableError;
@@ -42,6 +49,7 @@ public class NetworkParameters implements Serializable {
     */
    public NetworkParameters() {
       this.learningConstant = 0.1;
+      this.hiddenLayerDepths = new int[] { 5 };
       this.regressionThreshold = 50;
       this.staleThreshold = 1000;
       this.acceptableTestError = 100;

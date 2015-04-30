@@ -7,17 +7,21 @@ import java.io.Serializable;
  */
 public abstract class Schema implements Serializable {
    /** Size of input vector. */
-   protected final int inputSize;
+   public final int inputSize;
+
+   /** Size of coutput vector. */
+   public final int outputSize;
 
    /** Output classifications. */
-   protected final String[] classifications;
+   public final Object[] classifications;
 
    /**
     * Cosntructor.
     * @param classifications output classifications
     */
-   public Schema(int inputSize, String[] classifications) {
+   public Schema(int inputSize, Object[] classifications) {
       this.inputSize = inputSize;
+      this.outputSize = classifications.length;
       this.classifications = classifications;
    }
 
@@ -33,7 +37,7 @@ public abstract class Schema implements Serializable {
     * @param out output string
     * @return output vector
     */
-   public abstract double[] convertOutput(String out) throws Exception;
+   public abstract double[] convertOutput(Object out) throws Exception;
 
    /**
     * Converts an input vector to an input object.
@@ -45,15 +49,16 @@ public abstract class Schema implements Serializable {
    /**
     * Translate an output vector to a meaningful output.
     * @param out output vector
-    * @return String output result
+    * @return Object output result
     */
-   public String translateOutput(double[] out) throws Exception {
+   public Object translateOutput(double[] out) throws Exception {
       if (out.length != classifications.length)
          throw new Exception ("Invalid output vector!");
 
       double max = out[0];
       int maxIndex = 0;
 
+      // Find the output with the highest probability.
       for (int index = 1; index < out.length; ++index) {
          if (out[index] > max) {
             max = out[index];
@@ -69,7 +74,7 @@ public abstract class Schema implements Serializable {
     * @param out output result
     * @return experience
     */
-   public Experience createExperience(Object in, String out) throws Exception {
+   public Experience createExperience(Object in, Object out) throws Exception {
       return new Experience(convertInput(in), convertOutput(out));
    }
 }

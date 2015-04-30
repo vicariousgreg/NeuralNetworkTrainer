@@ -4,13 +4,16 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 /**
- * Represents a neural network test case.
+ * Represents a neural network experience, which consists of an input and
+ * output vector.
  */
 public class Experience implements Serializable {
    /** Test case inputs. */
    public final double[] inputs;
    /** Expected outputs. */
    public final double[] outputs;
+   /** The schema of the experience. */
+   public final Schema schema = null;
 
    /**
     * Constructor.

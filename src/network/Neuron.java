@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 /**
- * Represents a neural network node.
+ * Represents a neural network neuron.
  */
 public class Neuron implements Serializable {
    /** Number of inputs. */
