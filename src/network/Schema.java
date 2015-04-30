@@ -4,13 +4,18 @@ package network;
  * Created by gpdavis on 4/29/15.
  */
 public abstract class Schema {
-   protected String[] classifications;
+   /** Size of input vector. */
+   protected final int inputSize;
+
+   /** Output classifications. */
+   protected final String[] classifications;
 
    /**
     * Cosntructor.
     * @param classifications output classifications
     */
-   public Schema(String[] classifications) {
+   public Schema(int inputSize, String[] classifications) {
+      this.inputSize = inputSize;
       this.classifications = classifications;
    }
 
@@ -19,7 +24,7 @@ public abstract class Schema {
     * @param in input object
     * @return network input vector
     */
-   public abstract double[] convertInput(Object in);
+   public abstract double[] convertInput(Object in) throws Exception;
 
    /**
     * Converts an output string to an output vector.
@@ -29,11 +34,21 @@ public abstract class Schema {
    public abstract double[] convertOutput(String out) throws Exception;
 
    /**
+    * Converts an input vector to an input object.
+    * @param in input vector
+    * @return input object
+    */
+   public abstract Object translateInput(double[] in) throws Exception;
+
+   /**
     * Translate an output vector to a meaningful output.
     * @param out output vector
     * @return String output result
     */
-   public String translateOutput(double[] out) {
+   public String translateOutput(double[] out) throws Exception {
+      if (out.length != classifications.length)
+         throw new Exception ("Invalid output vector!");
+
       double max = out[0];
       int maxIndex = 0;
 

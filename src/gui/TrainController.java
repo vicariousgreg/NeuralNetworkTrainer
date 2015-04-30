@@ -40,37 +40,37 @@ public class TrainController implements Initializable {
    }
 
    public void clickRed() {
-      commit("Red", 0);
+      commit("Red");
    }
 
    public void clickOrange() {
-      commit("Orange", 1);
+      commit("Orange");
    }
 
    public void clickYellow() {
-      commit("Yellow", 2);
+      commit("Yellow");
    }
 
    public void clickGreen() {
-      commit("Green", 3);
+      commit("Green");
    }
 
    public void clickBlue() {
-      commit("Blue", 4);
+      commit("Blue");
    }
 
    public void clickPurple() {
-      commit("Purple", 5);
+      commit("Purple");
    }
 
-   public void commit(String answer, int index) {
+   public void commit(String answer) {
       Color color = (Color) colorBox.getFill();
       double red = color.getRed();
       double green = color.getGreen();
       double blue = color.getBlue();
 
       System.out.printf("Color: %.3f %.3f %.3f is %s\n", red, blue, green, answer);
-      MainController.addTestCase(red, green, blue, index);
+      MainController.addTestCase(color, answer);
       randomizeColor();
    }
 }

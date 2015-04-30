@@ -6,8 +6,11 @@ import javafx.scene.paint.Color;
  * Created by gpdavis on 4/29/15.
  */
 public class ColorSchema extends Schema{
+   /**
+    * Constructor.
+    */
    public ColorSchema() {
-      super(new String[] {
+      super(3, new String[] {
             "Red",
             "Orange",
             "Yellow",
@@ -18,7 +21,7 @@ public class ColorSchema extends Schema{
    }
 
    @Override
-   public double[] convertInput(Object in) {
+   public double[] convertInput(Object in) throws Exception {
       Color color = (Color) in;
       return new double[] { color.getRed(), color.getGreen(), color.getBlue() };
    }
@@ -38,5 +41,13 @@ public class ColorSchema extends Schema{
       double[] outVector = new double[classifications.length];
       outVector[expIndex] = 1.0;
       return outVector;
+   }
+
+   @Override
+   public Object translateInput(double[] in) throws Exception {
+      if (in.length != inputSize)
+         throw new Exception ("Invalid input vector size!");
+
+      return new Color((float)in[0], (float)in[1], (float)in[2], 1.0);
    }
 }

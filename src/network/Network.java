@@ -16,14 +16,14 @@ public class Network implements Serializable {
    /** Number of inputs to the network. */
    private int numInputs;
 
-   /** Learning constant. */
-   private double learningConstant = 0.1;
-
    /** Network learning/testing parameters. */
    private NetworkParameters parameters = new NetworkParameters();
 
+   /** Network schema. */
+   public final Schema schema;
+
    /** Memory of inputs and output test cases. */
-   private ArrayList<Experience> memory;
+   private ArrayList<Experience> memory = new ArrayList<Experience>();
 
 
 
@@ -31,7 +31,8 @@ public class Network implements Serializable {
     * Constructor.
     * @param layerSizes number of neurons per layer (index 0 is input size)
     */
-   public Network(int[] layerSizes) {
+   public Network(Schema schema, int[] layerSizes) {
+      this.schema = schema;
       this.layerSizes = layerSizes;
       this.numInputs = layerSizes[0];
       layers = new ArrayList<Neuron[]>();
@@ -47,18 +48,14 @@ public class Network implements Serializable {
 
          layers.add(layer);
       }
-
-      memory = new ArrayList<Experience>();
    }
 
    /**
-    * Explicit constructor.
-    * Sets layers.
-    * @param layers neuron layers
+    * Default unsafe constructor for cloning.
+    * @param schema schema
     */
-   private Network(ArrayList<Neuron[]> layers) {
-      this.layers = layers;
-      memory = new ArrayList<Experience>();
+   private Network(Schema schema) {
+      this.schema = schema;
    }
 
    /**
@@ -88,6 +85,15 @@ public class Network implements Serializable {
    }
 
    /**
+    * Creates an experience using the network's schema.
+    * @param in input object
+    * @param result resulting classification
+    */
+   public void addExperience(Object in, String result) throws Exception {
+      memory.add(schema.createExperience(in, result));
+   }
+
+   /**
     * Adds an experience to this network's memory.
     * @param exp experience to add
     */
@@ -96,11 +102,12 @@ public class Network implements Serializable {
    }
 
    /**
-    * Sets the learning constant.
-    * @param learningConstant new learning constant
+    * Queries the network given an input object.
+    * @param in input object
+    * @return output string
     */
-   public void setLearningConstant(double learningConstant) {
-      this.learningConstant = learningConstant;
+   public String query(Object in) throws Exception {
+      return schema.translateOutput(fire(schema.convertInput(in)));
    }
 
    /**
@@ -282,12 +289,12 @@ public class Network implements Serializable {
             // delta[p][c] = learningConstant * errors[c] * output[p]
             for (int prevIndex = 0; prevIndex < output.length; ++prevIndex) {
                neuron.setWeightDelta(prevIndex,
-                  learningConstant * errors[currIndex] *
+                  parameters.learningConstant * errors[currIndex] *
                        output[prevIndex]);
             }
             // Set bias delta.
             // dB = learningConstant * errors[c]
-            neuron.setBiasDelta(learningConstant * errors[currIndex]);
+            neuron.setBiasDelta(parameters.learningConstant * errors[currIndex]);
          }
 
          // Stop at input layer.
@@ -448,7 +455,13 @@ public class Network implements Serializable {
          newLayers.add(newLayer);
       }
 
-      return new Network(newLayers);
+      Network cloned = new Network(this.schema);
+      cloned.layers = newLayers;
+      cloned.memory = new ArrayList<Experience>();
+      for (Experience exp : memory) {
+         cloned.memory.add(exp);
+      }
+      return cloned;
    }
 
    /**

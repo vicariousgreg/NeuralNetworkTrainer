@@ -47,7 +47,26 @@ public class Main {
 
       // Create the network.
       int[] layerSizes = new int[] {2, 3, 3, 1};
-      Network network = new Network(layerSizes);
+      Network network = new Network(new Schema(2, new String[] {"greater", "less"}) {
+         @Override
+         public double[] convertInput(Object in) {
+            return (double[]) in;
+         }
+
+         @Override
+         public double[] convertOutput(String out) throws Exception {
+            if (out.equals("greater")) return new double[] {1.0, 0.0 };
+            if (out.equals("less")) return new double[] {1.0, 0.0 };
+            throw new Exception("Invalid output classification!");
+         }
+
+         @Override
+         public Object translateInput(double[] in) throws Exception {
+            if (in.length != inputSize)
+               throw new Exception ("Invalid input vector size!");
+            return in;
+         }
+      }, layerSizes);
 
       for (Experience test : tests) {
          network.addExperience(test);

@@ -43,11 +43,8 @@ public class InteractController implements Initializable {
       System.out.println("Guess color");
       answer.setText(colorPicker.getValue().toString());
       Color color = colorPicker.getValue();
-      double red = color.getRed();
-      double green = color.getGreen();
-      double blue = color.getBlue();
 
-      String guess = MainController.guessColor(red, green, blue);
+      String guess = MainController.guessColor(color);
       System.out.println(guess);
       answer.setText(guess);
    }
@@ -64,37 +61,37 @@ public class InteractController implements Initializable {
    }
 
    public void clickRed() {
-      commit("Red", 0);
+      commit("Red");
    }
 
    public void clickOrange() {
-      commit("Orange", 1);
+      commit("Orange");
    }
 
    public void clickYellow() {
-      commit("Yellow", 2);
+      commit("Yellow");
    }
 
    public void clickGreen() {
-      commit("Green", 3);
+      commit("Green");
    }
 
    public void clickBlue() {
-      commit("Blue", 4);
+      commit("Blue");
    }
 
    public void clickPurple() {
-      commit("Purple", 5);
+      commit("Purple");
    }
 
-   public void commit(String answer, int index) {
+   public void commit(String answer) {
       Color color = (Color) rectangle.getFill();
       double red = color.getRed();
       double green = color.getGreen();
       double blue = color.getBlue();
 
       System.out.printf("Color: %.3f %.3f %.3f is %s\n", red, blue, green, answer);
-      MainController.addTestCase(red, green, blue, index);
+      MainController.addTestCase(color, answer);
       randomize();
    }
 }

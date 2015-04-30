@@ -3,6 +3,8 @@ package gui;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import network.ColorSchema;
 import network.Network;
 import network.Experience;
 
@@ -12,7 +14,7 @@ import java.util.Arrays;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
-   public static final Network network = new Network(new int[] {3, 3, 6});
+   public static final Network network = new Network(new ColorSchema(), new int[] {3, 5, 6});
    public static final ArrayList<Experience> tests = new ArrayList<Experience>();
 
    @FXML Pane train;
@@ -47,35 +49,23 @@ public class MainController implements Initializable {
       System.out.println("Examine");
    }
 
-   public static void addTestCase(double r, double g, double b, int colorIndex) {
-      double[] answer = new double[6];
-      answer[colorIndex] = 1.0;
-
-      network.addExperience(new Experience(new double[]{r, g, b}, answer));
+   public static void addTestCase(Color color, String result) {
+      try {
+         network.addExperience(color, result);
+      } catch (Exception e) {
+         System.out.println("Experience does not match network's schema!");
+      }
    }
 
-   public static String guessColor(double r, double g, double b) {
-      double[] result = network.fire(new double[]{r, g, b});
-      System.out.println("Guess: " + Arrays.toString(result));
-
-      double max = result[0];
-      int maxIndex = 0;
-      for (int i = 1; i < result.length; ++i) {
-         if (result[i] > max) {
-            maxIndex = i;
-         }
+   public static String guessColor(Color color) {
+      String guess = "";
+      try {
+         guess = network.query(color);
+         System.out.println("Guess: " + guess);
+      } catch (Exception e) {
+         System.out.println("Invalid network input!");
       }
-
-      String[] colorList = new String[] {
-            "Red",
-            "Orange",
-            "Yellow",
-            "Green",
-            "Blue",
-            "Purple"
-      };
-
-      return colorList[maxIndex];
+      return guess;
    }
 
    public static void teach() {
