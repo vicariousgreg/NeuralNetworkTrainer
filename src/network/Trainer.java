@@ -15,10 +15,10 @@ public class Trainer {
     * The error threshold for network regression.
     * If the network's error increases by this much, it is reset.
     */
-   private static final int kErrorRegressionThreshold = 100;
+   private static final int kErrorRegressionThreshold = 50;
 
    /** Acceptable test error for learning termination. */
-   private static final double kAcceptableTestError = 1000000;
+   private static final double kAcceptableTestError = 100;
    /** Acceptable percentage correct for learning termination. */
    private static final double kAcceptablePercentCorrect = 60;
 

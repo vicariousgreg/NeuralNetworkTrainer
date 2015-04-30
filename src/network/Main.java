@@ -51,69 +51,12 @@ public class Main {
       int[] layerSizes = new int[] {2, 3, 3, 1};
       Network network = new Network(layerSizes);
 
-      // Counter for stale networks.
-      int staleCounter = 0;
-
-      // Test Errors.
-      double testError = network.calcTotalTestError(validation);
-      double prevTestError = 10000.0;
-
-      // Percentage of tests passed.
-      double percentCorrect = calcPercentCorrect(validation, network);
-      double prevPercentCorrect = 0;
-
-      System.out.println("Total test error before learning: " + testError);
-      System.out.println("Passing percentage: %" + percentCorrect);
-
-      // Teach the network until the error is acceptable.
-      // Loop is broken when conditions are met.
-      while (true) {
-         // Teach the network using the tests.
-         for (int i = 0; i < tests.size(); ++i) {
-            network.learn(tests.get(i));
-         }
-
-         // Calculate error and percentage correct.
-         testError = network.calcTotalTestError(validation);
-         percentCorrect = calcPercentCorrect(validation, network);
-
-         // Break out of the loop if we've hit an acceptable state.
-         if (testError < kAcceptableTestError &&
-             percentCorrect > kAcceptablePercentCorrect) break;
-
-         // Determine if the network needs to be reset.
-         // If it is unacceptable, and is either stale or has regressed
-         //   significantly in error, it should be reset.
-         if (staleCounter > kStaleThreshold ||
-             testError - prevTestError > kErrorRegressionThreshold) {
-            network = new Network(layerSizes);
-            staleCounter = 0;
-            System.out.println("====================");
-            System.out.println("Resetting network...");
-            System.out.println("====================");
-         // If the error and percentage correct have not changed significantly,
-         //   increase the stale counter.
-         } else if ((Double.compare(testError, 100) != 0 && 
-                     Double.compare(testError, prevTestError) == 0) ||
-                    Double.compare(percentCorrect, prevPercentCorrect) == 0) {
-            ++staleCounter;
-         } else {
-            System.out.printf("Percent Correct: %.6f%%  |  ", percentCorrect);
-            System.out.printf("Test error: %.6f\n", testError);
-            staleCounter = 0;
-         }
-         prevTestError = testError;
-         prevPercentCorrect = percentCorrect;
+      Trainer trainer = new Trainer();
+      for (TestCase test : tests) {
+         trainer.addTest(test);
       }
 
-      System.out.println("Total test error after learning: " +
-         network.calcTotalTestError(validation));
-      System.out.println("Passing percentage: %" +
-         calcPercentCorrect(validation, network));
-      System.out.println();
-
-      System.out.println(network);
-
+      trainer.train(network);
 
       /////////////////
       /* INTERACTION */
