@@ -347,6 +347,17 @@ public class Network implements Serializable {
          return;
       }
 
+      ArrayList<Experience> trainingMemory = new ArrayList<Experience>();
+      ArrayList<Experience> testMemory = new ArrayList<Experience>();
+
+      int cutoffIndex = (int) (memory.size() * 2 / 3);
+      for (int index = 0; index < cutoffIndex; ++index) {
+         trainingMemory.add(memory.get(index));
+      }
+      for (int index = cutoffIndex; index < memory.size(); ++index) {
+         testMemory.add(memory.get(index));
+      }
+
       // Counter for stale networks.
       int staleCounter = 0;
 
@@ -365,13 +376,13 @@ public class Network implements Serializable {
       // Loop is broken when conditions are met.
       while (true) {
          // Teach the network using the tests.
-         for (int i = 0; i < memory.size(); ++i) {
-            learn(memory.get(i));
+         for (int i = 0; i < trainingMemory.size(); ++i) {
+            learn(trainingMemory.get(i));
          }
 
          // Calculate error and percentage correct.
-         testError = calcTotalTestError(memory);
-         percentCorrect = calcPercentCorrect(memory);
+         testError = calcTotalTestError(testMemory);
+         percentCorrect = calcPercentCorrect(testMemory);
 
          // Break out of the loop if we've hit an acceptable state.
          if (testError < parameters.acceptableTestError &&
@@ -403,9 +414,9 @@ public class Network implements Serializable {
       }
 
       System.out.println("Total test error after learning: " +
-         calcTotalTestError(memory));
+         calcTotalTestError(testMemory));
       System.out.println("Passing percentage: %" +
-         calcPercentCorrect(memory));
+         calcPercentCorrect(testMemory));
       System.out.println();
 
       System.out.println(toString());
