@@ -1,9 +1,11 @@
 package network;
 
+import java.io.Serializable;
+
 /**
  * Created by gpdavis on 4/29/15.
  */
-public abstract class Schema {
+public abstract class Schema implements Serializable {
    /** Size of input vector. */
    protected final int inputSize;
 

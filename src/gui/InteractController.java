@@ -2,24 +2,34 @@ package gui;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
 import javafx.scene.control.ColorPicker;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+import network.Network;
 
 import java.net.URL;
 import java.util.Random;
 import java.util.ResourceBundle;
 
 public class InteractController implements Initializable {
+   private Network network;
+
    @FXML ColorPicker colorPicker;
    @FXML Rectangle rectangle;
    @FXML Text answer;
 
    private Random rand = new Random();
 
-   public void initialize(URL location, ResourceBundle resources) {
+   public void initialize(URL location, ResourceBundle resources) { }
+
+   public void setNetwork(Network network) {
+      this.network = network;
+   }
+
+   public void train() {
+      network.train();
       randomize();
    }
 
@@ -44,20 +54,21 @@ public class InteractController implements Initializable {
       answer.setText(colorPicker.getValue().toString());
       Color color = colorPicker.getValue();
 
-      String guess = MainController.guessColor(color);
+      String guess = "";
+      try {
+         guess = network.query(color);
+         System.out.println("Guess: " + guess);
+      } catch (Exception e) {
+         System.out.println("Invalid network input!");
+         e.printStackTrace();
+      }
+
       System.out.println(guess);
       answer.setText(guess);
    }
 
    public void clickCorrect() {
-      String[] colorList = new String[] {
-            "Red",
-            "Orange",
-            "Yellow",
-            "Green",
-            "Blue",
-            "Purple"
-      };
+      commit(answer.getText());
    }
 
    public void clickRed() {
@@ -91,7 +102,14 @@ public class InteractController implements Initializable {
       double blue = color.getBlue();
 
       System.out.printf("Color: %.3f %.3f %.3f is %s\n", red, blue, green, answer);
-      MainController.addTestCase(color, answer);
+
+      try {
+         network.addExperience(color, answer);
+      } catch (Exception e) {
+         System.out.println("Experience does not match network's schema!");
+         e.printStackTrace();
+      }
+
       randomize();
    }
 }

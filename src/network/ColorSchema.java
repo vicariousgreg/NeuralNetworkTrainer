@@ -5,7 +5,7 @@ import javafx.scene.paint.Color;
 /**
  * Created by gpdavis on 4/29/15.
  */
-public class ColorSchema extends Schema{
+public class ColorSchema extends Schema {
    /**
     * Constructor.
     */

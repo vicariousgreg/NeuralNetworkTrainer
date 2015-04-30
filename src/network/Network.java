@@ -25,8 +25,6 @@ public class Network implements Serializable {
    /** Memory of inputs and output test cases. */
    private ArrayList<Experience> memory = new ArrayList<Experience>();
 
-
-
    /**
     * Constructor.
     * @param layerSizes number of neurons per layer (index 0 is input size)
@@ -75,6 +73,14 @@ public class Network implements Serializable {
 
          layers.add(layer);
       }
+   }
+
+   /**
+    * Returns this network's memory.
+    * @return memory
+    */
+   public ArrayList<Experience> getMemory() {
+      return memory;
    }
 
    /**

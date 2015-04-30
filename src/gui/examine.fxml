@@ -9,8 +9,8 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.text.Text?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
-    <children>
-        <Text layoutX="286.0" layoutY="205.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Examine" />
-    </children>
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.ExamineController">
+   <children>
+      <VBox fx:id="memoryList" layoutX="36.0" layoutY="48.0" prefHeight="319.0" prefWidth="528.0" />
+   </children>
 </Pane>

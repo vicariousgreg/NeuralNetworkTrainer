@@ -45,6 +45,6 @@ public class NetworkParameters implements Serializable {
       this.regressionThreshold = 50;
       this.staleThreshold = 1000;
       this.acceptableTestError = 100;
-      this.acceptablePercentCorrect = 90;
+      this.acceptablePercentCorrect = 60;
    }
 }
