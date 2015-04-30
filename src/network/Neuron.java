@@ -1,12 +1,13 @@
 package network;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Random;
 
 /**
  * Represents a neural network node.
  */
-public class Neuron {
+public class Neuron implements Serializable {
    /** Number of inputs. */
    private int numInputs;
    /** Array of weight values. */

@@ -4,8 +4,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.Pane;
 import network.Network;
-import network.TestCase;
-import network.Trainer;
+import network.Experience;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -14,8 +13,7 @@ import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
    public static final Network network = new Network(new int[] {3, 3, 6});
-   public static final Trainer trainer = new Trainer();
-   public static final ArrayList<TestCase> tests = new ArrayList<TestCase>();
+   public static final ArrayList<Experience> tests = new ArrayList<Experience>();
 
    @FXML Pane train;
    @FXML Pane interact;
@@ -53,7 +51,7 @@ public class MainController implements Initializable {
       double[] answer = new double[6];
       answer[colorIndex] = 1.0;
 
-      trainer.addTest(new TestCase(new double[]{r, g, b}, answer));
+      network.addExperience(new Experience(new double[]{r, g, b}, answer));
    }
 
    public static String guessColor(double r, double g, double b) {
@@ -81,6 +79,6 @@ public class MainController implements Initializable {
    }
 
    public static void teach() {
-      trainer.train(network);
+      network.train();
    }
 }

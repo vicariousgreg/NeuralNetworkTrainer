@@ -1,12 +1,12 @@
 package network;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Random;
 
 /**
  * Represents a neural network.
  */
-public class Network {
+public class Network implements Serializable {
    /** Layer sizes. */
    private int[] layerSizes;
 
@@ -18,6 +18,14 @@ public class Network {
 
    /** Learning constant. */
    private double learningConstant = 0.1;
+
+   /** Network learning/testing parameters. */
+   private NetworkParameters parameters = new NetworkParameters();
+
+   /** Memory of inputs and output test cases. */
+   private ArrayList<Experience> memory;
+
+
 
    /**
     * Constructor.
@@ -39,6 +47,8 @@ public class Network {
 
          layers.add(layer);
       }
+
+      memory = new ArrayList<Experience>();
    }
 
    /**
@@ -48,6 +58,7 @@ public class Network {
     */
    private Network(ArrayList<Neuron[]> layers) {
       this.layers = layers;
+      memory = new ArrayList<Experience>();
    }
 
    /**
@@ -67,6 +78,21 @@ public class Network {
 
          layers.add(layer);
       }
+   }
+
+   /**
+    * Wipes the network's memory.
+    */
+   public void wipeMemory() {
+      memory = new ArrayList<Experience>();
+   }
+
+   /**
+    * Adds an experience to this network's memory.
+    * @param exp experience to add
+    */
+   public void addExperience(Experience exp) {
+      memory.add(exp);
    }
 
    /**
@@ -159,7 +185,7 @@ public class Network {
     * @param tests test suite
     * @return total test error
     */
-   public double calcTotalTestError(ArrayList<TestCase> tests) {
+   public double calcTotalTestError(ArrayList<Experience> tests) {
       double totalTestError = 0.0;
       for (int i = 0; i < tests.size(); ++i) {
          totalTestError += calcTestError(tests.get(i));
@@ -173,7 +199,7 @@ public class Network {
     * @param test test to calculate error for
     * @return total error
     */
-   public double calcTestError(TestCase test) {
+   public double calcTestError(Experience test) {
       // Get quadratic deviations for each output neuron
       double[] errors = calcError(fire(test.inputs), test.outputs);
 
@@ -223,26 +249,27 @@ public class Network {
    }
 
    /**
-    * Teaches the network using a test case.
-    * @param test test case
+    * Teaches the network using an experience.
+    * Uses backpropagation.
+    * @param exp experience to learn from
     */
-   public void learn(TestCase test) {
+   public void learn(Experience exp) {
       // Fire network and gather outputs.
-      ArrayList<double[]> outputs = getOutputs(test.inputs);
+      ArrayList<double[]> outputs = getOutputs(exp.inputs);
 
       // Calculate error for output layer
       // The output layer derives its error from the error function.
       // Backpropagation requires calculation of the derivative.
       double[] output = outputs.get(outputs.size() - 1);
-      double[] errors = calcBPError(output, test.outputs);
+      double[] errors = calcBPError(output, exp.outputs);
 
       // Backpropagate through layers.
       for (int layerIndex = layers.size() - 1; layerIndex >= 0; --layerIndex) {
          // Get output from previous layer.
-         // For input layer, this is the test input.
+         // For input layer, this is the experience input.
          output = (layerIndex > 0)
             ? outputs.get(layerIndex - 1)
-            : test.inputs;
+            : exp.inputs;
 
          // Get current layer.
          Neuron[] currLayer = layers.get(layerIndex);
@@ -296,6 +323,111 @@ public class Network {
             layer[i].commitDeltas();
          }
       }
+   }
+
+   /**
+    * Trains the network with its memory.
+    */
+   public void train() {
+      if (memory.size() == 0) {
+         System.out.println("No memory!");
+         return;
+      }
+
+      // Counter for stale networks.
+      int staleCounter = 0;
+
+      // Test Errors.
+      double testError = calcTotalTestError(memory);
+      double prevTestError = 10000.0;
+
+      // Percentage of tests passed.
+      double percentCorrect = calcPercentCorrect(memory);
+      double prevPercentCorrect = 0;
+
+      System.out.println("Total test error before learning: " + testError);
+      System.out.println("Passing percentage: %" + percentCorrect);
+
+      // Teach the network until the error is acceptable.
+      // Loop is broken when conditions are met.
+      while (true) {
+         // Teach the network using the tests.
+         for (int i = 0; i < memory.size(); ++i) {
+            learn(memory.get(i));
+         }
+
+         // Calculate error and percentage correct.
+         testError = calcTotalTestError(memory);
+         percentCorrect = calcPercentCorrect(memory);
+
+         // Break out of the loop if we've hit an acceptable state.
+         if (testError < parameters.acceptableTestError &&
+             percentCorrect > parameters.acceptablePercentCorrect) break;
+
+         // Determine if the network needs to be reset.
+         // If it is unacceptable, and is either stale or has regressed
+         //   significantly in error, it should be reset.
+         if (staleCounter > parameters.staleThreshold ||
+             testError - prevTestError > parameters.regressionThreshold) {
+            reset();
+            staleCounter = 0;
+            System.out.println("====================");
+            System.out.println("Resetting network...");
+            System.out.println("====================");
+         // If the error and percentage correct have not changed significantly,
+         //   increase the stale counter.
+         } else if ((Double.compare(testError, 100) != 0 && 
+                     Double.compare(testError, prevTestError) == 0) ||
+                    Double.compare(percentCorrect, prevPercentCorrect) == 0) {
+            ++staleCounter;
+         } else {
+            System.out.printf("Percent Correct: %.6f%%  |  ", percentCorrect);
+            System.out.printf("Test error: %.6f\n", testError);
+            staleCounter = 0;
+         }
+         prevTestError = testError;
+         prevPercentCorrect = percentCorrect;
+      }
+
+      System.out.println("Total test error after learning: " +
+         calcTotalTestError(memory));
+      System.out.println("Passing percentage: %" +
+         calcPercentCorrect(memory));
+      System.out.println();
+
+      System.out.println(toString());
+   }
+
+   /**
+    * Calculates the percentage of test cases passed.
+    * @return percenage of tests passed
+    */
+   public double calcPercentCorrect(ArrayList<Experience> tests) {
+      int correct = 0;
+
+      // Run each test.
+      for (int i = 0; i < tests.size(); ++i) {
+         Experience test = tests.get(i);
+         double[] output = fire(test.inputs);
+
+         int outputMaxIndex = 0;
+         double outputMax = output[0];
+
+         int answerMaxIndex = 0;
+         double answerMax = test.outputs[0];
+
+         // Determine if network guessed correctly.
+         for (int j = 0; j < output.length; ++j) {
+            double out = output[j];
+            double ans = test.outputs[j];
+
+            if (out > outputMax) outputMaxIndex = j;
+            if (ans > answerMax) answerMaxIndex = j;
+         }
+         boolean passed = outputMaxIndex == answerMaxIndex;
+         if (passed) ++correct;
+      }
+      return 100.0 * (double) correct / tests.size();
    }
 
    /**

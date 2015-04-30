@@ -1,11 +1,12 @@
 package network;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
  * Represents a neural network test case.
  */
-public class TestCase {
+public class Experience implements Serializable {
    /** Test case inputs. */
    public final double[] inputs;
    /** Expected outputs. */
@@ -16,7 +17,7 @@ public class TestCase {
     * @param inputs test case inputs
     * @param outputs test case expected outputs
     */
-   public TestCase(double[] inputs, double[] outputs) {
+   public Experience(double[] inputs, double[] outputs) {
       this.inputs = inputs;
       this.outputs = outputs;
    }

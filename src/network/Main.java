@@ -1,8 +1,6 @@
 package network;
 
-import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -38,9 +36,9 @@ public class Main {
       ////////////////
 
       // Generate test cases.
-      ArrayList<TestCase> tests = generateTests();
+      ArrayList<Experience> tests = generateTests();
       // Generate validation test cases.
-      ArrayList<TestCase> validation = generateTests();
+      ArrayList<Experience> validation = generateTests();
 
 
       //////////////
@@ -51,12 +49,11 @@ public class Main {
       int[] layerSizes = new int[] {2, 3, 3, 1};
       Network network = new Network(layerSizes);
 
-      Trainer trainer = new Trainer();
-      for (TestCase test : tests) {
-         trainer.addTest(test);
+      for (Experience test : tests) {
+         network.addExperience(test);
       }
 
-      trainer.train(network);
+      network.train();
 
       /////////////////
       /* INTERACTION */
@@ -128,13 +125,13 @@ public class Main {
     * @param network network to test
     * @return percenage of tests passed
     */
-   public static double calcPercentCorrect(ArrayList<TestCase> tests,
+   public static double calcPercentCorrect(ArrayList<Experience> tests,
                                            Network network) {
       int correct = 0;
 
       // Run each test.
       for (int i = 0; i < tests.size(); ++i) {
-         TestCase test = tests.get(i);
+         Experience test = tests.get(i);
          double[] output = network.fire(test.inputs);
          boolean passed = true;
 
@@ -156,24 +153,24 @@ public class Main {
     * factor.
     * @return test suite
     */
-   public static ArrayList<TestCase> generateTests() {
+   public static ArrayList<Experience> generateTests() {
       Random rand = new Random();
 
       // Generate test cases.
-      ArrayList<TestCase> tests = new ArrayList<TestCase>();
+      ArrayList<Experience> tests = new ArrayList<Experience>();
       for (int i = 0; i < kNumTests; ++i) {
          double x = rand.nextDouble() * 2 - 1.0;
          double y = rand.nextDouble() * 2 - 1.0;
          double answer = (Double.compare(x, y) < 0) ? 1.0 : 0.0;
-         tests.add(new TestCase(new double[] { x, y }, new double[] { answer }));
+         tests.add(new Experience(new double[] { x, y }, new double[] { answer }));
       }
       // Add in fringe cases
       for (int i = 0; i < kNumFringeTests; ++i) {
          double x = rand.nextDouble() * 2 - 1.0;
          double y = x - kFringeFactor;
-         tests.add(new TestCase(new double[] { x, y }, new double[] { 0.0 }));
+         tests.add(new Experience(new double[] { x, y }, new double[] { 0.0 }));
          y = x + kFringeFactor;
-         tests.add(new TestCase(new double[] { x, y }, new double[] { 1.0 }));
+         tests.add(new Experience(new double[] { x, y }, new double[] { 1.0 }));
       }
       return tests;
    }
