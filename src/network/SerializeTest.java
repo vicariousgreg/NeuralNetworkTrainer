@@ -15,7 +15,7 @@ public class SerializeTest {
          Schema schema = new ColorSchema();
          NetworkParameters params = new NetworkParameters();
          Neuron neuron = new Neuron(activ, 5);
-         Experience exp = new Experience(schema, new ColorInput(0.5, 0.5, 0.5), "Red");
+         Experience exp = new Experience(schema, new double[] {0.5, 0.5, 0.5}, "Red");
 
          HashMap<String, Serializable> map = new HashMap<String, Serializable>();
          map.put("activ.ser", activ);

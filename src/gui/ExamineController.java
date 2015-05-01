@@ -30,7 +30,7 @@ public class ExamineController implements Initializable {
       for (Experience exp : memory) {
          try {
             HBox memoryBox = new HBox();
-            memoryBox.getChildren().add(exp.toFXNode(25, 25));
+            memoryBox.getChildren().add(schema.toFXNode(exp.input, 25, 25));
             memoryBox.getChildren().add(new Text(exp.output.toString()));
             memoryList.getChildren().add(memoryBox);
          } catch (Exception e) {

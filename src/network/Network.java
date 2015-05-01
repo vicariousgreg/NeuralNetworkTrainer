@@ -106,7 +106,7 @@ public class Network implements Serializable {
     * @param result resulting classification
     * @throws Exception if the experience does not fit the network schema
     */
-   public void addExperience(NetworkInput in, Object result) throws Exception {
+   public void addExperience(Object in, Object result) throws Exception {
       memory.add(schema.createExperience(in, result));
    }
 
@@ -116,8 +116,8 @@ public class Network implements Serializable {
     * @return output object
     * @throws Exception if the input does not fit the network schema
     */
-   public Object query(NetworkInput in) throws Exception {
-      return schema.translateOutput(fire(in.inputVector));
+   public Object query(Object in) throws Exception {
+      return schema.translateOutput(fire(schema.encodeInput(in)));
    }
 
    /**
@@ -451,8 +451,8 @@ public class Network implements Serializable {
       for (int i = 0; i < tests.size(); ++i) {
          try {
             Experience test = tests.get(i);
-            Object out = query(schema.translateInput(test.getInputVector()));
-            if (out.equals(schema.translateOutput(test.getOutputVector()))) ++correct;
+            Object out = query(schema.encodeInput(test.getInputVector()));
+            if (out.equals(test.output)) ++correct;
          } catch (Exception e) { e.printStackTrace(); }
       }
       return 100.0 * (double) correct / tests.size();

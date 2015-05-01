@@ -1,5 +1,8 @@
 package network;
 
+import javafx.scene.Node;
+import javafx.scene.shape.Rectangle;
+
 /**
  * A Neural Network schema for color identification.
  * Includes primary and secondary colors.
@@ -9,7 +12,8 @@ public class ColorSchema extends Schema {
     * Constructor.
     */
    public ColorSchema() {
-      super(ColorInput.class, 3, new String[] {
+      super(new Class[] { java.awt.Color.class, javafx.scene.paint.Color.class },
+         3, new String[] {
             "Red",
             "Orange",
             "Yellow",
@@ -20,29 +24,33 @@ public class ColorSchema extends Schema {
    }
 
    @Override
-   public double[] convertOutput(Object out) throws Exception {
-      int expIndex = -1;
+   protected double[] encode(Object in) throws Exception {
+      double[] outputVector = new double[inputSize];
 
-      // Find the index of the classification.
-      for (int index = 0; index < classifications.length; ++index) {
-         if (out.equals(classifications[index])) expIndex = index;
+      if (in instanceof java.awt.Color) {
+         java.awt.Color color = (java.awt.Color) in;
+         outputVector[0] = color.getRed() / 255;
+         outputVector[1] = color.getGreen() / 255;
+         outputVector[2] = color.getBlue() / 255;
+      } else if (in instanceof javafx.scene.paint.Color) {
+         javafx.scene.paint.Color color = (javafx.scene.paint.Color) in;
+         outputVector[0] = color.getRed();
+         outputVector[1] = color.getGreen();
+         outputVector[2] = color.getBlue();
+      } else {
+         throw new Exception ("Input object not recognized by this schema: " + in.getClass().toString());
       }
 
-      // If not found, the output to convert was invalid.
-      if (expIndex == -1)
-         throw new Exception(
-               "Output string does not represent a classification!");
-
-      double[] outVector = new double[classifications.length];
-      outVector[expIndex] = 1.0;
-      return outVector;
+      return outputVector;
    }
 
    @Override
-   public NetworkInput translateInput(double[] in) throws Exception {
-      if (in.length != inputSize)
-         throw new Exception ("Invalid input vector size!");
+   public Node toFXNode(Object in, double width, double height) throws Exception {
+      Rectangle rect = new Rectangle(width, height);
+      double[] vector = encodeInput(in);
 
-      return new ColorInput(in);
+      rect.setFill(
+         new javafx.scene.paint.Color(vector[0], vector[1], vector[2], 1.0));
+      return rect;
    }
 }

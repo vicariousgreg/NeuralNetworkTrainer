@@ -8,7 +8,6 @@ import javafx.scene.control.ColorPicker;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import network.Network;
-import network.ColorInput;
 
 import java.net.URL;
 import java.util.Random;
@@ -79,7 +78,7 @@ public class TrainController implements Initializable {
       System.out.printf("Color: %.3f %.3f %.3f is %s\n", red, blue, green, answer);
 
       try {
-         network.addExperience(new ColorInput(red, green, blue), answer);
+         network.addExperience(color, answer);
       } catch (Exception e) {
          System.out.println("Experience does not match network's schema!");
       }

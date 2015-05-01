@@ -7,7 +7,6 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
-import network.ColorInput;
 import network.Network;
 
 import java.net.URL;
@@ -57,7 +56,7 @@ public class InteractController implements Initializable {
 
       String guess = "";
       try {
-         guess = (String) network.query(new ColorInput(color));
+         guess = (String) network.query(color);
          System.out.println("Guess: " + guess);
       } catch (Exception e) {
          System.out.println("Invalid network input!");
@@ -105,7 +104,7 @@ public class InteractController implements Initializable {
       System.out.printf("Color: %.3f %.3f %.3f is %s\n", red, blue, green, answer);
 
       try {
-         network.addExperience(new ColorInput(color), answer);
+         network.addExperience(color, answer);
       } catch (Exception e) {
          System.out.println("Experience does not match network's schema!");
          e.printStackTrace();

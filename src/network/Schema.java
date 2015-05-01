@@ -1,13 +1,18 @@
 package network;
 
+import javafx.scene.Node;
+
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by gpdavis on 4/29/15.
  */
 public abstract class Schema implements Serializable {
-   /** Class of input. */
-   public final Class<? extends NetworkInput> inputClass;
+   /** Classes supported by this schema. */
+   public final List<Class> inputClasses;
 
    /** Size of input vector. */
    public final int inputSize;
@@ -19,30 +24,69 @@ public abstract class Schema implements Serializable {
    public final Object[] classifications;
 
    /**
-    * Cosntructor.
+    * Constructor.
     * @param classifications output classifications
     */
-   public Schema(Class<? extends NetworkInput> inputClass, int inputSize, Object[] classifications) {
-      this.inputClass = inputClass;
+   public Schema(Class[] inputClasses, int inputSize, Object[] classifications) {
+      this.inputClasses = new ArrayList<Class>();
+      this.inputClasses.addAll(Arrays.asList(inputClasses));
+      this.inputClasses.add(double[].class);
       this.inputSize = inputSize;
       this.outputSize = classifications.length;
       this.classifications = classifications;
    }
 
    /**
+    * Returns a list of classes supported by this schema.
+    * @return supported class list
+    */
+   public final Class[] getSupportedClasses() {
+      return inputClasses.toArray(new Class[inputClasses.size()]);
+   }
+
+   /**
+    * Checks whether this schema supports the given object's class.
+    * @param obj input object
+    * @return whether the object class is supported
+    */
+   public final boolean validInput(Object obj) {
+      return inputClasses.contains(obj.getClass());
+   }
+
+   /**
+    * Converts an input object to an input vector.
+    * Wrapper to handle double[] passing.
+    * @param in input object
+    * @return input vector
+    */
+   public final double[] encodeInput(Object in) throws Exception {
+      if (in instanceof double[]) return (double[]) in;
+      else return encode(in);
+   }
+
+   /**
+    * Converts an input object to an input vector.
+    * @param in input object
+    * @return input vector
+    */
+
+   protected abstract double[] encode(Object in) throws Exception;
+
+   /**
     * Converts an output string to an output vector.
     * @param out output string
     * @return output vector
     */
-   public abstract double[] convertOutput(Object out) throws Exception;
+   public final double[] encodeOutput(Object out) throws Exception {
+      double[] outputVector = new double[classifications.length];
 
-   /**
-    * Converts an input vector to an input object.
-    * @param in input vector
-    * @return input object
-    */
-   public NetworkInput translateInput(double[] in) throws Exception {
-      return (NetworkInput) inputClass.getConstructor(inputClass).newInstance(in);
+      for (int i = 0; i < classifications.length; ++i)
+         if (out.equals(classifications[i])) {
+            outputVector[i] = 1.0;
+            return outputVector;
+         }
+
+      throw new Exception("Output object is not recognized by this schema.");
    }
 
    /**
@@ -50,7 +94,7 @@ public abstract class Schema implements Serializable {
     * @param out output vector
     * @return Object output result
     */
-   public Object translateOutput(double[] out) throws Exception {
+   public final Object translateOutput(double[] out) throws Exception {
       if (out.length != classifications.length)
          throw new Exception ("Invalid output vector!");
 
@@ -73,7 +117,22 @@ public abstract class Schema implements Serializable {
     * @param out output result
     * @return experience
     */
-   public Experience createExperience(NetworkInput in, Object out) throws Exception {
+   public final Experience createExperience(Object in, Object out) throws Exception {
+      // Ensure valid input and output objects.
+      if (!validInput(in))
+         throw new Exception("Input object is not recognized by this schema.");
+      if (!Arrays.asList(classifications).contains(out))
+         throw new Exception("Output object is not recognized by this schema.");
+
       return new Experience(this, in, out);
    }
+
+   /**
+    * Converts an input object to a JavaFX Node for rendering.
+    * @param in input object
+    * @param width width of node
+    * @param height height of node
+    * @return javaFX node
+    */
+   public abstract Node toFXNode(Object in, double width, double height) throws Exception;
 }

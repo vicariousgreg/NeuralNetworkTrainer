@@ -11,7 +11,7 @@ import java.util.Arrays;
  */
 public class Experience implements Serializable {
    /** Experience input. */
-   public final NetworkInput input;
+   public final Object input;
    /** Input vector. */
    public final double[] inputVector;
    /** Experience output. */
@@ -24,11 +24,11 @@ public class Experience implements Serializable {
     * @param in experience input object
     * @param out experience output object
     */
-   public Experience(Schema schema, NetworkInput in, Object out) throws Exception {
+   public Experience(Schema schema, Object in, Object out) throws Exception {
       this.input = in;
-      this.inputVector = in.inputVector;
+      this.inputVector = schema.encodeInput(in);
       this.output = out;
-      this.outputVector = schema.convertOutput(out);
+      this.outputVector = schema.encodeOutput(out);
    }
 
    /**
@@ -45,16 +45,6 @@ public class Experience implements Serializable {
     */
    public double[] getOutputVector() {
       return outputVector;
-   }
-
-   /**
-    * Converts this memory to a JavaFX Node for rendering.
-    * @param width node width
-    * @param height node height
-    * @return node
-    */
-   public Node toFXNode(double width, double height) {
-      return input.toFXNode(width, height);
    }
 
    /**

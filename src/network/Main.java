@@ -39,12 +39,15 @@ public class Main {
       ////////////////////
 
       // Create schema.
-      Schema schema =  new Schema(XYInput.class, 2, new String[] {"less", "greater"}) {
+      Schema schema =  new Schema(new Class[0], 2, new String[] {"less", "greater"}) {
          @Override
-         public double[] convertOutput(Object out) throws Exception {
-            if (out.equals("greater")) return new double[] {1.0, 0.0 };
-            if (out.equals("less")) return new double[] {1.0, 0.0 };
-            throw new Exception("Invalid output classification!");
+         protected double[] encode(Object in) throws Exception {
+            return new double[0];
+         }
+
+         @Override
+         public Node toFXNode(Object in, double width, double height) throws Exception {
+            return null;
          }
       };
 
@@ -151,32 +154,16 @@ public class Main {
          double x = rand.nextDouble() * 2 - 1.0;
          double y = rand.nextDouble() * 2 - 1.0;
          String answer = (Double.compare(x, y) < 0) ? "less" : "greater";
-         tests.add(schema.createExperience(new XYInput(x, y), answer));
+         tests.add(schema.createExperience(new double[] {x,y}, answer));
       }
       // Add in fringe cases
       for (int i = 0; i < kNumFringeTests; ++i) {
          double x = rand.nextDouble() * 2 - 1.0;
          double y = x - kFringeFactor;
-         tests.add(schema.createExperience(new XYInput(x, y), "greater"));
+         tests.add(schema.createExperience(new double[] {x,y}, "greater"));
          y = x + kFringeFactor;
-         tests.add(schema.createExperience(new XYInput(x, y), "less"));
+         tests.add(schema.createExperience(new double[] {x,y}, "less"));
       }
       return tests;
-   }
-
-   private static class XYInput extends NetworkInput {
-      public XYInput(double x, double y) throws Exception {
-         super(new double[] { x, y });
-      }
-
-      @Override
-      public int getInputSize() {
-         return 2;
-      }
-
-      @Override
-      public Node toFXNode(double width, double height) {
-         return null;
-      }
    }
 }
