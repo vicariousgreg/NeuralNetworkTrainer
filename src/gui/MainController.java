@@ -20,7 +20,6 @@ import java.util.ResourceBundle;
 public class MainController implements Initializable {
    private Stage stage;
    public static Network network = new Network(new ColorSchema());
-   public static final ArrayList<Experience> tests = new ArrayList<Experience>();
 
    @FXML Pane train;
    @FXML Pane interact;
