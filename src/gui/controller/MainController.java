@@ -34,6 +34,7 @@ public class MainController implements Initializable {
       train.setVisible(false);
       interact.setVisible(false);
       examine.setVisible(false);
+      parameters.setVisible(false);
    }
 
    public void loadNetwork() {

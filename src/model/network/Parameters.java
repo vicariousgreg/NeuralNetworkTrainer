@@ -3,8 +3,8 @@ package model.network;
 import model.network.activation.*;
 
 import java.io.Serializable;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Neural network parameters.
@@ -38,16 +38,13 @@ public class Parameters implements Serializable {
    /** Acceptable percentage correct for learning termination. */
    public double acceptablePercentCorrect;
 
-   /** The name of the set activation function. */
-   public String activationFunctionName;
-
    /** Activation function names to class map. */
-   public static final Map<String, Class> activationFunctionNames =
-      new HashMap<String, Class>();
+   public static final List<Class> activationFunctions =
+      new ArrayList<Class>();
    static {
-      activationFunctionNames.put("Sigmoid", Sigmoid.class);
-      activationFunctionNames.put("SigmoidClip", SigmoidClip.class);
-      activationFunctionNames.put("SigmoidEstimate", SigmoidEstimate.class);
+      activationFunctions.add(Sigmoid.class);
+      activationFunctions.add(SigmoidClip.class);
+      activationFunctions.add(SigmoidEstimate.class);
    }
 
    /**
@@ -64,12 +61,6 @@ public class Parameters implements Serializable {
       this.staleThreshold = staleThresh;
       this.acceptableTestError = acceptableError;
       this.acceptablePercentCorrect = acceptablePercentage;
-
-      for (String key : activationFunctionNames.keySet()) {
-         Class activClass = activationFunctionNames.get(key);
-         if (activation.getClass().equals(activClass))
-            this.activationFunctionName = key;
-      }
    }
 
    /**

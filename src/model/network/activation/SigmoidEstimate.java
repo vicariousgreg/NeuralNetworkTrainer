@@ -1,16 +1,19 @@
 package model.network.activation;
 
+import java.util.List;
+import java.util.Map;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 /**
  * Models the Sigmoid function using precalculated values to speed up computation.
  */
 public class SigmoidEstimate extends Sigmoid {
    /** Estimation granularity in points per integer. */
-   private final int granularity;
+   private int granularity;
 
    /** Estimation bounds. */
-   private final int estimationBounds;
+   private int estimationBounds;
 
    /**
     * Map of values to Sigmoid outputs.
@@ -34,6 +37,10 @@ public class SigmoidEstimate extends Sigmoid {
       super(slopeParameter);
       this.granularity = granularity;
       this.estimationBounds = (int) Math.ceil((double) 7 / slopeParameter);
+      initializeEstimations();
+   }
+
+   private void initializeEstimations() {
       this.precalculated = new HashMap<Integer, Double>();
 
       // Precalculate estimation values.
@@ -43,6 +50,29 @@ public class SigmoidEstimate extends Sigmoid {
                super.calculate((double) i + (double)tick / granularity));
          }
       }
+   }
+
+   @Override
+   public String getValue(String param) {
+      if (param.equals("Granularity"))
+         return Integer.toString(granularity);
+      else return super.getValue(param);
+   }
+
+   @Override
+   public void setValue(String param, String value) throws Exception {
+      if (param.equals("Granularity"))
+         granularity = Integer.parseInt(value);
+      else
+         super.setValue(param, value);
+
+      initializeEstimations();
+   }
+
+   public static List<String> getParameters() {
+      List<String> params = Sigmoid.getParameters();
+      params.add("Granularity");
+      return params;
    }
 
    /**

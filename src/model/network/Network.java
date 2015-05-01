@@ -65,6 +65,7 @@ public class Network implements Serializable {
 
          layers.add(layer);
       }
+      train();
    }
 
    /**
