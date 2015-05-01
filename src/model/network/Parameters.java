@@ -1,8 +1,10 @@
-package network;
+package model.network;
 
-import network.activation.*;
+import model.network.activation.*;
 
 import java.io.Serializable;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Neural network parameters.
@@ -36,6 +38,18 @@ public class Parameters implements Serializable {
    /** Acceptable percentage correct for learning termination. */
    public double acceptablePercentCorrect;
 
+   /** The name of the set activation function. */
+   public String activationFunctionName;
+
+   /** Activation function names to class map. */
+   public static final Map<String, Class> activationFunctionNames =
+      new HashMap<String, Class>();
+   static {
+      activationFunctionNames.put("Sigmoid", Sigmoid.class);
+      activationFunctionNames.put("SigmoidClip", SigmoidClip.class);
+      activationFunctionNames.put("SigmoidEstimate", SigmoidEstimate.class);
+   }
+
    /**
     * Constructor.
     */
@@ -50,6 +64,12 @@ public class Parameters implements Serializable {
       this.staleThreshold = staleThresh;
       this.acceptableTestError = acceptableError;
       this.acceptablePercentCorrect = acceptablePercentage;
+
+      for (String key : activationFunctionNames.keySet()) {
+         Class activClass = activationFunctionNames.get(key);
+         if (activation.getClass().equals(activClass))
+            this.activationFunctionName = key;
+      }
    }
 
    /**
@@ -63,5 +83,20 @@ public class Parameters implements Serializable {
          1000,
          100,
          80);
+   }
+
+   /**
+    * Clones the network parameters.
+    * @return clone of parameters
+    */
+   public Parameters clone() {
+      return new Parameters(
+         this.learningConstant,
+         this.hiddenLayerDepths,
+         this.activationFunction,
+         this.staleThreshold,
+         this.regressionThreshold,
+         this.acceptableTestError,
+         this.acceptablePercentCorrect);
    }
 }

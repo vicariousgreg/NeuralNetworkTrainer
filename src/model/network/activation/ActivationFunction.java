@@ -1,4 +1,4 @@
-package network.activation;
+package model.network.activation;
 
 /**
  * Interface for neuron activation function.

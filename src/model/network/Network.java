@@ -1,4 +1,6 @@
-package network;
+package model.network;
+
+import model.network.schema.Schema;
 
 import java.util.Collections;
 import java.io.Serializable;
@@ -79,10 +81,11 @@ public class Network implements Serializable {
 
    /**
     * Returns the network parameters.
+    * Returns a copy.
     * @return network parameters
     */
    public Parameters getParameters() {
-      return parameters;
+      return parameters.clone();
    }
 
    /**

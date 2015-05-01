@@ -1,8 +1,6 @@
-package network.activation;
+package model.network.activation;
 
-import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Random;
 
 /**
  * Models the Sigmoid function using precalculated values to speed up computation.
@@ -19,6 +17,13 @@ public class SigmoidEstimate extends Sigmoid {
     * Inputs are multiplied by granularity so they are discrete.
     */
    private HashMap<Integer, Double> precalculated;
+
+   /**
+    * Default constructor.
+    */
+   public SigmoidEstimate() {
+      this(1, 1000);
+   }
 
    /**
     * Constructor.

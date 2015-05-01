@@ -1,6 +1,8 @@
-package network;
+package model.network;
 
-import network.activation.*;
+import model.network.activation.*;
+import model.network.schema.ColorSchema;
+import model.network.schema.Schema;
 
 import java.io.File;
 import java.io.FileOutputStream;

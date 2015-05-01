@@ -1,6 +1,7 @@
-package network;
+package model.network.schema;
 
 import javafx.scene.Node;
+import model.network.Experience;
 
 import java.io.Serializable;
 import java.util.ArrayList;

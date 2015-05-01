@@ -1,8 +1,4 @@
-package network.activation;
-
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Random;
+package model.network.activation;
 
 /**
  * Models the Sigmoid function using a calculation cutoff.
@@ -12,6 +8,13 @@ import java.util.Random;
 public class SigmoidClip extends Sigmoid {
    /** Calculation cutoff. */
    private final double cutoff;
+
+   /**
+    * Default constructor.
+    */
+   public SigmoidClip() {
+      this(1);
+   }
 
    /**
     * Constructor.

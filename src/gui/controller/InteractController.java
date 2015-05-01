@@ -1,13 +1,12 @@
-package gui;
+package gui.controller;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ColorPicker;
-import javafx.scene.control.ProgressIndicator;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
-import network.Network;
+import model.network.Network;
 
 import java.net.URL;
 import java.util.Random;

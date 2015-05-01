@@ -1,20 +1,16 @@
-package gui;
+package gui.controller;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import network.ColorSchema;
-import network.Network;
-import network.Experience;
+import model.network.Parameters;
+import model.network.schema.ColorSchema;
+import model.network.Network;
 
 import java.io.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
@@ -24,10 +20,12 @@ public class MainController implements Initializable {
    @FXML Pane train;
    @FXML Pane interact;
    @FXML Pane examine;
+   @FXML Pane parameters;
 
    @FXML TrainController trainController;
    @FXML InteractController interactController;
    @FXML ExamineController examineController;
+   @FXML ParametersController parametersController;
 
    public void initialize(URL location, ResourceBundle resources) {
       stage = new Stage();
@@ -76,6 +74,7 @@ public class MainController implements Initializable {
       train.setVisible(true);
       interact.setVisible(false);
       examine.setVisible(false);
+      parameters.setVisible(false);
       System.out.println("Train");
    }
 
@@ -83,6 +82,7 @@ public class MainController implements Initializable {
       train.setVisible(false);
       interact.setVisible(true);
       examine.setVisible(false);
+      parameters.setVisible(false);
       interactController.train();
       System.out.println("Interact");
    }
@@ -92,6 +92,15 @@ public class MainController implements Initializable {
       train.setVisible(false);
       interact.setVisible(false);
       examine.setVisible(true);
+      parameters.setVisible(false);
       System.out.println("Examine");
+   }
+
+   public void onSetParametersClick() {
+      train.setVisible(false);
+      interact.setVisible(false);
+      examine.setVisible(false);
+      parameters.setVisible(true);
+      parametersController.setNetwork(network);
    }
 }

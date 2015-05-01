@@ -8,7 +8,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 
-<Pane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.MainController">
+<Pane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.controller.MainController">
    <children>
       <MenuBar prefHeight="29.0" prefWidth="600.0">
         <menus>
@@ -23,6 +23,7 @@
               <MenuItem mnemonicParsing="false" onAction="#onTrainClick" text="Train" />
                   <MenuItem mnemonicParsing="false" onAction="#onInteractClick" text="Interact" />
                   <MenuItem mnemonicParsing="false" onAction="#onExamineClick" text="Examine" />
+                  <MenuItem mnemonicParsing="false" onAction="#onSetParametersClick" text="Set Parameters" />
             </items>
           </Menu>
         </menus>
@@ -32,6 +33,7 @@
              <fx:include fx:id="train" source="train.fxml" />
              <fx:include fx:id="interact" source="interact.fxml" />
              <fx:include fx:id="examine" source="examine.fxml" />
+             <fx:include fx:id="parameters" source="parameters.fxml" />
          </children>
       </AnchorPane>
    </children>

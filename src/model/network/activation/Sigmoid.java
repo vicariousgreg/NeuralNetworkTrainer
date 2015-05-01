@@ -1,8 +1,6 @@
-package network.activation;
+package model.network.activation;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Random;
 
 /**
  * Models the Sigmoid function using precalculated values to speed up computation.
@@ -10,6 +8,13 @@ import java.util.Random;
 public class Sigmoid implements ActivationFunction, Serializable {
    /** Sigmoid slope parameter. */
    private final int slopeParameter;
+
+   /**
+    * Default constructor.
+    */
+   public Sigmoid() {
+      this(1);
+   }
 
    /**
     * Constructor.

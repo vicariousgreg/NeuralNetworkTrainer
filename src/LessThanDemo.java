@@ -1,13 +1,15 @@
-package network;
-
 import javafx.scene.Node;
+import model.network.Experience;
+import model.network.Network;
+import model.network.Parameters;
+import model.network.schema.Schema;
 
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
-public class Main {
+public class LessThanDemo {
    /** The number of standard tests generated in a suite. */
    private static final int kNumTests = 90;
    /** The number of fringe tests generated in a suite. */
@@ -15,23 +17,8 @@ public class Main {
    /** The offset for fringe tests. */
    private static final double kFringeFactor = 0.01;
 
-   /** The number of iterations the learning process can go through without
-    * making significant improvements before the network is reset. */
-   private static final int kStaleThreshold = 100;
-
    /**
-    * The error threshold for network regression.
-    * If the network's error increases by this much, it is reset.
-    */
-   private static final int kErrorRegressionThreshold = 100;
-
-   /** Acceptable test error for learning termination. */
-   private static final double kAcceptableTestError = 5;
-   /** Acceptable percentage correct for learning termination. */
-   private static final double kAcceptablePercentCorrect = 95;
-
-   /**
-    * Main driver.
+    * Main driver for demo of less-than neural network.
     */
    public static void main(String[] args) {
       ////////////////////

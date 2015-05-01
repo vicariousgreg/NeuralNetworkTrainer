@@ -1,6 +1,6 @@
-package network;
+package model.network;
 
-import network.activation.ActivationFunction;
+import model.network.activation.ActivationFunction;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -8,6 +8,7 @@ import java.util.Random;
 
 /**
  * Represents a neural network neuron.
+ * TODO: transform to observer/observable
  */
 public class Neuron implements Serializable {
    /** Activation function. */

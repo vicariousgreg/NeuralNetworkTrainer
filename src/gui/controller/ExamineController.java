@@ -1,13 +1,13 @@
-package gui;
+package gui.controller;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
-import network.Experience;
-import network.Network;
-import network.Schema;
+import model.network.Experience;
+import model.network.Network;
+import model.network.schema.Schema;
 
 import java.net.URL;
 import java.util.ArrayList;

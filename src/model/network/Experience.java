@@ -1,4 +1,6 @@
-package network;
+package model.network;
+
+import model.network.schema.Schema;
 
 import java.io.Serializable;
 import java.util.Arrays;
