@@ -1,5 +1,6 @@
 package network;
 
+import java.util.Collections;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -17,7 +18,7 @@ public class Network implements Serializable {
    private ArrayList<Neuron[]> layers;
 
    /** Memory of inputs and output test cases. */
-   private ArrayList<Experience> memory;
+   private final ArrayList<Experience> memory;
 
    /**
     * Constructor.
@@ -37,8 +38,12 @@ public class Network implements Serializable {
       this.schema = schema;
       this.parameters = params;
       this.memory = new ArrayList<Experience>();
-      int[] layerSizes = new int[parameters.hiddenLayerDepths.length + 2];
+      buildNetwork();
+   }
+
+   public void buildNetwork() {
       layers = new ArrayList<Neuron[]>();
+      int[] layerSizes = new int[parameters.hiddenLayerDepths.length + 2];
 
       // Set up layer sizes array.
       layerSizes[0] = schema.inputSize;
@@ -58,11 +63,11 @@ public class Network implements Serializable {
 
          layers.add(layer);
       }
- 
    }
 
    /**
-    * Resets the network.
+    * Resets the network by randomizing each neuron's weights.
+    * Retains memories and parameters.
     */
    public void reset() {
       for (Neuron[] layer : layers) {
@@ -70,6 +75,14 @@ public class Network implements Serializable {
             layer[index].randomize();
          }
       }
+   }
+
+   /**
+    * Returns the network parameters.
+    * @return network parameters
+    */
+   public NetworkParameters getParameters() {
+      return parameters;
    }
 
    /**
@@ -91,26 +104,20 @@ public class Network implements Serializable {
     * Creates an experience using the network's schema.
     * @param in input object
     * @param result resulting classification
+    * @throws Exception if the experience does not fit the network schema
     */
-   public void addExperience(Object in, String result) throws Exception {
+   public void addExperience(NetworkInput in, Object result) throws Exception {
       memory.add(schema.createExperience(in, result));
-   }
-
-   /**
-    * Adds an experience to this network's memory.
-    * @param exp experience to add
-    */
-   public void addExperience(Experience exp) {
-      memory.add(exp);
    }
 
    /**
     * Queries the network given an input object.
     * @param in input object
     * @return output object
+    * @throws Exception if the input does not fit the network schema
     */
-   public Object query(Object in) throws Exception {
-      return schema.translateOutput(fire(schema.convertInput(in)));
+   public Object query(NetworkInput in) throws Exception {
+      return schema.translateOutput(fire(in.inputVector));
    }
 
    /**
@@ -212,13 +219,19 @@ public class Network implements Serializable {
     * @return total error
     */
    private double calcTestError(Experience test) {
-      // Get quadratic deviations for each output neuron
-      double[] errors = calcError(fire(test.inputs), test.outputs);
-
-      // Total deviations.
       double totalError = 0.0;
-      for (int i = 0; i < errors.length; ++i) {
-         totalError += errors[i];
+      try {
+         // Get quadratic deviations for each output neuron
+         double[] errors = calcError(fire(test.getInputVector()),
+               test.getOutputVector());
+
+         // Total deviations.
+         for (int i = 0; i < errors.length; ++i) {
+            totalError += errors[i];
+         }
+      } catch (Exception e) {
+         System.out.println("Experience does not match network schema!");
+         e.printStackTrace();
       }
       return totalError;
    }
@@ -266,13 +279,13 @@ public class Network implements Serializable {
     */
    public void learn(Experience exp) {
       // Fire network and gather outputs.
-      ArrayList<double[]> outputs = getOutputs(exp.inputs);
+      ArrayList<double[]> outputs = getOutputs(exp.getInputVector());
 
       // Calculate error for output layer
       // The output layer derives its error from the error function.
       // Backpropagation requires calculation of the derivative.
       double[] output = outputs.get(outputs.size() - 1);
-      double[] errors = calcBPError(output, exp.outputs);
+      double[] errors = calcBPError(output, exp.getOutputVector());
 
       // Backpropagate through layers.
       for (int layerIndex = layers.size() - 1; layerIndex >= 0; --layerIndex) {
@@ -280,7 +293,7 @@ public class Network implements Serializable {
          // For input layer, this is the experience input.
          output = (layerIndex > 0)
             ? outputs.get(layerIndex - 1)
-            : exp.inputs;
+            : exp.getInputVector();
 
          // Get current layer.
          Neuron[] currLayer = layers.get(layerIndex);
@@ -346,17 +359,21 @@ public class Network implements Serializable {
          return;
       }
 
+      // Shuffle memories.
+      ArrayList<Experience> shuffled = new ArrayList<Experience>(memory);
+      Collections.shuffle(shuffled);
+
       // Split up memories into training and test sets.
       ArrayList<Experience> trainingMemory = new ArrayList<Experience>();
       ArrayList<Experience> testMemory = new ArrayList<Experience>();
 
       // Use a 2/3rds cutoff.
-      int cutoffIndex = (int) (memory.size() * 2 / 3);
+      int cutoffIndex = (int) (shuffled.size() * 2 / 3);
       for (int index = 0; index < cutoffIndex; ++index) {
-         trainingMemory.add(memory.get(index));
+         trainingMemory.add(shuffled.get(index));
       }
-      for (int index = cutoffIndex; index < memory.size(); ++index) {
-         testMemory.add(memory.get(index));
+      for (int index = cutoffIndex; index < shuffled.size(); ++index) {
+         testMemory.add(shuffled.get(index));
       }
 
       // Counter for stale networks.
@@ -434,8 +451,8 @@ public class Network implements Serializable {
       for (int i = 0; i < tests.size(); ++i) {
          try {
             Experience test = tests.get(i);
-            Object out = query(schema.translateInput(test.inputs));
-            if (out.equals(schema.translateOutput(test.outputs))) ++correct;
+            Object out = query(schema.translateInput(test.getInputVector()));
+            if (out.equals(schema.translateOutput(test.getOutputVector()))) ++correct;
          } catch (Exception e) { e.printStackTrace(); }
       }
       return 100.0 * (double) correct / tests.size();
@@ -461,7 +478,6 @@ public class Network implements Serializable {
 
       Network cloned = new Network(this.schema, this.parameters);
       cloned.layers = newLayers;
-      cloned.memory = new ArrayList<Experience>();
       for (Experience exp : memory) {
          cloned.memory.add(exp);
       }

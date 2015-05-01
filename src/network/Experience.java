@@ -1,5 +1,7 @@
 package network;
 
+import javafx.scene.Node;
+
 import java.io.Serializable;
 import java.util.Arrays;
 
@@ -8,21 +10,51 @@ import java.util.Arrays;
  * output vector.
  */
 public class Experience implements Serializable {
-   /** Test case inputs. */
-   public final double[] inputs;
-   /** Expected outputs. */
-   public final double[] outputs;
-   /** The schema of the experience. */
-   public final Schema schema = null;
+   /** Experience input. */
+   public final NetworkInput input;
+   /** Input vector. */
+   public final double[] inputVector;
+   /** Experience output. */
+   public final Object output;
+   /** Output vector. */
+   public final double[] outputVector;
 
    /**
     * Constructor.
-    * @param inputs test case inputs
-    * @param outputs test case expected outputs
+    * @param in experience input object
+    * @param out experience output object
     */
-   public Experience(double[] inputs, double[] outputs) {
-      this.inputs = inputs;
-      this.outputs = outputs;
+   public Experience(Schema schema, NetworkInput in, Object out) throws Exception {
+      this.input = in;
+      this.inputVector = in.inputVector;
+      this.output = out;
+      this.outputVector = schema.convertOutput(out);
+   }
+
+   /**
+    * Gets the input vector for this experience.
+    * @return input vector
+    */
+   public double[] getInputVector() {
+      return inputVector;
+   }
+
+   /**
+    * Gets the output vector for this experience.
+    * @return output vector
+    */
+   public double[] getOutputVector() {
+      return outputVector;
+   }
+
+   /**
+    * Converts this memory to a JavaFX Node for rendering.
+    * @param width node width
+    * @param height node height
+    * @return node
+    */
+   public Node toFXNode(double width, double height) {
+      return input.toFXNode(width, height);
    }
 
    /**
@@ -30,7 +62,7 @@ public class Experience implements Serializable {
     * @return string representation
     */
    public String toString() {
-      return "Input: " + Arrays.toString(inputs) + "\n" +
-         "Expected output: " + Arrays.toString(outputs);
+      return "Input: " + input.toString() + "\n" +
+         "Expected output: " + output.toString();
    }
 }

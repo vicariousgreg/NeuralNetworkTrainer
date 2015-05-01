@@ -43,7 +43,7 @@ public class NetworkParameters implements Serializable {
          double acceptablePercentage) {
       this.learningConstant = learningConstant;
       this.hiddenLayerDepths = hidden;
-      this.activationFunction = new SigmoidEstimate(1, 1000, 10);
+      this.activationFunction = new SigmoidEstimate(2, 100, 10);
       this.regressionThreshold = regressionThresh;
       this.staleThreshold = staleThresh;
       this.acceptableTestError = acceptableError;
@@ -54,6 +54,12 @@ public class NetworkParameters implements Serializable {
     * Default constructor.
     */
    public NetworkParameters() {
-      this(0.1, new int[] { 5 }, new SigmoidEstimate(1, 1000, 10), 50, 1000, 100, 60);
+      this(0.1,
+         new int[] { 5 },
+         new SigmoidEstimate(1, 1000, 10),
+         50,
+         1000,
+         100,
+         80);
    }
 }

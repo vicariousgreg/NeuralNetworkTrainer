@@ -30,13 +30,12 @@ public class ExamineController implements Initializable {
       for (Experience exp : memory) {
          try {
             HBox memoryBox = new HBox();
-            Rectangle rect = new Rectangle(25, 25);
-            rect.setFill((Color) schema.translateInput(exp.inputs));
-            memoryBox.getChildren().add(rect);
-            memoryBox.getChildren().add(new Text(schema.translateOutput(exp.outputs).toString()));
+            memoryBox.getChildren().add(exp.toFXNode(25, 25));
+            memoryBox.getChildren().add(new Text(exp.output.toString()));
             memoryList.getChildren().add(memoryBox);
          } catch (Exception e) {
             System.out.println("Error loading memory!");
+            e.printStackTrace();
          }
       }
    }

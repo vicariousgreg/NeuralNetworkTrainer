@@ -6,10 +6,13 @@ import java.io.Serializable;
  * Created by gpdavis on 4/29/15.
  */
 public abstract class Schema implements Serializable {
+   /** Class of input. */
+   public final Class<? extends NetworkInput> inputClass;
+
    /** Size of input vector. */
    public final int inputSize;
 
-   /** Size of coutput vector. */
+   /** Size of output vector. */
    public final int outputSize;
 
    /** Output classifications. */
@@ -19,18 +22,12 @@ public abstract class Schema implements Serializable {
     * Cosntructor.
     * @param classifications output classifications
     */
-   public Schema(int inputSize, Object[] classifications) {
+   public Schema(Class<? extends NetworkInput> inputClass, int inputSize, Object[] classifications) {
+      this.inputClass = inputClass;
       this.inputSize = inputSize;
       this.outputSize = classifications.length;
       this.classifications = classifications;
    }
-
-   /**
-    * Converts an input object to a vector.
-    * @param in input object
-    * @return network input vector
-    */
-   public abstract double[] convertInput(Object in) throws Exception;
 
    /**
     * Converts an output string to an output vector.
@@ -44,7 +41,9 @@ public abstract class Schema implements Serializable {
     * @param in input vector
     * @return input object
     */
-   public abstract Object translateInput(double[] in) throws Exception;
+   public NetworkInput translateInput(double[] in) throws Exception {
+      return (NetworkInput) inputClass.getConstructor(inputClass).newInstance(in);
+   }
 
    /**
     * Translate an output vector to a meaningful output.
@@ -74,7 +73,7 @@ public abstract class Schema implements Serializable {
     * @param out output result
     * @return experience
     */
-   public Experience createExperience(Object in, Object out) throws Exception {
-      return new Experience(convertInput(in), convertOutput(out));
+   public Experience createExperience(NetworkInput in, Object out) throws Exception {
+      return new Experience(this, in, out);
    }
 }

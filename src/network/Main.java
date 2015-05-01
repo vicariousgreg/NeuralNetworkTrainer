@@ -1,12 +1,15 @@
 package network;
 
+import javafx.scene.Node;
+
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
 public class Main {
    /** The number of standard tests generated in a suite. */
-   private static final int kNumTests = 25;
+   private static final int kNumTests = 90;
    /** The number of fringe tests generated in a suite. */
    private static final int kNumFringeTests = 5;
    /** The offset for fringe tests. */
@@ -31,45 +34,38 @@ public class Main {
     * Main driver.
     */
    public static void main(String[] args) {
-      ////////////////
-      /* TEST CASES */
-      ////////////////
+      ////////////////////
+      /* Initialization */
+      ////////////////////
 
-      // Generate test cases.
-      ArrayList<Experience> tests = generateTests();
-      // Generate validation test cases.
-      ArrayList<Experience> validation = generateTests();
-
-
-      //////////////
-      /* LEARNING */
-      //////////////
-
-      // Create the network.
-      int[] layerSizes = new int[] {2, 3, 3, 1};
-      Network network = new Network(new Schema(2, new String[] {"greater", "less"}) {
-         @Override
-         public double[] convertInput(Object in) {
-            return (double[]) in;
-         }
-
+      // Create schema.
+      Schema schema =  new Schema(XYInput.class, 2, new String[] {"less", "greater"}) {
          @Override
          public double[] convertOutput(Object out) throws Exception {
             if (out.equals("greater")) return new double[] {1.0, 0.0 };
             if (out.equals("less")) return new double[] {1.0, 0.0 };
             throw new Exception("Invalid output classification!");
          }
+      };
 
-         @Override
-         public Object translateInput(double[] in) throws Exception {
-            if (in.length != inputSize)
-               throw new Exception ("Invalid input vector size!");
-            return in;
+      // Create the network.
+      Network network = new Network(schema);
+      network.getParameters().hiddenLayerDepths = new int[] { 3 };
+      network.getParameters().learningConstant = 0.05;
+      network.buildNetwork();
+
+      //////////////
+      /* Training */
+      //////////////
+
+      try {
+         // Generate test cases.
+         for (Experience test : generateTests(schema)) {
+            network.addExperience(test.input, test.output);
          }
-      });
-
-      for (Experience test : tests) {
-         network.addExperience(test);
+      } catch (Exception e) {
+         System.out.println("This file is jenky.  Could not generate tests.");
+         e.printStackTrace();
       }
 
       network.train();
@@ -122,48 +118,22 @@ public class Main {
             }
          }
 
-         boolean answer = Double.compare(x,y) < 0;
-         double guessValue = 
-            network.fire(new double[] {x, y})[0];
-         boolean guess = Double.compare(guessValue, 0.5) > 0;
+         try {
+            String answer = (Double.compare(x,y) < 0) ? "less": "greater";
+            double[] output = network.fire(new double[] {x, y});
+            String guess = (String) schema.translateOutput(output);
 
-         // Check network's guess.
-         if (guess == answer) {
-            System.out.println("Successful guess!");
-         } else {
-            System.out.println("Unsuccessful guess!");
-            System.out.println("  Got: " + guessValue);
-            System.out.println("  Expected: " + (answer ? "1.0" : 0.0));
+            // Check network's guess.
+            if (guess.equals(answer)) {
+               System.out.println("Successful guess!");
+            } else {
+               System.out.println("Unsuccessful guess!");
+               System.out.println("  Output vector: " + Arrays.toString(output));
+            }
+         } catch (Exception e) {
+            System.out.println("This file is jenky.  Could not query network.");
          }
       }
-   }
-
-   /**
-    * Calculates the percentage of test cases passed.
-    * @param tests test suite
-    * @param network network to test
-    * @return percenage of tests passed
-    */
-   public static double calcPercentCorrect(ArrayList<Experience> tests,
-                                           Network network) {
-      int correct = 0;
-
-      // Run each test.
-      for (int i = 0; i < tests.size(); ++i) {
-         Experience test = tests.get(i);
-         double[] output = network.fire(test.inputs);
-         boolean passed = true;
-
-         // Determine if network guessed correctly.
-         for (int j = 0; j < output.length; ++j) {
-            boolean outLow = Double.compare(output[j], 0.5) < 0;
-            boolean expLow = Double.compare(test.outputs[j], 0.5) < 0;
-
-            if (outLow != expLow) passed = false;
-         }
-         if (passed) ++correct;
-      }
-      return 100.0 * (double) correct / tests.size();
    }
 
    /**
@@ -172,25 +142,41 @@ public class Main {
     * factor.
     * @return test suite
     */
-   public static ArrayList<Experience> generateTests() {
+   public static ArrayList<Experience> generateTests(Schema schema) throws Exception {
       Random rand = new Random();
+      ArrayList<Experience> tests = new ArrayList<Experience>();
 
       // Generate test cases.
-      ArrayList<Experience> tests = new ArrayList<Experience>();
       for (int i = 0; i < kNumTests; ++i) {
          double x = rand.nextDouble() * 2 - 1.0;
          double y = rand.nextDouble() * 2 - 1.0;
-         double answer = (Double.compare(x, y) < 0) ? 1.0 : 0.0;
-         tests.add(new Experience(new double[] { x, y }, new double[] { answer }));
+         String answer = (Double.compare(x, y) < 0) ? "less" : "greater";
+         tests.add(schema.createExperience(new XYInput(x, y), answer));
       }
       // Add in fringe cases
       for (int i = 0; i < kNumFringeTests; ++i) {
          double x = rand.nextDouble() * 2 - 1.0;
          double y = x - kFringeFactor;
-         tests.add(new Experience(new double[] { x, y }, new double[] { 0.0 }));
+         tests.add(schema.createExperience(new XYInput(x, y), "greater"));
          y = x + kFringeFactor;
-         tests.add(new Experience(new double[] { x, y }, new double[] { 1.0 }));
+         tests.add(schema.createExperience(new XYInput(x, y), "less"));
       }
       return tests;
+   }
+
+   private static class XYInput extends NetworkInput {
+      public XYInput(double x, double y) {
+         super(new double[] { x, y });
+      }
+
+      @Override
+      public int getInputSize() {
+         return 2;
+      }
+
+      @Override
+      public Node toFXNode(double width, double height) {
+         return null;
+      }
    }
 }

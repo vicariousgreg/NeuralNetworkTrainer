@@ -1,8 +1,5 @@
 package network;
 
-import java.util.HashMap;
-import java.util.Random;
-
 /**
  * Interface for neuron activation function.
  * Supports calculation and derivative calculation with respect to calculation

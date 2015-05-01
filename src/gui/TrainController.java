@@ -8,6 +8,7 @@ import javafx.scene.control.ColorPicker;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import network.Network;
+import network.ColorInput;
 
 import java.net.URL;
 import java.util.Random;
@@ -71,14 +72,14 @@ public class TrainController implements Initializable {
 
    public void commit(String answer) {
       Color color = (Color) colorBox.getFill();
-      double red = color.getRed();
-      double green = color.getGreen();
-      double blue = color.getBlue();
+      float red = (float) color.getRed();
+      float green = (float) color.getGreen();
+      float blue = (float) color.getBlue();
 
       System.out.printf("Color: %.3f %.3f %.3f is %s\n", red, blue, green, answer);
 
       try {
-         network.addExperience(color, answer);
+         network.addExperience(new ColorInput(red, green, blue), answer);
       } catch (Exception e) {
          System.out.println("Experience does not match network's schema!");
       }

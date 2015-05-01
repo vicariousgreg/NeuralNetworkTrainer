@@ -1,7 +1,5 @@
 package network;
 
-import javafx.scene.paint.Color;
-
 /**
  * A Neural Network schema for color identification.
  * Includes primary and secondary colors.
@@ -11,7 +9,7 @@ public class ColorSchema extends Schema {
     * Constructor.
     */
    public ColorSchema() {
-      super(3, new String[] {
+      super(ColorInput.class, 3, new String[] {
             "Red",
             "Orange",
             "Yellow",
@@ -19,12 +17,6 @@ public class ColorSchema extends Schema {
             "Blue",
             "Purple"
       });
-   }
-
-   @Override
-   public double[] convertInput(Object in) throws Exception {
-      Color color = (Color) in;
-      return new double[] { color.getRed(), color.getGreen(), color.getBlue() };
    }
 
    @Override
@@ -47,10 +39,10 @@ public class ColorSchema extends Schema {
    }
 
    @Override
-   public Object translateInput(double[] in) throws Exception {
+   public NetworkInput translateInput(double[] in) throws Exception {
       if (in.length != inputSize)
          throw new Exception ("Invalid input vector size!");
 
-      return new Color((float)in[0], (float)in[1], (float)in[2], 1.0);
+      return new ColorInput(in);
    }
 }

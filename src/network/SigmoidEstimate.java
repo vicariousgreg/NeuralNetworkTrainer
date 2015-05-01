@@ -1,12 +1,13 @@
 package network;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Random;
 
 /**
  * Models the Sigmoid function using precalculated values to speed up computation.
  */
-public class SigmoidEstimate implements ActivationFunction {
+public class SigmoidEstimate implements ActivationFunction, Serializable {
    /** Estimation granularity in points per integer. */
    private final int granularity;
 
@@ -30,7 +31,7 @@ public class SigmoidEstimate implements ActivationFunction {
     */
    public SigmoidEstimate(int slopeParameter, int granularity, int bounds) {
       this.granularity = granularity;
-      this.estimationBounds = bounds;
+      this.estimationBounds = (int) Math.ceil((double) 7 / slopeParameter);
       this.precalculated = new HashMap<Integer, Double>();
 
       sigmoid = new Sigmoid(slopeParameter);
