@@ -45,6 +45,16 @@ public abstract class Schema implements Serializable {
    }
 
    /**
+    * Returns a copy of this schema's classification list.
+    * @return classification list
+    */
+   public final Object[] getOutputClassifications() {
+      Object[] copy = new Object[classifications.length];
+      System.arraycopy(classifications, 0, copy, 0, copy.length);
+      return copy;
+   }
+
+   /**
     * Checks whether this schema supports the given object's class.
     * @param obj input object
     * @return whether the object class is supported
@@ -65,12 +75,19 @@ public abstract class Schema implements Serializable {
    }
 
    /**
+    * Recreates an input object given an input vector.
+    * @param inputVector input vector
+    * @return recreated input object
+    */
+   public abstract Object recreateInput(double[] inputVector);
+
+   /**
     * Converts an input object to an input vector.
     * @param in input object
     * @return input vector
     */
 
-   protected abstract double[] encode(Object in) throws Exception;
+   public abstract double[] encode(Object in) throws Exception;
 
    /**
     * Converts an output string to an output vector.
@@ -128,11 +145,11 @@ public abstract class Schema implements Serializable {
    }
 
    /**
-    * Converts an input object to a JavaFX Node for rendering.
-    * @param in input object
+    * Converts an experience to a JavaFX Node for rendering.
+    * @param exp experience
     * @param width width of node
     * @param height height of node
     * @return javaFX node
     */
-   public abstract Node toFXNode(Object in, double width, double height) throws Exception;
+   public abstract Node toFXNode(Experience exp, double width, double height) throws Exception;
 }

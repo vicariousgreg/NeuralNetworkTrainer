@@ -24,7 +24,13 @@ public class ColorSchema extends Schema {
    }
 
    @Override
-   protected double[] encode(Object in) throws Exception {
+   public Object recreateInput(double[] inputVector) {
+      return new javafx.scene.paint.Color(
+         inputVector[0], inputVector[1], inputVector[2], 1.0);
+   }
+
+   @Override
+   public double[] encode(Object in) throws Exception {
       double[] outputVector = new double[inputSize];
 
       if (in instanceof java.awt.Color) {
@@ -38,19 +44,17 @@ public class ColorSchema extends Schema {
          outputVector[1] = color.getGreen();
          outputVector[2] = color.getBlue();
       } else {
-         throw new Exception ("Input object not recognized by this schema: " + in.getClass().toString());
+         throw new Exception ("Input class not recognized by this schema: "
+            + in.getClass().toString());
       }
 
       return outputVector;
    }
 
    @Override
-   public Node toFXNode(Object in, double width, double height) throws Exception {
+   public Node toFXNode(Experience exp, double width, double height) throws Exception {
       Rectangle rect = new Rectangle(width, height);
-      double[] vector = encodeInput(in);
-
-      rect.setFill(
-         new javafx.scene.paint.Color(vector[0], vector[1], vector[2], 1.0));
+      rect.setFill((javafx.scene.paint.Color)(recreateInput(exp.inputVector)));
       return rect;
    }
 }

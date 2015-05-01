@@ -7,7 +7,7 @@ import java.io.Serializable;
 /**
  * Neural network parameters.
  */
-public class NetworkParameters implements Serializable {
+public class Parameters implements Serializable {
    /** Learning constant. */
    public double learningConstant;
 
@@ -39,10 +39,10 @@ public class NetworkParameters implements Serializable {
    /**
     * Constructor.
     */
-   public NetworkParameters(double learningConstant, int[] hidden,
-         ActivationFunction activation, int staleThresh,
-         double regressionThresh, double acceptableError,
-         double acceptablePercentage) {
+   public Parameters(double learningConstant, int[] hidden,
+                     ActivationFunction activation, int staleThresh,
+                     double regressionThresh, double acceptableError,
+                     double acceptablePercentage) {
       this.learningConstant = learningConstant;
       this.hiddenLayerDepths = hidden;
       this.activationFunction = activation;
@@ -55,7 +55,7 @@ public class NetworkParameters implements Serializable {
    /**
     * Default constructor.
     */
-   public NetworkParameters() {
+   public Parameters() {
       this(0.1,
          new int[] { 5 },
          new SigmoidEstimate(2, 1000),

@@ -1,7 +1,5 @@
 package network;
 
-import javafx.scene.Node;
-
 import java.io.Serializable;
 import java.util.Arrays;
 
@@ -10,12 +8,8 @@ import java.util.Arrays;
  * output vector.
  */
 public class Experience implements Serializable {
-   /** Experience input. */
-   public final Object input;
    /** Input vector. */
    public final double[] inputVector;
-   /** Experience output. */
-   public final Object output;
    /** Output vector. */
    public final double[] outputVector;
 
@@ -25,9 +19,7 @@ public class Experience implements Serializable {
     * @param out experience output object
     */
    public Experience(Schema schema, Object in, Object out) throws Exception {
-      this.input = in;
       this.inputVector = schema.encodeInput(in);
-      this.output = out;
       this.outputVector = schema.encodeOutput(out);
    }
 
@@ -52,7 +44,7 @@ public class Experience implements Serializable {
     * @return string representation
     */
    public String toString() {
-      return "Input: " + input.toString() + "\n" +
-         "Expected output: " + output.toString();
+      return "Input: " + Arrays.toString(inputVector) + "\n" +
+         "Expected output: " + Arrays.toString(outputVector);
    }
 }

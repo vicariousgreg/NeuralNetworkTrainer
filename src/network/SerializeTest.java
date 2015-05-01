@@ -13,7 +13,7 @@ public class SerializeTest {
       try {
          Sigmoid activ = new SigmoidEstimate(1, 1000);
          Schema schema = new ColorSchema();
-         NetworkParameters params = new NetworkParameters();
+         Parameters params = new Parameters();
          Neuron neuron = new Neuron(activ, 5);
          Experience exp = new Experience(schema, new double[] {0.5, 0.5, 0.5}, "Red");
 

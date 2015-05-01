@@ -41,21 +41,27 @@ public class Main {
       // Create schema.
       Schema schema =  new Schema(new Class[0], 2, new String[] {"less", "greater"}) {
          @Override
-         protected double[] encode(Object in) throws Exception {
+         public Object recreateInput(double[] inputVector) {
+            return inputVector;
+         }
+
+         @Override
+         public double[] encode(Object in) throws Exception {
             return new double[0];
          }
 
          @Override
-         public Node toFXNode(Object in, double width, double height) throws Exception {
+         public Node toFXNode(Experience exp, double width, double height) throws Exception {
             return null;
          }
       };
 
       // Create the network.
       Network network = new Network(schema);
-      network.getParameters().hiddenLayerDepths = new int[] { 3 };
-      network.getParameters().learningConstant = 0.05;
-      network.buildNetwork();
+      Parameters params = network.getParameters();
+      params.hiddenLayerDepths = new int[] { 3 };
+      params.learningConstant = 0.05;
+      network.setParameters(params);
 
       //////////////
       /* Training */
@@ -64,7 +70,7 @@ public class Main {
       try {
          // Generate test cases.
          for (Experience test : generateTests(schema)) {
-            network.addExperience(test.input, test.output);
+            network.addExperience(test.inputVector, test.outputVector);
          }
       } catch (Exception e) {
          System.out.println("This file is jenky.  Could not generate tests.");

@@ -12,7 +12,7 @@ public class Network implements Serializable {
    public final Schema schema;
 
    /** Network learning parameters. */
-   private NetworkParameters parameters;
+   private Parameters parameters;
 
    /** Network neuron layers. */
    private ArrayList<Neuron[]> layers;
@@ -26,7 +26,7 @@ public class Network implements Serializable {
     * @param schema network schema
     */
    public Network(Schema schema) {
-      this(schema, new NetworkParameters());
+      this(schema, new Parameters());
    }
 
    /**
@@ -34,14 +34,14 @@ public class Network implements Serializable {
     * @param schema network schema
     * @param params network parameters
     */
-   public Network(Schema schema, NetworkParameters params) {
+   public Network(Schema schema, Parameters params) {
       this.schema = schema;
       this.parameters = params;
       this.memory = new ArrayList<Experience>();
       buildNetwork();
    }
 
-   public void buildNetwork() {
+   private void buildNetwork() {
       layers = new ArrayList<Neuron[]>();
       int[] layerSizes = new int[parameters.hiddenLayerDepths.length + 2];
 
@@ -81,8 +81,17 @@ public class Network implements Serializable {
     * Returns the network parameters.
     * @return network parameters
     */
-   public NetworkParameters getParameters() {
+   public Parameters getParameters() {
       return parameters;
+   }
+
+   /**
+    * Sets the network parameters.
+    * @param params network parameters
+    */
+   public void setParameters(Parameters params) {
+      this.parameters = params;
+      buildNetwork();
    }
 
    /**
@@ -153,7 +162,7 @@ public class Network implements Serializable {
     * @param layerIndex layer index
     * @return weights table
     */
-   public double[][] getLayerWeights(int layerIndex) {
+   private double[][] getLayerWeights(int layerIndex) {
       Neuron[] previousLayer = layers.get(layerIndex - 1);
       Neuron[] currLayer = layers.get(layerIndex);
       double[][] weights = new double[previousLayer.length][currLayer.length];
@@ -175,7 +184,7 @@ public class Network implements Serializable {
     * @param input input signals
     * @return all neuron output signals
     */
-   public ArrayList<double[]> getOutputs(double[] input) {
+   private ArrayList<double[]> getOutputs(double[] input) {
       // Validate input size.
       if (input.length != schema.inputSize)
          throw new RuntimeException("Network fired with improper input!");
@@ -204,7 +213,7 @@ public class Network implements Serializable {
     * @param tests test suite
     * @return total test error
     */
-   public double calcTotalTestError(ArrayList<Experience> tests) {
+   private double calcTotalTestError(ArrayList<Experience> tests) {
       double totalTestError = 0.0;
       for (int i = 0; i < tests.size(); ++i) {
          totalTestError += calcTestError(tests.get(i));
@@ -277,7 +286,7 @@ public class Network implements Serializable {
     * Uses backpropagation.
     * @param exp experience to learn from
     */
-   public void learn(Experience exp) {
+   private void learn(Experience exp) {
       // Fire network and gather outputs.
       ArrayList<double[]> outputs = getOutputs(exp.getInputVector());
 
@@ -444,7 +453,7 @@ public class Network implements Serializable {
     * Calculates the percentage of test cases passed.
     * @return percentage of tests passed
     */
-   public double calcPercentCorrect(ArrayList<Experience> tests) {
+   private double calcPercentCorrect(ArrayList<Experience> tests) {
       int correct = 0;
 
       // Run each test.
@@ -452,7 +461,7 @@ public class Network implements Serializable {
          try {
             Experience test = tests.get(i);
             Object out = query(schema.encodeInput(test.getInputVector()));
-            if (out.equals(test.output)) ++correct;
+            if (out.equals(schema.translateOutput(test.outputVector))) ++correct;
          } catch (Exception e) { e.printStackTrace(); }
       }
       return 100.0 * (double) correct / tests.size();
