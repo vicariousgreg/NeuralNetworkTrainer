@@ -57,7 +57,7 @@ public class InteractController implements Initializable {
 
       String guess = "";
       try {
-         guess = (String) network.query(ColorInput.convertFXColor(color));
+         guess = (String) network.query(new ColorInput(color));
          System.out.println("Guess: " + guess);
       } catch (Exception e) {
          System.out.println("Invalid network input!");
@@ -105,7 +105,7 @@ public class InteractController implements Initializable {
       System.out.printf("Color: %.3f %.3f %.3f is %s\n", red, blue, green, answer);
 
       try {
-         network.addExperience(ColorInput.convertFXColor(color), answer);
+         network.addExperience(new ColorInput(color), answer);
       } catch (Exception e) {
          System.out.println("Experience does not match network's schema!");
          e.printStackTrace();

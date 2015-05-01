@@ -18,48 +18,40 @@ public class ColorInput extends NetworkInput {
 
    /**
     * Constructor.
+    * Uses input vector.
+    * @param inputVector input vector
+    */
+   public ColorInput(double[] inputVector) throws Exception {
+      super(inputVector);
+
+      for (int i = 0; i < inputVector.length; ++i) {
+         if (Double.compare(inputVector[i], 1.0) > 0 ||
+             Double.compare(inputVector[i], 0.0) < 0)
+            throw new Exception("Invalid color parameters!");
+      }
+      red = inputVector[0];
+      green = inputVector[1];
+      blue = inputVector[2];
+   }
+
+   /**
+    * Constructor.
     * @param red red channel
     * @param green green channel
     * @param blue blue channel
     * @throws Exception if colors are not between 0.0 and 1.0
     */
    public ColorInput(double red, double green, double blue) throws Exception{
-      super(new double[] { red, green, blue });
-
-      if (Double.compare(red, 1.0) > 0 ||
-          Double.compare(blue, 1.0) > 0 ||
-          Double.compare(green, 1.0) > 0 ||
-          Double.compare(red, 0.0) < 0 ||
-          Double.compare(green, 0.0) < 0 ||
-          Double.compare(blue, 0.0) < 0)
-         throw new Exception("Invalid color parameters!");
-
-      this.red = red;
-      this.green = green;
-      this.blue = blue;
+      this(new double[] { red, green, blue });
    }
 
    /**
     * Constructor.
-    * Uses input vector.
-    * @param inputVector input vector
+    * Uses JavaFX color.
+    * @param fxColor JavaFX color
     */
-   public ColorInput(double[] inputVector) throws Exception {
-      this(inputVector[0], inputVector[1], inputVector[2]);
-   }
-
-   /**
-    * Converts a JavaFX color to a network input color.
-    * @param in JavaFX color
-    * @return network input color
-    */
-   public static ColorInput convertFXColor(javafx.scene.paint.Color in) {
-      try {
-         return new ColorInput(in.getRed(), in.getGreen(), in.getBlue());
-      } catch (Exception e) {
-         // This should never happen.
-         return null;
-      }
+   public ColorInput(javafx.scene.paint.Color fxColor) throws Exception {
+      this(fxColor.getRed(), fxColor.getGreen(), fxColor.getBlue());
    }
 
    @Override

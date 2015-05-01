@@ -12,7 +12,9 @@ public abstract class NetworkInput implements Serializable {
     * Constructor.
     * @param inputVector input vector
     */
-   public NetworkInput(double[] inputVector) {
+   public NetworkInput(double[] inputVector) throws Exception {
+      if (inputVector.length != getInputSize())
+         throw new Exception("Invalid input vector length!");
       this.inputVector = inputVector;
    }
 

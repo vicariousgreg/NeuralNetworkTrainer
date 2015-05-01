@@ -1,5 +1,7 @@
 package network;
 
+import network.activation.*;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
@@ -9,7 +11,7 @@ import java.util.HashMap;
 public class SerializeTest {
    public static void main (String[] args) {
       try {
-         Sigmoid activ = new Sigmoid(1);
+         Sigmoid activ = new SigmoidEstimate(1, 1000);
          Schema schema = new ColorSchema();
          NetworkParameters params = new NetworkParameters();
          Neuron neuron = new Neuron(activ, 5);

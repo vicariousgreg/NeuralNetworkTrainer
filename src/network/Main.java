@@ -165,7 +165,7 @@ public class Main {
    }
 
    private static class XYInput extends NetworkInput {
-      public XYInput(double x, double y) {
+      public XYInput(double x, double y) throws Exception {
          super(new double[] { x, y });
       }
 

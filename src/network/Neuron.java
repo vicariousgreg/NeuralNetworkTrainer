@@ -1,5 +1,7 @@
 package network;
 
+import network.activation.ActivationFunction;
+
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Random;
