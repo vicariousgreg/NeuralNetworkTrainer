@@ -2,10 +2,11 @@ package gui.controller;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
+import javafx.scene.control.TabPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import model.network.Parameters;
 import model.network.schema.ColorSchema;
 import model.network.Network;
 
@@ -14,13 +15,15 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
-   private Stage stage;
-   public static Network network = new Network(new ColorSchema());
+   public static Stage stage;
+   public static Network network;
+   public static Network backupNetwork;
 
    @FXML Pane train;
    @FXML Pane interact;
    @FXML Pane examine;
    @FXML Pane parameters;
+   @FXML TabPane tabPane;
 
    @FXML TrainController trainController;
    @FXML InteractController interactController;
@@ -29,12 +32,7 @@ public class MainController implements Initializable {
 
    public void initialize(URL location, ResourceBundle resources) {
       stage = new Stage();
-      trainController.setNetwork(network);
-      interactController.setNetwork(network);
-      train.setVisible(false);
-      interact.setVisible(false);
-      examine.setVisible(false);
-      parameters.setVisible(false);
+      tabPane.setVisible(false);
    }
 
    public void loadNetwork() {
@@ -45,12 +43,19 @@ public class MainController implements Initializable {
             FileInputStream fin = new FileInputStream(file);
             ObjectInputStream ois = new ObjectInputStream(fin);
             network = (Network) ois.readObject();
+            backupNetwork = network.clone();
             trainController.setNetwork(network);
             interactController.setNetwork(network);
+            examineController.extractMemories(network);
+            parametersController.setNetwork(network);
+            tabPane.setVisible(true);
             ois.close();
          } catch (Exception e) {
-            System.out.println("Could not load newtork!");
-            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error!");
+            alert.setHeaderText("Error loading network!");
+            alert.setContentText(null);
+            alert.showAndWait();
          }
       }
    }
@@ -65,43 +70,17 @@ public class MainController implements Initializable {
             out.writeObject(network);
             out.close();
          } catch (Exception e) {
-            System.out.println("Could not save newtork!");
-            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error!");
+            alert.setHeaderText("Error saving network!");
+            alert.setContentText(null);
+            alert.showAndWait();
          }
       }
    }
 
-   public void onTrainClick() {
-      train.setVisible(true);
-      interact.setVisible(false);
-      examine.setVisible(false);
-      parameters.setVisible(false);
-      System.out.println("Train");
-   }
-
-   public void onInteractClick() {
-      train.setVisible(false);
-      interact.setVisible(true);
-      examine.setVisible(false);
-      parameters.setVisible(false);
-      interactController.train();
-      System.out.println("Interact");
-   }
-
-   public void onExamineClick() {
-      examineController.extractMemories(network);
-      train.setVisible(false);
-      interact.setVisible(false);
-      examine.setVisible(true);
-      parameters.setVisible(false);
-      System.out.println("Examine");
-   }
-
-   public void onSetParametersClick() {
-      train.setVisible(false);
-      interact.setVisible(false);
-      examine.setVisible(false);
-      parameters.setVisible(true);
-      parametersController.setNetwork(network);
+   public static Network restoreNetwork() {
+      network = backupNetwork.clone();
+      return network;
    }
 }

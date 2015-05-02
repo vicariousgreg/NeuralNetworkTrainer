@@ -11,19 +11,16 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.text.Text?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.controller.InteractController">
+<Pane fx:id="pane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.controller.InteractController">
    <children>
       <ColorPicker fx:id="colorPicker" layoutX="46.0" layoutY="54.0" onAction="#setColor" />
-      <Rectangle fx:id="rectangle" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="200.0" layoutX="46.0" layoutY="106.0" stroke="BLACK" strokeType="INSIDE" width="303.0" />
-      <Button layoutX="252.0" layoutY="54.0" mnemonicParsing="false" onAction="#randomize" text="Randomize" />
-      <Text fx:id="answer" layoutX="385.0" layoutY="118.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="177.7294921875" />
+      <Rectangle fx:id="rectangle" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="200.0" layoutX="46.0" layoutY="106.0" stroke="BLACK" strokeType="INSIDE" width="220.0" />
+      <Button layoutX="381.0" layoutY="65.0" mnemonicParsing="false" onAction="#clickSkip" prefHeight="25.0" prefWidth="100.0" text="Skip" />
+      <Text fx:id="answer" layoutX="156.0" layoutY="94.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="177.7294921875" />
 
-      <Button fx:id="correctbutton" layoutX="426.0" layoutY="148.0" mnemonicParsing="false" onAction="#clickCorrect" prefHeight="25.0" prefWidth="100.0" text="Correct!" />
-      <Button fx:id="redbutton" layoutX="364.0" layoutY="194.0" mnemonicParsing="false" onAction="#clickRed" prefHeight="25.0" prefWidth="100.0" text="Red" />
-      <Button fx:id="orangebutton" layoutX="362.0" layoutY="234.0" mnemonicParsing="false" onAction="#clickOrange" prefHeight="25.0" prefWidth="100.0" text="Orange" />
-      <Button fx:id="yellowbutton" layoutX="364.0" layoutY="271.0" mnemonicParsing="false" onAction="#clickYellow" prefHeight="25.0" prefWidth="100.0" text="Yellow" />
-      <Button fx:id="greenbutton" layoutX="487.0" layoutY="195.0" mnemonicParsing="false" onAction="#clickGreen" prefHeight="25.0" prefWidth="100.0" text="Green" />
-      <Button fx:id="bluebutton" layoutX="487.0" layoutY="234.0" mnemonicParsing="false" onAction="#clickBlue" prefHeight="25.0" prefWidth="100.0" text="Blue" />
-      <Button fx:id="purplebutton" layoutX="487.0" layoutY="270.0" mnemonicParsing="false" onAction="#clickPurple" prefHeight="25.0" prefWidth="100.0" text="Purple" />
+      <Button fx:id="correctbutton" layoutX="381.0" layoutY="109.0" mnemonicParsing="false" onAction="#clickCorrect" prefHeight="25.0" prefWidth="100.0" text="Correct!" />
+       <FlowPane fx:id="buttonPane" alignment="CENTER_LEFT" hgap="10.0" layoutX="283.0" layoutY="147.0" prefHeight="157.0" prefWidth="295.0" vgap="10.0" />
+      <Button layoutX="46.0" layoutY="335.0" mnemonicParsing="false" onAction="#consolidateMemories" text="Consolidate Memories..." />
+      <ProgressIndicator fx:id="progress" layoutX="239.0" layoutY="337.0" progress="0.0" />
    </children>
 </Pane>

@@ -1,19 +1,17 @@
 package gui.controller;
 
+import javafx.concurrent.Task;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.Pane;
 import model.network.Network;
 import model.network.Parameters;
 import model.network.activation.ActivationFunction;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.*;
@@ -23,6 +21,7 @@ public class ParametersController implements Initializable {
    private Parameters parameters;
    private ArrayList<TextField> parameterTextFields;
 
+   @FXML Pane pane;
    @FXML TextField learningConstantField;
    @FXML TextField hiddenLayersField;
    @FXML ComboBox activationFunctionsField;
@@ -32,7 +31,14 @@ public class ParametersController implements Initializable {
    @FXML TextField acceptableErrorField;
    @FXML TextField acceptablePercentField;
 
+   @FXML ProgressIndicator progress;
+   @FXML Button saveButton;
+   @FXML Button cancelButton;
+
    public void initialize(URL location, ResourceBundle resources) {
+      progress.setVisible(false);
+      cancelButton.setVisible(false);
+
       // Set up activation functions dropdown.
       for (Class function : Parameters.activationFunctions) {
          activationFunctionsField.getItems().add(function.getSimpleName());
@@ -111,34 +117,35 @@ public class ParametersController implements Initializable {
    }
 
    public void save() {
+      System.out.println("Save");
       String invalidField = "";
       try {
          /* Extract standard fields. */
          invalidField = "Learning Constant";
-         double learning = Double.parseDouble(learningConstantField.getText());
+         final double learning = Double.parseDouble(learningConstantField.getText());
          if (learning < 0.0 || learning > 1.0) throw new Exception();
 
          invalidField = "Regression Error Threshold";
-         double regression = Double.parseDouble(regressionThresholdField.getText());
+         final double regression = Double.parseDouble(regressionThresholdField.getText());
          if (regression < 0.0) throw new Exception();
 
          invalidField = "Stale Threshold";
-         int stale = Integer.parseInt(staleThresholdField.getText());
+         final int stale = Integer.parseInt(staleThresholdField.getText());
          if (stale < 0) throw new Exception();
 
          invalidField = "Acceptable Test Error";
-         double error = Double.parseDouble(acceptableErrorField.getText());
+         final double error = Double.parseDouble(acceptableErrorField.getText());
          if (error < 1.0) throw new Exception();
 
          invalidField = "Acceptable Percentage Correct";
-         double percent = Double.parseDouble(acceptablePercentField.getText());
+         final double percent = Double.parseDouble(acceptablePercentField.getText());
          if (percent < 0.0 || percent > 100.0) throw new Exception();
 
 
          /* Extract hidden layers. */
          invalidField = "Hidden Layers";
          String[] tokens = hiddenLayersField.getText().split("\\s+");
-         int[] hidden = new int[tokens.length];
+         final int[] hidden = new int[tokens.length];
          for (int i = 0; i < hidden.length; ++i) {
             hidden[i] = Integer.parseInt(tokens[i]);
          }
@@ -156,7 +163,7 @@ public class ParametersController implements Initializable {
          }
 
          // Instantiate activation function.
-         ActivationFunction activ = (ActivationFunction) functionClass.newInstance();
+         final ActivationFunction activ = (ActivationFunction) functionClass.newInstance();
 
          // Set parameters.
          invalidField = "Activation Function Parameters";
@@ -164,22 +171,47 @@ public class ParametersController implements Initializable {
             activ.setValue(text.getPromptText(), text.getText());
          }
 
+         // Rebuild network on background thread.
+         Task<Void> task = new Task<Void>() {
+            @Override
+            public Void call() {
+                System.out.println("Rebuilding network...");
+                progress.setVisible(true);
+                network.setParameters(
+                     new Parameters(learning,
+                        hidden,
+                        activ,
+                        stale,
+                        regression,
+                        error,
+                        percent));
+               progress.setVisible(false);
+               cancelButton.setVisible(false);
+               saveButton.setVisible(true);
+               return null;
+            }
+         };
+         progress.progressProperty().bind(task.progressProperty());
+         final Thread thread = new Thread(task);
 
-         /* Set parameters. */
-         network.setParameters(
-            new Parameters(learning,
-               hidden,
-               activ,
-               stale,
-               regression,
-               error,
-               percent));
+         cancelButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent event) {
+               thread.interrupt();
+               network = MainController.restoreNetwork();
+               cancelButton.setVisible(false);
+               saveButton.setVisible(true);
+            }
+         });
+         cancelButton.setVisible(true);
+         saveButton.setVisible(false);
+         thread.start();
       } catch (Exception e) {
          Alert alert = new Alert(Alert.AlertType.ERROR);
          alert.setTitle("Invalid Parameters!");
          alert.setHeaderText("Invalid parameter: " + invalidField);
          alert.setContentText(null);
          alert.showAndWait();
+         e.printStackTrace();
       }
    }
 }
