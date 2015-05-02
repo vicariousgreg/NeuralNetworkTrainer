@@ -2,7 +2,7 @@ package model.network.schema;
 
 import javafx.scene.Node;
 import javafx.scene.shape.Rectangle;
-import model.network.Experience;
+import model.network.Memory;
 
 /**
  * A Neural Network schema for color identification.
@@ -53,7 +53,7 @@ public class ColorSchema extends Schema {
    }
 
    @Override
-   public Node toFXNode(Experience exp, double width, double height) throws Exception {
+   public Node toFXNode(Memory exp, double width, double height) throws Exception {
       Rectangle rect = new Rectangle(width, height);
       rect.setFill((javafx.scene.paint.Color)(recreateInput(exp.inputVector)));
       return rect;

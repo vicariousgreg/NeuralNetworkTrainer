@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.control.*?>
@@ -17,7 +18,5 @@
 
       <Button fx:id="correctbutton" layoutX="381.0" layoutY="109.0" mnemonicParsing="false" onAction="#clickCorrect" prefHeight="25.0" prefWidth="100.0" text="Correct!" />
        <FlowPane fx:id="buttonPane" alignment="CENTER_LEFT" hgap="10.0" layoutX="283.0" layoutY="147.0" prefHeight="157.0" prefWidth="295.0" vgap="10.0" />
-      <Button layoutX="46.0" layoutY="335.0" mnemonicParsing="false" onAction="#consolidateMemories" text="Consolidate Memories..." />
-      <ProgressIndicator fx:id="progress" layoutX="239.0" layoutY="337.0" progress="0.0" />
    </children>
 </Pane>

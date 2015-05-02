@@ -22,7 +22,7 @@ public class Interact implements Observer {
    }
 
    public void addMemory(Object input, Object output) throws Exception {
-      network.addExperience(input, output);
+      network.addMemory(input, output);
    }
 
    @Override

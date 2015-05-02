@@ -11,9 +11,9 @@
 
 <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.controller.ExamineController">
    <children>
-      <ScrollPane layoutX="36.0" layoutY="48.0" prefViewportHeight="319.0" prefViewportWidth="528.0">
+      <ScrollPane layoutX="36.0" layoutY="48.0" prefHeight="309.0" prefViewportHeight="319.0" prefViewportWidth="528.0" prefWidth="530.0">
          <content>
-            <VBox fx:id="memoryList" layoutX="36.0" layoutY="48.0" prefHeight="319.0" prefWidth="528.0" />
+            <VBox fx:id="memoryList" layoutX="36.0" layoutY="48.0" prefHeight="305.0" prefWidth="528.0" />
          </content>
       </ScrollPane>
    </children>

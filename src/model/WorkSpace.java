@@ -2,11 +2,12 @@ package model;
 
 import gui.controller.MainController;
 import javafx.application.Platform;
-import javafx.scene.control.Alert;
+import model.network.Memory;
 import model.network.Network;
 import model.network.schema.ColorSchema;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Observable;
 
 /**
@@ -82,13 +83,45 @@ public class WorkSpace extends Observable {
          ObjectOutputStream out = new ObjectOutputStream(fos);
          out.writeObject(network);
          out.close();
+         updateUI();
       } catch (Exception e) {
          signalUIError("Error saving network!");
       }
    }
 
-   public void consolidateMemories() {
-      network.train();
+   public void consolidateMemory() {
+      System.out.println("Training network...");
+      if (network != null) network.train();
+      System.out.println("...done!");
+      updateUI();
+   }
+
+   public void saveMemory(File file) {
+      try {
+         FileOutputStream fos = new FileOutputStream(file);
+         ObjectOutputStream out = new ObjectOutputStream(fos);
+         out.writeObject(network.getMemories());
+         out.close();
+         updateUI();
+      } catch (Exception e) {
+         signalUIError("Error saving memories!");
+      }
+   }
+
+   public void loadMemory(File file) {
+      try {
+         FileInputStream fin = new FileInputStream(file);
+         ObjectInputStream ois = new ObjectInputStream(fin);
+         network.addMemories(((ArrayList<Memory>) ois.readObject()));
+         ois.close();
+         updateUI();
+      } catch (Exception e) {
+         signalUIError("Error loading network!");
+      }
+   }
+
+   public void wipeMemory() {
+      network.wipeMemory();
       updateUI();
    }
 
@@ -107,11 +140,8 @@ public class WorkSpace extends Observable {
       Platform.runLater(new Runnable() {
          @Override
          public void run() {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error!");
-            alert.setHeaderText(errorMessage);
-            alert.setContentText(null);
-            alert.showAndWait();
+            setChanged();
+            notifyObservers(errorMessage);
          }
       });
    }

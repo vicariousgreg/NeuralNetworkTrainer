@@ -1,5 +1,5 @@
 import javafx.scene.Node;
-import model.network.Experience;
+import model.network.Memory;
 import model.network.Network;
 import model.network.Parameters;
 import model.network.schema.Schema;
@@ -38,7 +38,7 @@ public class LessThanDemo {
          }
 
          @Override
-         public Node toFXNode(Experience exp, double width, double height) throws Exception {
+         public Node toFXNode(Memory exp, double width, double height) throws Exception {
             return null;
          }
       };
@@ -56,8 +56,8 @@ public class LessThanDemo {
 
       try {
          // Generate test cases.
-         for (Experience test : generateTests(schema)) {
-            network.addExperience(test.inputVector, test.outputVector);
+         for (Memory test : generateTests(schema)) {
+            network.addMemory(test.inputVector, test.outputVector);
          }
       } catch (Exception e) {
          System.out.println("This file is jenky.  Could not generate tests.");
@@ -138,24 +138,24 @@ public class LessThanDemo {
     * factor.
     * @return test suite
     */
-   public static ArrayList<Experience> generateTests(Schema schema) throws Exception {
+   public static ArrayList<Memory> generateTests(Schema schema) throws Exception {
       Random rand = new Random();
-      ArrayList<Experience> tests = new ArrayList<Experience>();
+      ArrayList<Memory> tests = new ArrayList<Memory>();
 
       // Generate test cases.
       for (int i = 0; i < kNumTests; ++i) {
          double x = rand.nextDouble() * 2 - 1.0;
          double y = rand.nextDouble() * 2 - 1.0;
          String answer = (Double.compare(x, y) < 0) ? "less" : "greater";
-         tests.add(schema.createExperience(new double[] {x,y}, answer));
+         tests.add(schema.createMemory(new double[]{x, y}, answer));
       }
       // Add in fringe cases
       for (int i = 0; i < kNumFringeTests; ++i) {
          double x = rand.nextDouble() * 2 - 1.0;
          double y = x - kFringeFactor;
-         tests.add(schema.createExperience(new double[] {x,y}, "greater"));
+         tests.add(schema.createMemory(new double[]{x, y}, "greater"));
          y = x + kFringeFactor;
-         tests.add(schema.createExperience(new double[] {x,y}, "less"));
+         tests.add(schema.createMemory(new double[]{x, y}, "less"));
       }
       return tests;
    }

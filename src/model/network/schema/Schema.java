@@ -1,7 +1,7 @@
 package model.network.schema;
 
 import javafx.scene.Node;
-import model.network.Experience;
+import model.network.Memory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -26,6 +26,8 @@ public abstract class Schema implements Serializable {
 
    /**
     * Constructor.
+    * @param inputClasses objects recognized as input
+    * @param inputSize the number of doubles that inputs are converted into
     * @param classifications output classifications
     */
    public Schema(Class[] inputClasses, int inputSize, Object[] classifications) {
@@ -130,27 +132,27 @@ public abstract class Schema implements Serializable {
    }
 
    /**
-    * Creates an experience from an input object and output result.
+    * Creates a memory from an input object and output result.
     * @param in input object
     * @param out output result
-    * @return experience
+    * @return memory
     */
-   public final Experience createExperience(Object in, Object out) throws Exception {
+   public final Memory createMemory(Object in, Object out) throws Exception {
       // Ensure valid input and output objects.
       if (!validInput(in))
          throw new Exception("Input object is not recognized by this schema.");
       if (!Arrays.asList(classifications).contains(out))
          throw new Exception("Output object is not recognized by this schema.");
 
-      return new Experience(this, in, out);
+      return new Memory(this, in, out);
    }
 
    /**
-    * Converts an experience to a JavaFX Node for rendering.
-    * @param exp experience
+    * Converts a memory to a JavaFX Node for rendering.
+    * @param memory memory
     * @param width width of node
     * @param height height of node
     * @return javaFX node
     */
-   public abstract Node toFXNode(Experience exp, double width, double height) throws Exception;
+   public abstract Node toFXNode(Memory memory, double width, double height) throws Exception;
 }

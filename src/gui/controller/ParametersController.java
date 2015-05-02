@@ -1,11 +1,8 @@
 package gui.controller;
 
-import javafx.concurrent.Task;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import model.SetParameters;
@@ -33,14 +30,10 @@ public class ParametersController implements Initializable {
    @FXML TextField acceptablePercentField;
 
    @FXML ProgressIndicator progress;
-   @FXML Button saveButton;
-   @FXML Button cancelButton;
 
    public void initialize(URL location, ResourceBundle resources) {
       this.setParameters = WorkSpace.instance.setParameters;
       setParameters.setController(this);
-      progress.setVisible(false);
-      cancelButton.setVisible(false);
 
       parameterTextFields = new ArrayList<TextField>();
 
@@ -186,40 +179,14 @@ public class ParametersController implements Initializable {
             activ.setValue(text.getPromptText(), text.getText());
          }
 
-         // Rebuild network on background thread.
-         Task<Void> task = new Task<Void>() {
-            @Override
-            public Void call() {
-               System.out.println("Rebuilding network...");
-               progress.setVisible(true);
-               setParameters.setParameters(
-                     new Parameters(learning,
-                           hidden,
-                           activ,
-                           stale,
-                           regression,
-                           error,
-                           percent));
-               progress.setVisible(false);
-               cancelButton.setVisible(false);
-               saveButton.setVisible(true);
-               return null;
-            }
-         };
-         progress.progressProperty().bind(task.progressProperty());
-         final Thread thread = new Thread(task);
-
-         cancelButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            public void handle(MouseEvent event) {
-               thread.interrupt();
-               setParameters.cancel();
-               cancelButton.setVisible(false);
-               saveButton.setVisible(true);
-            }
-         });
-         cancelButton.setVisible(true);
-         saveButton.setVisible(false);
-         thread.start();
+         setParameters.setParameters(
+               new Parameters(learning,
+                     hidden,
+                     activ,
+                     stale,
+                     regression,
+                     error,
+                     percent));
       } catch (Exception e) {
          Alert alert = new Alert(Alert.AlertType.ERROR);
          alert.setTitle("Invalid Parameters!");

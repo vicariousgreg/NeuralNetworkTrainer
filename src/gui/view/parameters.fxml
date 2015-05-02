@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -31,18 +32,17 @@
                      <children>
                         <HBox alignment="CENTER" prefHeight="36.0" prefWidth="200.0">
                            <children>
-                              <Button mnemonicParsing="false" onAction="#reset" text="Reset" GridPane.rowIndex="10" />
+                              <Button fx:id="resetButton" mnemonicParsing="false" onAction="#reset" text="Reset" GridPane.rowIndex="10" />
                            </children>
                         </HBox>
                         <HBox alignment="CENTER" prefHeight="36.0" prefWidth="100.0">
                            <children>
-                               <ProgressIndicator fx:id="progress" progress="0.0" />
+                              <Button fx:id="clearButton" mnemonicParsing="false" onAction="#clearFields" text="Clear" />
                            </children>
                         </HBox>
                         <HBox alignment="CENTER" prefHeight="36.0" prefWidth="200.0">
                            <children>
                               <Button fx:id="saveButton" mnemonicParsing="false" onAction="#save" text="Save" />
-                              <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#save" text="Cancel" />
                            </children>
                         </HBox>
                      </children>

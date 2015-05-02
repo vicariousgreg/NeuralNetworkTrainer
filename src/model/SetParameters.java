@@ -26,10 +26,6 @@ public class SetParameters implements Observer {
       network.setParameters(newParams);
    }
 
-   public void cancel() {
-      WorkSpace.instance.restoreNetwork();
-   }
-
    @Override
    public void update(Observable o, Object arg) {
       this.network = WorkSpace.instance.getNetwork();

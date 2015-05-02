@@ -3,6 +3,8 @@ package gui.controller;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
@@ -17,16 +19,19 @@ import java.util.ResourceBundle;
 
 public class MainController implements Initializable, Observer {
    public static Stage stage;
+   public static ProgressBar progress;
 
    @FXML Pane interact;
    @FXML Pane examine;
    @FXML Pane parameters;
    @FXML TabPane tabPane;
+   @FXML ProgressBar progressBar;
 
    public void initialize(URL location, ResourceBundle resources) {
       WorkSpace.instance.setController(this);
       stage = new Stage();
       tabPane.setVisible(false);
+      this.progress = progressBar;
    }
 
    public void newNetwork() {
@@ -48,11 +53,10 @@ public class MainController implements Initializable, Observer {
             @Override
             public Void call() {
                WorkSpace.instance.loadNetwork(file);
-               tabPane.setVisible(true);
                return null;
             }
          };
-         //progress.progressProperty().bind(task.progressProperty());
+         progressBar.progressProperty().bind(task.progressProperty());
          new Thread(task).start();
       }
    }
@@ -66,21 +70,93 @@ public class MainController implements Initializable, Observer {
             @Override
             public Void call() {
                WorkSpace.instance.saveNetwork(file);
-               tabPane.setVisible(true);
                return null;
             }
          };
-         //progress.progressProperty().bind(task.progressProperty());
+         progressBar.progressProperty().bind(task.progressProperty());
          new Thread(task).start();
       }
    }
 
+   public void consolidateMemory() {
+      // Rebuild network on background thread.
+      Task<Void> task = new Task<Void>() {
+         @Override
+         public Void call() {
+            System.out.println("Rebuilding network...");
+            WorkSpace.instance.consolidateMemory();
+            return null;
+         }
+      };
+      progressBar.progressProperty().bind(task.progressProperty());
+      new Thread(task).start();
+   }
+
+   public void saveMemory() {
+      FileChooser fileChooser = new FileChooser();
+      final File file = fileChooser.showSaveDialog(MainController.stage);
+      if (file != null) {
+         // Rebuild network on background thread.
+         Task<Void> task = new Task<Void>() {
+            @Override
+            public Void call() {
+               WorkSpace.instance.saveMemory(file);
+               return null;
+            }
+         };
+         progressBar.progressProperty().bind(task.progressProperty());
+         new Thread(task).start();
+      }
+   }
+
+   public void loadMemory() {
+      FileChooser fileChooser = new FileChooser();
+      final File file = fileChooser.showOpenDialog(MainController.stage);
+      if (file != null) {
+         // Rebuild network on background thread.
+         Task<Void> task = new Task<Void>() {
+            @Override
+            public Void call() {
+               WorkSpace.instance.loadMemory(file);
+               return null;
+            }
+         };
+         progressBar.progressProperty().bind(task.progressProperty());
+         new Thread(task).start();
+      }
+   }
+
+   public void wipeMemory() {
+      // Rebuild network on background thread.
+      Task<Void> task = new Task<Void>() {
+         @Override
+         public Void call() {
+            WorkSpace.instance.wipeMemory();
+            return null;
+         }
+      };
+      progressBar.progressProperty().bind(task.progressProperty());
+      new Thread(task).start();
+   }
+
    @Override
    public void update(Observable o, Object arg) {
-      if (WorkSpace.instance.getNetwork() == null) {
-         tabPane.setVisible(false);
+      System.out.println("Main Controller update!");
+      progressBar.progressProperty().unbind();
+      progressBar.setProgress(0);
+
+      if (arg instanceof String) {
+         Alert alert = new Alert(Alert.AlertType.ERROR);
+         alert.setTitle("Error!");
+         alert.setHeaderText((String) arg);
+         alert.setContentText(null);
+         alert.showAndWait();
       } else {
-         tabPane.setVisible(true);
+         if (WorkSpace.instance.getNetwork() == null) {
+            tabPane.setVisible(false);
+         } else {
+            tabPane.setVisible(true);
+         }
       }
    }
 }

@@ -6,10 +6,10 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 /**
- * Represents a neural network experience, which consists of an input and
+ * Represents a neural network memory, which consists of an input and
  * output vector.
  */
-public class Experience implements Serializable {
+public class Memory implements Serializable {
    /** Input vector. */
    public final double[] inputVector;
    /** Output vector. */
@@ -17,16 +17,17 @@ public class Experience implements Serializable {
 
    /**
     * Constructor.
+    * @param schema schema of memory
     * @param in experience input object
     * @param out experience output object
     */
-   public Experience(Schema schema, Object in, Object out) throws Exception {
+   public Memory(Schema schema, Object in, Object out) throws Exception {
       this.inputVector = schema.encodeInput(in);
       this.outputVector = schema.encodeOutput(out);
    }
 
    /**
-    * Gets the input vector for this experience.
+    * Gets the input vector for this memory.
     * @return input vector
     */
    public double[] getInputVector() {
@@ -34,7 +35,7 @@ public class Experience implements Serializable {
    }
 
    /**
-    * Gets the output vector for this experience.
+    * Gets the output vector for this memory.
     * @return output vector
     */
    public double[] getOutputVector() {

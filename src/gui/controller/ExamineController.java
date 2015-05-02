@@ -6,7 +6,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import model.WorkSpace;
-import model.network.Experience;
+import model.network.Memory;
 import model.network.schema.Schema;
 
 import java.net.URL;
@@ -24,10 +24,10 @@ public class ExamineController implements Initializable {
       memoryList.getChildren().clear();
    }
 
-   public void setMemories(Schema schema, ArrayList<Experience> memories) {
+   public void setMemories(Schema schema, ArrayList<Memory> memories) {
       clearMemories();
 
-      for (Experience exp : memories) {
+      for (Memory exp : memories) {
          try {
             HBox memoryBox = new HBox();
             memoryBox.getChildren().add(schema.toFXNode(exp, 25, 25));
@@ -39,4 +39,5 @@ public class ExamineController implements Initializable {
          }
       }
    }
+
 }

@@ -1,7 +1,6 @@
 package model;
 
 import gui.controller.ExamineController;
-import gui.controller.InteractController;
 import model.network.Network;
 
 import java.util.Observable;
@@ -22,7 +21,7 @@ public class Examine implements Observer {
    public void update(Observable o, Object arg) {
       this.network = WorkSpace.instance.getNetwork();
       if (network != null)
-         controller.setMemories(network.schema, network.getMemory());
+         controller.setMemories(network.schema, network.getMemories());
       else
          controller.clearMemories();
    }

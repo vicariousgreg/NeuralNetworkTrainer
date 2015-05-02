@@ -11,19 +11,32 @@
 
 <Pane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.controller.MainController">
    <children>
-      <MenuBar prefHeight="29.0" prefWidth="600.0">
-        <menus>
-            <Menu mnemonicParsing="false" text="File">
-              <items>
-                  <MenuItem mnemonicParsing="false" onAction="#newNetwork" text="New Network" />
-                  <MenuItem mnemonicParsing="false" onAction="#loadNetwork" text="Load Network" />
-                  <MenuItem mnemonicParsing="false" onAction="#saveNetwork" text="Save Network" />
-                  <MenuItem mnemonicParsing="false" onAction="#closeNetwork" text="Close Network" />
-              </items>
-            </Menu>
-        </menus>
-      </MenuBar>
-      <TabPane fx:id="tabPane" layoutY="29.0">
+      <HBox>
+         <children>
+            <MenuBar prefHeight="30.0" prefWidth="402.0">
+              <menus>
+                  <Menu mnemonicParsing="false" text="File">
+                    <items>
+                        <MenuItem mnemonicParsing="false" onAction="#newNetwork" text="New Network" />
+                        <MenuItem mnemonicParsing="false" onAction="#loadNetwork" text="Load Network" />
+                        <MenuItem mnemonicParsing="false" onAction="#saveNetwork" text="Save Network" />
+                        <MenuItem mnemonicParsing="false" onAction="#closeNetwork" text="Close Network" />
+                    </items>
+                  </Menu>
+                  <Menu mnemonicParsing="false" text="Network">
+                      <items>
+                          <MenuItem mnemonicParsing="false" onAction="#consolidateMemory" text="Consolidate Memory" />
+                          <MenuItem mnemonicParsing="false" onAction="#loadMemory" text="Load Memories" />
+                          <MenuItem mnemonicParsing="false" onAction="#saveMemory" text="Save Memories" />
+                          <MenuItem mnemonicParsing="false" onAction="#wipeMemory" text="Wipe Memories" />
+                      </items>
+                  </Menu>
+              </menus>
+            </MenuBar>
+             <ProgressBar fx:id="progressBar" layoutX="400.0" prefHeight="30.0" prefWidth="200.0" progress="0.0" />
+         </children>
+      </HBox>
+      <TabPane fx:id="tabPane" layoutY="29.0" prefHeight="505.0" prefWidth="602.0">
          <tabs>
             <Tab closable="false" text="Main Menu">
                <content>

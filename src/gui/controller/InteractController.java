@@ -26,7 +26,6 @@ public class InteractController implements Initializable {
 
    @FXML Pane pane;
    @FXML FlowPane buttonPane;
-   @FXML ProgressIndicator progress;
    @FXML ColorPicker colorPicker;
    @FXML Rectangle rectangle;
    @FXML Text answer;
@@ -36,7 +35,6 @@ public class InteractController implements Initializable {
    public void initialize(URL location, ResourceBundle resources) {
       interact = WorkSpace.instance.interact;
       WorkSpace.instance.interact.setController(this);
-      progress.setVisible(false);
       buttonPane.setOrientation(Orientation.VERTICAL);
    }
 
@@ -93,22 +91,6 @@ public class InteractController implements Initializable {
       answer.setText(guess);
    }
 
-   public void consolidateMemories() {
-      // Rebuild network on background thread.
-      Task<Void> task = new Task<Void>() {
-         @Override
-         public Void call() {
-            System.out.println("Rebuilding network...");
-            progress.setVisible(true);
-            WorkSpace.instance.consolidateMemories();
-            progress.setVisible(false);
-            guessColor();
-            return null;
-         }
-      };
-      progress.progressProperty().bind(task.progressProperty());
-      new Thread(task).start();
-   }
 
    public void clickSkip() {
       randomize();
