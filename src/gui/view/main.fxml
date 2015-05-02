@@ -15,29 +15,22 @@
         <menus>
             <Menu mnemonicParsing="false" text="File">
               <items>
-                <MenuItem mnemonicParsing="false" onAction="#loadNetwork" text="Load Network" />
+                  <MenuItem mnemonicParsing="false" onAction="#newNetwork" text="New Network" />
+                  <MenuItem mnemonicParsing="false" onAction="#loadNetwork" text="Load Network" />
                   <MenuItem mnemonicParsing="false" onAction="#saveNetwork" text="Save Network" />
+                  <MenuItem mnemonicParsing="false" onAction="#closeNetwork" text="Close Network" />
               </items>
             </Menu>
         </menus>
       </MenuBar>
       <TabPane fx:id="tabPane" layoutY="29.0">
          <tabs>
-            <Tab text="Main Menu">
+            <Tab closable="false" text="Main Menu">
                <content>
                   <AnchorPane layoutY="29.0" prefHeight="371.0" prefWidth="600.0" />
                </content>
             </Tab>
-            <Tab text="Train">
-               <content>
-                  <AnchorPane layoutY="29.0" prefHeight="371.0" prefWidth="600.0">
-                     <children>
-                        <fx:include fx:id="train" source="train.fxml" />
-                     </children>
-                  </AnchorPane>
-               </content>
-            </Tab>
-            <Tab text="Interact">
+            <Tab closable="false" text="Interact">
                <content>
                   <AnchorPane layoutY="29.0" prefHeight="371.0" prefWidth="600.0">
                      <children>
@@ -46,7 +39,7 @@
                   </AnchorPane>
                </content>
             </Tab>
-            <Tab text="Examine">
+            <Tab closable="false" text="Examine">
                <content>
                   <AnchorPane layoutY="29.0" prefHeight="371.0" prefWidth="600.0">
                      <children>
@@ -55,7 +48,7 @@
                   </AnchorPane>
                </content>
             </Tab>
-            <Tab text="Parameters">
+            <Tab closable="false" text="Parameters">
                <content>
                   <AnchorPane layoutY="29.0" prefHeight="371.0" prefWidth="600.0">
                      <children>

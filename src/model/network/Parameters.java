@@ -68,7 +68,7 @@ public class Parameters implements Serializable {
     */
    public Parameters() {
       this(0.1,
-         new int[] { 5 },
+         new int[] { 3 },
          new SigmoidEstimate(2, 1000),
          50,
          1000,

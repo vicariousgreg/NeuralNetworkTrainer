@@ -8,7 +8,8 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
-import model.network.Network;
+import model.SetParameters;
+import model.WorkSpace;
 import model.network.Parameters;
 import model.network.activation.ActivationFunction;
 
@@ -17,9 +18,9 @@ import java.net.URL;
 import java.util.*;
 
 public class ParametersController implements Initializable {
-   private Network network;
-   private Parameters parameters;
+   private SetParameters setParameters;
    private ArrayList<TextField> parameterTextFields;
+   private ActivationFunction currentActivationFunction;
 
    @FXML Pane pane;
    @FXML TextField learningConstantField;
@@ -36,8 +37,12 @@ public class ParametersController implements Initializable {
    @FXML Button cancelButton;
 
    public void initialize(URL location, ResourceBundle resources) {
+      this.setParameters = WorkSpace.instance.setParameters;
+      setParameters.setController(this);
       progress.setVisible(false);
       cancelButton.setVisible(false);
+
+      parameterTextFields = new ArrayList<TextField>();
 
       // Set up activation functions dropdown.
       for (Class function : Parameters.activationFunctions) {
@@ -45,32 +50,40 @@ public class ParametersController implements Initializable {
       }
    }
 
+   public void clearFields() {
+      learningConstantField.clear();
+      hiddenLayersField.clear();
+      regressionThresholdField.clear();
+      staleThresholdField.clear();
+      acceptableErrorField.clear();
+      acceptablePercentField.clear();
 
-   public void setNetwork(Network network) {
-      this.network = network;
-      this.parameters = network.getParameters();
-      setFields();
+      for (TextField field : parameterTextFields)  {
+         field.clear();
+      }
    }
 
-   public void setFields() {
+   public void setFields(Parameters params) {
       // Set up standard parameters.
-      learningConstantField.setText(Double.toString(parameters.learningConstant));
-      regressionThresholdField.setText(Double.toString(parameters.regressionThreshold));
-      staleThresholdField.setText(Integer.toString(parameters.staleThreshold));
-      acceptableErrorField.setText(Double.toString(parameters.acceptableTestError));
-      acceptablePercentField.setText(Double.toString(parameters.acceptablePercentCorrect));
+      learningConstantField.setText(Double.toString(params.learningConstant));
+      regressionThresholdField.setText(Double.toString(params.regressionThreshold));
+      staleThresholdField.setText(Integer.toString(params.staleThreshold));
+      acceptableErrorField.setText(Double.toString(params.acceptableTestError));
+      acceptablePercentField.setText(Double.toString(params.acceptablePercentCorrect));
 
       // Set up hidden layers string.
       // String is formatted as a space delimited list of integers.
       StringBuilder sb = new StringBuilder();
-      int[] layers = parameters.hiddenLayerDepths;
+      int[] layers = params.hiddenLayerDepths;
       for (int i = 0; i < layers.length; ++i)
          sb.append(layers[i] + " ");
       hiddenLayersField.setText(sb.toString());
 
+      currentActivationFunction = params.activationFunction;
+
       // Set up activation function dropdown.
       activationFunctionsField.setValue(
-            parameters.activationFunction.getClass().getSimpleName());
+            params.activationFunction.getClass().getSimpleName());
 
       // Set up activation function parameters.
       initializeActivationParameters();
@@ -100,8 +113,10 @@ public class ParametersController implements Initializable {
 
             // For the currently selected activation function in the
             // network's parameters, set the values to the current ones.
-            if (functionName.equals(parameters.activationFunction.getClass().getSimpleName()))
-               input.setText(parameters.activationFunction.getValue(param));
+            if (currentActivationFunction != null &&
+                  functionName.equals(
+                        currentActivationFunction.getClass().getSimpleName()))
+               input.setText(currentActivationFunction.getValue(param));
 
             activationParametersGrid.addRow(i, label, input);
             parameterTextFields.add(input);
@@ -113,7 +128,7 @@ public class ParametersController implements Initializable {
    }
 
    public void reset() {
-      setFields();
+      setFields(setParameters.getParameters());
    }
 
    public void save() {
@@ -175,16 +190,16 @@ public class ParametersController implements Initializable {
          Task<Void> task = new Task<Void>() {
             @Override
             public Void call() {
-                System.out.println("Rebuilding network...");
-                progress.setVisible(true);
-                network.setParameters(
+               System.out.println("Rebuilding network...");
+               progress.setVisible(true);
+               setParameters.setParameters(
                      new Parameters(learning,
-                        hidden,
-                        activ,
-                        stale,
-                        regression,
-                        error,
-                        percent));
+                           hidden,
+                           activ,
+                           stale,
+                           regression,
+                           error,
+                           percent));
                progress.setVisible(false);
                cancelButton.setVisible(false);
                saveButton.setVisible(true);
@@ -197,7 +212,7 @@ public class ParametersController implements Initializable {
          cancelButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) {
                thread.interrupt();
-               network = MainController.restoreNetwork();
+               setParameters.cancel();
                cancelButton.setVisible(false);
                saveButton.setVisible(true);
             }

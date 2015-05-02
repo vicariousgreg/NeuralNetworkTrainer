@@ -1,86 +1,86 @@
 package gui.controller;
 
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import model.network.schema.ColorSchema;
-import model.network.Network;
+import model.WorkSpace;
 
 import java.io.*;
 import java.net.URL;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.ResourceBundle;
 
-public class MainController implements Initializable {
+public class MainController implements Initializable, Observer {
    public static Stage stage;
-   public static Network network;
-   public static Network backupNetwork;
 
-   @FXML Pane train;
    @FXML Pane interact;
    @FXML Pane examine;
    @FXML Pane parameters;
    @FXML TabPane tabPane;
 
-   @FXML TrainController trainController;
-   @FXML InteractController interactController;
-   @FXML ExamineController examineController;
-   @FXML ParametersController parametersController;
-
    public void initialize(URL location, ResourceBundle resources) {
+      WorkSpace.instance.setController(this);
       stage = new Stage();
+      tabPane.setVisible(false);
+   }
+
+   public void newNetwork() {
+      WorkSpace.instance.newNetwork();
+      tabPane.setVisible(true);
+   }
+
+   public void closeNetwork() {
+      WorkSpace.instance.closeNetwork();
       tabPane.setVisible(false);
    }
 
    public void loadNetwork() {
       FileChooser fileChooser = new FileChooser();
-      File file = fileChooser.showOpenDialog(stage);
+      final File file = fileChooser.showOpenDialog(stage);
       if (file != null) {
-         try {
-            FileInputStream fin = new FileInputStream(file);
-            ObjectInputStream ois = new ObjectInputStream(fin);
-            network = (Network) ois.readObject();
-            backupNetwork = network.clone();
-            trainController.setNetwork(network);
-            interactController.setNetwork(network);
-            examineController.extractMemories(network);
-            parametersController.setNetwork(network);
-            tabPane.setVisible(true);
-            ois.close();
-         } catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error!");
-            alert.setHeaderText("Error loading network!");
-            alert.setContentText(null);
-            alert.showAndWait();
-         }
+         // Rebuild network on background thread.
+         Task<Void> task = new Task<Void>() {
+            @Override
+            public Void call() {
+               WorkSpace.instance.loadNetwork(file);
+               tabPane.setVisible(true);
+               return null;
+            }
+         };
+         //progress.progressProperty().bind(task.progressProperty());
+         new Thread(task).start();
       }
    }
 
    public void saveNetwork() {
       FileChooser fileChooser = new FileChooser();
-      File file = fileChooser.showSaveDialog(stage);
+      final File file = fileChooser.showSaveDialog(stage);
       if (file != null) {
-         try {
-            FileOutputStream fos = new FileOutputStream(file);
-            ObjectOutputStream out = new ObjectOutputStream(fos);
-            out.writeObject(network);
-            out.close();
-         } catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error!");
-            alert.setHeaderText("Error saving network!");
-            alert.setContentText(null);
-            alert.showAndWait();
-         }
+         // Rebuild network on background thread.
+         Task<Void> task = new Task<Void>() {
+            @Override
+            public Void call() {
+               WorkSpace.instance.saveNetwork(file);
+               tabPane.setVisible(true);
+               return null;
+            }
+         };
+         //progress.progressProperty().bind(task.progressProperty());
+         new Thread(task).start();
       }
    }
 
-   public static Network restoreNetwork() {
-      network = backupNetwork.clone();
-      return network;
+   @Override
+   public void update(Observable o, Object arg) {
+      if (WorkSpace.instance.getNetwork() == null) {
+         tabPane.setVisible(false);
+      } else {
+         tabPane.setVisible(true);
+      }
    }
 }

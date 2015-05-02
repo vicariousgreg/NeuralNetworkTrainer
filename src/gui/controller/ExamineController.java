@@ -5,8 +5,8 @@ import javafx.fxml.Initializable;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import model.WorkSpace;
 import model.network.Experience;
-import model.network.Network;
 import model.network.schema.Schema;
 
 import java.net.URL;
@@ -16,14 +16,18 @@ import java.util.ResourceBundle;
 public class ExamineController implements Initializable {
    @FXML VBox memoryList;
 
-   public void initialize(URL location, ResourceBundle resources) { }
+   public void initialize(URL location, ResourceBundle resources) {
+      WorkSpace.instance.examine.setController(this);
+   }
 
-   public void extractMemories(Network network) {
+   public void clearMemories() {
       memoryList.getChildren().clear();
-      ArrayList<Experience> memory = network.getMemory();
-      Schema schema = network.schema;
+   }
 
-      for (Experience exp : memory) {
+   public void setMemories(Schema schema, ArrayList<Experience> memories) {
+      clearMemories();
+
+      for (Experience exp : memories) {
          try {
             HBox memoryBox = new HBox();
             memoryBox.getChildren().add(schema.toFXNode(exp, 25, 25));
