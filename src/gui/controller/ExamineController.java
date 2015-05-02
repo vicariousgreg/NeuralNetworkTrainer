@@ -39,5 +39,4 @@ public class ExamineController implements Initializable {
          }
       }
    }
-
 }

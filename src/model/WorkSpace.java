@@ -125,6 +125,23 @@ public class WorkSpace extends Observable {
       updateUI();
    }
 
+   public void addMemory(Object input, Object output) {
+      try {
+         network.addMemory(input, output);
+      } catch (Exception e) {
+         signalUIError("Error adding memory!");
+      }
+   }
+
+   public Object queryNetwork(Object input) {
+      try {
+         return network.query(input);
+      } catch(Exception e) {
+         signalUIError("Error querying network!");
+         return "Unknown";
+      }
+   }
+
    private void updateUI() {
        Platform.runLater(new Runnable() {
          @Override

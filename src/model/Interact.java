@@ -17,12 +17,12 @@ public class Interact implements Observer {
       this.controller = controller;
    }
 
-   public Object guess(Object input) throws Exception {
-      return network.query(input);
+   public Object guess(Object input) {
+      return WorkSpace.instance.queryNetwork(input);
    }
 
-   public void addMemory(Object input, Object output) throws Exception {
-      network.addMemory(input, output);
+   public void addMemory(Object input, Object output) {
+      WorkSpace.instance.addMemory(input, output);
    }
 
    @Override

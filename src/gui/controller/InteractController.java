@@ -1,16 +1,16 @@
 package gui.controller;
 
-import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Orientation;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ColorPicker;
-import javafx.scene.control.ProgressIndicator;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.TilePane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
@@ -25,7 +25,7 @@ public class InteractController implements Initializable {
    private Interact interact;
 
    @FXML Pane pane;
-   @FXML FlowPane buttonPane;
+   @FXML TilePane buttonPane;
    @FXML ColorPicker colorPicker;
    @FXML Rectangle rectangle;
    @FXML Text answer;
@@ -48,6 +48,7 @@ public class InteractController implements Initializable {
       for (int i = 0; i < classifications.length; ++i) {
          String name = classifications[i].toString();
          final Button button = new Button(name);
+         button.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
          button.setOnMouseClicked(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) {
                commit(button.getText());
@@ -55,6 +56,7 @@ public class InteractController implements Initializable {
          });
          buttonPane.getChildren().add(button);
       }
+
       randomize();
       guessColor();
    }
@@ -78,16 +80,9 @@ public class InteractController implements Initializable {
       System.out.println("Guess color");
       Color color = colorPicker.getValue();
 
-      String guess = "";
-      try {
-         guess = interact.guess(color).toString();
-         System.out.println("Guess: " + guess);
-      } catch (Exception e) {
-         System.out.println("Invalid network input!");
-         e.printStackTrace();
-      }
+      String guess = interact.guess(color).toString();
+      System.out.println("Guess: " + guess);
 
-      System.out.println(guess);
       answer.setText(guess);
    }
 
@@ -109,11 +104,7 @@ public class InteractController implements Initializable {
 
       System.out.printf("Color: %.3f %.3f %.3f is %s\n", red, blue, green, answer);
 
-      try {
-         interact.addMemory(color, answer);
-      } catch (Exception e) {
-         System.out.println("Experience does not match network's schema!");
-      }
+      interact.addMemory(color, answer);
       randomize();
       guessColor();
    }

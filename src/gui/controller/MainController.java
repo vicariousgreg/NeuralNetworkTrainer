@@ -48,7 +48,6 @@ public class MainController implements Initializable, Observer {
       FileChooser fileChooser = new FileChooser();
       final File file = fileChooser.showOpenDialog(stage);
       if (file != null) {
-         // Rebuild network on background thread.
          Task<Void> task = new Task<Void>() {
             @Override
             public Void call() {
@@ -65,7 +64,6 @@ public class MainController implements Initializable, Observer {
       FileChooser fileChooser = new FileChooser();
       final File file = fileChooser.showSaveDialog(stage);
       if (file != null) {
-         // Rebuild network on background thread.
          Task<Void> task = new Task<Void>() {
             @Override
             public Void call() {
@@ -79,7 +77,6 @@ public class MainController implements Initializable, Observer {
    }
 
    public void consolidateMemory() {
-      // Rebuild network on background thread.
       Task<Void> task = new Task<Void>() {
          @Override
          public Void call() {
@@ -96,7 +93,6 @@ public class MainController implements Initializable, Observer {
       FileChooser fileChooser = new FileChooser();
       final File file = fileChooser.showSaveDialog(MainController.stage);
       if (file != null) {
-         // Rebuild network on background thread.
          Task<Void> task = new Task<Void>() {
             @Override
             public Void call() {
@@ -113,7 +109,6 @@ public class MainController implements Initializable, Observer {
       FileChooser fileChooser = new FileChooser();
       final File file = fileChooser.showOpenDialog(MainController.stage);
       if (file != null) {
-         // Rebuild network on background thread.
          Task<Void> task = new Task<Void>() {
             @Override
             public Void call() {
@@ -127,7 +122,6 @@ public class MainController implements Initializable, Observer {
    }
 
    public void wipeMemory() {
-      // Rebuild network on background thread.
       Task<Void> task = new Task<Void>() {
          @Override
          public Void call() {

@@ -124,7 +124,6 @@ public class Network implements Serializable {
     * Creates a memory using the network's schema.
     * @param in input object
     * @param result resulting classification
-    * @throws Exception if the memory does not fit the network schema
     */
    public void addMemory(Object in, Object result) throws Exception {
       memories.add(schema.createMemory(in, result));
@@ -412,7 +411,8 @@ public class Network implements Serializable {
 
       // Teach the network until the error is acceptable.
       // Loop is broken when conditions are met.
-      while (true) {
+      while (testError > parameters.acceptableTestError &&
+          percentCorrect < parameters.acceptablePercentCorrect) {
          // Teach the network using the tests.
          for (int i = 0; i < trainingMemory.size(); ++i) {
             learn(trainingMemory.get(i));
@@ -421,10 +421,6 @@ public class Network implements Serializable {
          // Calculate error and percentage correct.
          testError = calcTotalTestError(testMemory);
          percentCorrect = calcPercentCorrect(testMemory);
-
-         // Break out of the loop if we've hit an acceptable state.
-         if (testError < parameters.acceptableTestError &&
-             percentCorrect > parameters.acceptablePercentCorrect) break;
 
          // Determine if the network needs to be reset.
          // If it is unacceptable, and is either stale or has regressed
