@@ -387,10 +387,11 @@ public class Network implements Serializable {
     * Trains the network with its memories.
     */
    public void train() {
-      final boolean print = false;
+      final boolean print = true;
 
       // Split memory.
-      List<List<Memory>> split = memoryModule.splitMemories();
+//      List<List<Memory>> split = memoryModule.splitMemories();
+      List<List<Memory>> split = memoryModule.naiveSplitMemories();
       List<Memory> trainingMemory = split.get(0);
       List<Memory> testMemory = split.get(1);
 
@@ -403,20 +404,24 @@ public class Network implements Serializable {
       int staleCounter = 0;
 
       // Test Errors.
-      double testError = 0.0;
-      double prevTestError = calcTotalTestError(testMemory);
+      double prevTestError = 1000;
+      double testError = calcTotalTestError(testMemory);
 
       // Percentage of tests passed.
-      double percentCorrect = 0;
-      double prevPercentCorrect = calcPercentCorrect(testMemory);
+      double prevPercentCorrect = 0;
+      double percentCorrect = calcPercentCorrect(testMemory);
 
-      System.out.println("Total test error before learning: " + prevTestError);
-      System.out.println("Passing percentage: %" + prevPercentCorrect);
+      System.out.println("Total test error before learning: " + testError);
+      System.out.println("Passing percentage: %" + percentCorrect);
 
       // Teach the network until the error is acceptable.
       // Loop is broken when conditions are met.
-      while (testError > parameters.acceptableTestError &&
+      while (testError > parameters.acceptableTestError ||
           percentCorrect < parameters.acceptablePercentCorrect) {
+
+         prevTestError = testError;
+         prevPercentCorrect = percentCorrect;
+
          // Teach the network using the tests.
          for (int i = 0; i < trainingMemory.size(); ++i) {
             learn(trainingMemory.get(i));
@@ -426,11 +431,13 @@ public class Network implements Serializable {
          testError = calcTotalTestError(testMemory);
          percentCorrect = calcPercentCorrect(testMemory);
 
+
          // Determine if the network needs to be reset.
          // If it is unacceptable, and is either stale or has regressed
          //   significantly in error, it should be reset.
          if (staleCounter > parameters.staleThreshold ||
              testError - prevTestError > parameters.regressionThreshold) {
+            if (print && staleCounter > parameters.staleThreshold) System.out.println("STALE");
             reset();
             staleCounter = 0;
             if (print) System.out.println("====================");
@@ -447,8 +454,6 @@ public class Network implements Serializable {
             if (print) System.out.printf("Test error: %.6f\n", testError);
             staleCounter = 0;
          }
-         prevTestError = testError;
-         prevPercentCorrect = percentCorrect;
       }
 
       System.out.println("Total test error after learning: " +
