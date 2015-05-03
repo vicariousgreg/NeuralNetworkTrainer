@@ -1,7 +1,6 @@
 package model.network;
 
-import model.network.memory.Memory;
-import model.network.memory.MemoryModule;
+import model.network.memory.*;
 import model.network.schema.Schema;
 
 import java.io.Serializable;
@@ -41,7 +40,7 @@ public class Network implements Serializable {
    public Network(Schema schema, Parameters params) {
       this.schema = schema;
       this.parameters = params;
-      this.memoryModule = new MemoryModule(schema);
+      this.memoryModule = new BasicMemoryModule(schema);
       buildNetwork();
    }
 
@@ -387,11 +386,10 @@ public class Network implements Serializable {
     * Trains the network with its memories.
     */
    public void train() {
-      final boolean print = true;
+      final boolean print = false;
 
       // Split memory.
-//      List<List<Memory>> split = memoryModule.splitMemories();
-      List<List<Memory>> split = memoryModule.naiveSplitMemories();
+      List<List<Memory>> split = memoryModule.splitMemories();
       List<Memory> trainingMemory = split.get(0);
       List<Memory> testMemory = split.get(1);
 
