@@ -1,10 +1,11 @@
 package model.network;
 
+import model.network.memory.BasicMemoryModule;
 import model.network.memory.Memory;
 import model.network.memory.MemoryModule;
 import model.network.schema.Schema;
 
-import java.io.Serializable;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -46,7 +47,7 @@ public class Network implements Serializable {
    public Network(Schema schema, Parameters params) {
       this.schema = schema;
       this.parameters = params;
-      this.memoryModule = new MemoryModule(schema);
+      this.memoryModule = new BasicMemoryModule(schema);
       buildNetwork();
    }
 
@@ -371,43 +372,9 @@ public class Network implements Serializable {
       final boolean print = false;
 
       // Split memory.
-//      List<List<Memory>> split = memoryModule.splitMemories();
-      List<List<Memory>> split = memoryModule.naiveSplitMemories();
+      List<List<Memory>> split = memoryModule.splitMemories();
       List<Memory> trainingMemory = split.get(0);
       List<Memory> testMemory = split.get(1);
-
-      /*
-      List<Memory> temp = new ArrayList<Memory>();
-      temp.addAll(trainingMemory);
-      temp.addAll(testMemory);
-      trainingMemory.clear();
-      testMemory.clear();
-
-      int cutoff = (int) (temp.size() * (2.0 / 3));
-      trainingMemory.addAll(temp.subList(0, cutoff));
-      testMemory.addAll(temp.subList(cutoff, temp.size()));
-      */
-
-      /*  BASIC LEARNING TEST
-      Memory temp = testMemory.get(1);
-      System.out.println("In: " + Arrays.toString(temp.inputVector));
-      System.out.println("Exp: " + Arrays.toString(temp.outputVector));
-      for (int ctr = 0; ctr < 10; ++ctr) {
-         System.out.println("==========");
-         double[] out = fire(temp.inputVector);
-         System.out.println("  Before: " + Arrays.toString(out));
-
-         for (int i = 0; i < 50; ++i) {
-            learn(temp);
-         }
-
-         out = fire(temp.inputVector);
-         System.out.println("  After: " + Arrays.toString(out));
-         reset();
-      }
-      */
-
-
 
       if (testMemory.size() == 0) {
          System.out.println("Insufficient memory for training!");
@@ -512,27 +479,21 @@ public class Network implements Serializable {
     * Clones this network.
     * @return cloned network
     */
-   /*
    public Network clone() {
-      ArrayList<Neuron[]> newLayers = new ArrayList<Neuron[]>();
+      try {
+         ByteArrayOutputStream baos = new ByteArrayOutputStream();
+         ObjectOutputStream oos = new ObjectOutputStream(baos);
+         oos.writeObject(this);
 
-      // Iterate through layers.
-      for (Neuron[] layer : layers) {
-         Neuron[] newLayer = new Neuron[layer.length];
-
-         // Iterate through neurons in layer.
-         for (int i = 0; i < layer.length; ++i) {
-            newLayer[i] = layer[i].clone();
-         }
-         newLayers.add(newLayer);
+         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+         ObjectInputStream ois = new ObjectInputStream(bais);
+         return (Network) ois.readObject();
+      } catch (IOException e) {
+         return null;
+      } catch (ClassNotFoundException e) {
+         return null;
       }
-
-      Network cloned = new Network(this.schema, this.parameters);
-      cloned.layers = newLayers;
-      cloned.memoryModule = memoryModule.clone();
-      return cloned;
    }
-   */
 
    /**
     * Returns a string representation of this network.

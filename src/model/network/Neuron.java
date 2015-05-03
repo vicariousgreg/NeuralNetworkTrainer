@@ -7,7 +7,6 @@ import java.util.*;
 
 /**
  * Represents a neural network neuron.
- * TODO: transform to observer/observable
  */
 public class Neuron extends Observable implements Serializable, Observer {
    private double learningConstant;
@@ -20,8 +19,6 @@ public class Neuron extends Observable implements Serializable, Observer {
 
    /** Bias weight. */
    private double bias;
-   /** Delta of bias change for backpropagation. */
-   private double biasDelta;
 
    private Map<Observable, Double> weights;
    private Map<Observable, Double> inputs;
