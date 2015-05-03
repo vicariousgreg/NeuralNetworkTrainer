@@ -9,23 +9,31 @@ import java.util.*;
  * Represents a neural network neuron.
  */
 public class Neuron extends Observable implements Serializable, Observer {
+   /** Learning constant. */
    private double learningConstant;
 
    /** Activation function. */
    private ActivationFunction activationFunction;
-   /** Number of inputs. */
+   /** Number of input neurons. */
    private int numInputs;
+   /** Number of output neurons. */
    private int numOutputs;
 
    /** Bias weight. */
    private double bias;
 
+   /** Map of input neurons to weights. */
    private Map<Observable, Double> weights;
+   /** Map of last inputs observed. */
    private Map<Observable, Double> inputs;
 
+   /** Counter for input. */
    private int inputCounter;
+   /** Counter for backpropagation of error. */
    private int errorCounter;
+   /** Last output. */
    private double output;
+   /** Error sigma for backpropagation. */
    private double errorSigma;
 
    /**
@@ -84,7 +92,8 @@ public class Neuron extends Observable implements Serializable, Observer {
       // Once we receive all errors...
       if (numOutputs == 0 || errorCounter == numOutputs) {
          errorCounter = 0;
-         double error = errorSigma * activationFunction.calculateDerivative(output);
+         double error = errorSigma *
+            activationFunction.calculateDerivative(output);
 
          // Backpropagate error to input neurons.
          for (Observable key : inputs.keySet()) {

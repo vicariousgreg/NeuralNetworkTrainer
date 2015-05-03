@@ -20,15 +20,18 @@ public class Network implements Serializable {
    /** Network learning parameters. */
    private Parameters parameters;
 
-   /** Network neuron layers. */
-   private ArrayList<Neuron[]> layers;
-
    /** Memory of inputs and output test cases. */
    private MemoryModule memoryModule;
 
+   /** Network neuron layers. */
+   private ArrayList<Neuron[]> layers;
 
+   /** Neuron input layer. */
    private Neuron[] inputLayer;
+
+   /** Neuron output layer. */
    private Neuron[] outputLayer;
+
 
    /**
     * Constructor.
@@ -55,7 +58,6 @@ public class Network implements Serializable {
       layers = new ArrayList<Neuron[]>();
 
       // Build input layer.
-      System.out.println("Building input layer:");
       inputLayer = new Neuron[schema.inputSize];
       for (int index = 0; index < inputLayer.length; ++index) {
          inputLayer[index] = new Neuron(parameters);
@@ -66,7 +68,6 @@ public class Network implements Serializable {
 
       // Build hidden layers.
       for (int layerIndex = 0; layerIndex < parameters.hiddenLayerDepths.length; ++layerIndex) {
-         System.out.println("Building hidden layer:" + (layerIndex + 1));
          // Build a layer.
          Neuron[] currLayer = new Neuron[parameters.hiddenLayerDepths[layerIndex]];
 
@@ -89,7 +90,6 @@ public class Network implements Serializable {
       }
 
       // Build output layer.
-      System.out.println("Building output layer:");
       outputLayer = new Neuron[schema.outputSize];
 
       // Hook layer up to previous layer.
@@ -113,10 +113,7 @@ public class Network implements Serializable {
     * Retains memories and parameters.
     */
    public void reset() {
-      int i = 0;
       for (Neuron[] layer : layers) {
-//         System.out.println("Resetting layer: " + i);
-         i++;
          for (int index = 0; index < layer.length; ++index) {
             layer[index].randomize();
          }
@@ -219,60 +216,6 @@ public class Network implements Serializable {
 
       return output;
    }
-
-   /**
-    * Gets a table of weights for the neurons in a given layer.
-    * @param layerIndex layer index
-    * @return weights table
-    */
-   /*
-   private double[][] getLayerWeights(int layerIndex) {
-      Neuron[] previousLayer = layers.get(layerIndex - 1);
-      Neuron[] currLayer = layers.get(layerIndex);
-      double[][] weights = new double[previousLayer.length][currLayer.length];
-
-      // For each neuron in the layer, extract its weight for each
-      // neuron in the previous layer.
-      for (int c = 0; c < currLayer.length; ++c) {
-         Neuron neuron = currLayer[c];
-         double[] currWeights = neuron.getWeights();
-         for (int p = 0; p < previousLayer.length; ++p) {
-            weights[p][c] = currWeights[p];
-         }
-      }
-      return weights;
-   }
-   */
-
-   /**
-    * Fires the neural network and returns all neuron outputs.
-    * @param input input signals
-    * @return all neuron output signals
-    */
-   /*
-   private ArrayList<double[]> getOutputs(double[] input) {
-      // Validate input size.
-      if (input.length != schema.inputSize)
-         throw new RuntimeException("Network fired with improper input!");
-
-      ArrayList<double[]> outputs = new ArrayList<double[]>();
-
-      // Thread input through network layers.
-      for (Neuron[] layer : layers) {
-         double[] output = new double[layer.length];
-
-         // Process input and catch output.
-         for (int i = 0; i < layer.length; ++i) {
-            output[i] = layer[i].fire(input);
-         }
-         outputs.add(output);
-
-         // Set up input for next layer.
-         input = output;
-      }
-      return outputs;
-   }
-   */
 
    /**
     * Calculates the total test error by summing up individual test
@@ -416,7 +359,7 @@ public class Network implements Serializable {
          percentCorrect = calcPercentCorrect(testMemory);
          if (percentCorrect > bestPercent) {
             bestPercent = percentCorrect;
-            System.out.println("Improvement: " + bestPercent);
+            System.out.println("Best: " + bestPercent);
          }
 
 
