@@ -6,6 +6,7 @@ import model.network.schema.Schema;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -23,6 +24,10 @@ public class Network implements Serializable {
 
    /** Memory of inputs and output test cases. */
    private MemoryModule memoryModule;
+
+
+   private Neuron[] inputLayer;
+   private Neuron[] outputLayer;
 
    /**
     * Constructor.
@@ -47,26 +52,59 @@ public class Network implements Serializable {
 
    private void buildNetwork() {
       layers = new ArrayList<Neuron[]>();
-      int[] layerSizes = new int[parameters.hiddenLayerDepths.length + 2];
 
-      // Set up layer sizes array.
-      layerSizes[0] = schema.inputSize;
-      for (int i = 0; i < parameters.hiddenLayerDepths.length; ++i) {
-         layerSizes[i+1] = parameters.hiddenLayerDepths[i];
+      // Build input layer.
+      System.out.println("Building input layer:");
+      inputLayer = new Neuron[schema.inputSize];
+      for (int index = 0; index < inputLayer.length; ++index) {
+         inputLayer[index] = new Neuron(parameters);
       }
-      layerSizes[layerSizes.length-1] = schema.outputSize;
+      layers.add(inputLayer);
 
-      // Set up layers.
-      for (int i = 1; i < layerSizes.length; ++i) {
-         Neuron[] layer = new Neuron[layerSizes[i]];
+      Neuron[] prevLayer = inputLayer;
 
-         // Initialize neurons using previous layer size.
-         for (int j = 0; j < layer.length; ++j) {
-            layer[j] = new Neuron(parameters.activationFunction, layerSizes[i-1]);
+      // Build hidden layers.
+      for (int layerIndex = 0; layerIndex < parameters.hiddenLayerDepths.length; ++layerIndex) {
+         System.out.println("Building hidden layer:" + (layerIndex + 1));
+         // Build a layer.
+         Neuron[] currLayer = new Neuron[parameters.hiddenLayerDepths[layerIndex]];
+
+         // Hook layer up to previous layer.
+         for (int currIndex = 0; currIndex < currLayer.length; ++currIndex) {
+            currLayer[currIndex] = new Neuron(parameters);
+            for (int prevIndex = 0; prevIndex < prevLayer.length; ++prevIndex) {
+               // Hook up input from previous layer.
+               // Tell current neuron to expect input from previous.
+               currLayer[currIndex].addInputNeuron(prevLayer[prevIndex]);
+               // Tell previous neuron to notify current neuron.
+               prevLayer[prevIndex].addObserver(currLayer[currIndex]);
+            }
+            // Randomize neuron.
+            currLayer[currIndex].randomize();
          }
+         layers.add(currLayer);
 
-         layers.add(layer);
+         prevLayer = currLayer;
       }
+
+      // Build output layer.
+      System.out.println("Building output layer:");
+      outputLayer = new Neuron[schema.outputSize];
+
+      // Hook layer up to previous layer.
+      for (int outIndex = 0; outIndex < outputLayer.length; ++outIndex) {
+         outputLayer[outIndex] = new Neuron(parameters);
+         for (int prevIndex = 0; prevIndex < prevLayer.length; ++prevIndex) {
+            // Hook up input from previous layer.
+            // Tell current neuron to expect input from previous.
+            outputLayer[outIndex].addInputNeuron(prevLayer[prevIndex]);
+            // Tell previous neuron to notify current neuron.
+            prevLayer[prevIndex].addObserver(outputLayer[outIndex]);
+         }
+         // Randomize neuron.
+         outputLayer[outIndex].randomize();
+      }
+      layers.add(outputLayer);
    }
 
    /**
@@ -74,7 +112,10 @@ public class Network implements Serializable {
     * Retains memories and parameters.
     */
    public void reset() {
+      int i = 0;
       for (Neuron[] layer : layers) {
+//         System.out.println("Resetting layer: " + i);
+         i++;
          for (int index = 0; index < layer.length; ++index) {
             layer[index].randomize();
          }
@@ -165,19 +206,14 @@ public class Network implements Serializable {
       if (input.length != schema.inputSize)
          throw new RuntimeException("Network fired with improper input!");
 
-      double[] output = null;
+      double[] output = new double[outputLayer.length];
 
-      // Thread input through network layers.
-      for (Neuron[] layer : layers) {
-         output = new double[layer.length];
+      for (int inputIndex = 0; inputIndex < inputLayer.length; ++inputIndex) {
+         inputLayer[inputIndex].fire(input[inputIndex]);
+      }
 
-         // Process input and catch output.
-         for (int i = 0; i < layer.length; ++i) {
-            output[i] = layer[i].fire(input);
-         }
-
-         // Set up input for next layer.
-         input = output;
+      for (int outputIndex = 0; outputIndex < outputLayer.length; ++outputIndex) {
+         output[outputIndex] = outputLayer[outputIndex].getOutput();
       }
 
       return output;
@@ -188,6 +224,7 @@ public class Network implements Serializable {
     * @param layerIndex layer index
     * @return weights table
     */
+   /*
    private double[][] getLayerWeights(int layerIndex) {
       Neuron[] previousLayer = layers.get(layerIndex - 1);
       Neuron[] currLayer = layers.get(layerIndex);
@@ -204,12 +241,14 @@ public class Network implements Serializable {
       }
       return weights;
    }
+   */
 
    /**
     * Fires the neural network and returns all neuron outputs.
     * @param input input signals
     * @return all neuron output signals
     */
+   /*
    private ArrayList<double[]> getOutputs(double[] input) {
       // Validate input size.
       if (input.length != schema.inputSize)
@@ -232,6 +271,7 @@ public class Network implements Serializable {
       }
       return outputs;
    }
+   */
 
    /**
     * Calculates the total test error by summing up individual test
@@ -300,9 +340,10 @@ public class Network implements Serializable {
       double[] errors = new double[actual.length];
 
       // Calculate backpropagated error for each output neuron.
+      // Uses expected - actual so that error represents direction of gradient descent.
+      // Ommitting the extra output multiplication because the neuron does it for us.
       for (int i = 0; i < actual.length; ++i) {
-         errors[i] = (expected[i] - actual[i]) *
-            parameters.activationFunction.calculateDerivative(actual[i]);
+         errors[i] = (expected[i] - actual[i]);
       }
       return errors;
    }
@@ -313,73 +354,13 @@ public class Network implements Serializable {
     * @param memory memory to learn from
     */
    private void learn(Memory memory) {
-      // Fire network and gather outputs.
-      ArrayList<double[]> outputs = getOutputs(memory.inputVector);
-
-      // Calculate error for output layer
-      // The output layer derives its error from the error function.
-      // Backpropagation requires calculation of the derivative.
-      double[] output = outputs.get(outputs.size() - 1);
+      // Fire network and gather output.
+      double[] output = fire(memory.inputVector);
       double[] errors = calcBPError(output, memory.outputVector);
 
-      // Backpropagate through layers.
-      for (int layerIndex = layers.size() - 1; layerIndex >= 0; --layerIndex) {
-         // Get output from previous layer.
-         // For input layer, this is the memory input.
-         output = (layerIndex > 0)
-            ? outputs.get(layerIndex - 1)
-            : memory.inputVector;
-
-         // Get current layer.
-         Neuron[] currLayer = layers.get(layerIndex);
-
-         // Set deltas for each neuron.
-         for (int currIndex = 0; currIndex < currLayer.length; ++currIndex) {
-            Neuron neuron = currLayer[currIndex];
-
-            // Set weight deltas.
-            // delta[p][c] = learningConstant * errors[c] * output[p]
-            for (int prevIndex = 0; prevIndex < output.length; ++prevIndex) {
-               neuron.setWeightDelta(prevIndex,
-                  parameters.learningConstant * errors[currIndex] *
-                       output[prevIndex]);
-            }
-            // Set bias delta.
-            // dB = learningConstant * errors[c]
-            neuron.setBiasDelta(parameters.learningConstant * errors[currIndex]);
-         }
-
-         // Stop at input layer.
-         if (layerIndex == 0) break;
-
-         // Create weights table for the current layer.
-         double[][] weights = getLayerWeights(layerIndex);
-
-         // Calculate hidden layer backpropagated errors.
-         // newErrors[p] = out[p] * (1 - out[p]) * sigma(errors[c] * weights[p][c])
-         double[] newErrors = new double[output.length];
-         for (int prevIndex = 0; prevIndex < output.length; ++prevIndex) {
-            double sigma = 0.0;
-
-            // Calculate error sigma.
-            for (int currIndex = 0; currIndex < currLayer.length; ++currIndex) {
-               sigma += errors[currIndex] * weights[prevIndex][currIndex];
-            }
-
-            // Set the new error.
-            newErrors[prevIndex] = sigma *
-               parameters.activationFunction.calculateDerivative(output[prevIndex]);
-         }
-
-         // Move new errors over for next iteration.
-         errors = newErrors;
-      }
-
-      // Commit deltas.
-      for (Neuron[] layer : layers) {
-         for (int i = 0; i < layer.length; ++i) {
-            layer[i].commitDeltas();
-         }
+      // Backpropagate to output layer using calcBPError.
+      for (int index = 0; index < outputLayer.length; ++index) {
+         outputLayer[index].backPropagate(errors[index]);
       }
    }
 
@@ -387,13 +368,46 @@ public class Network implements Serializable {
     * Trains the network with its memories.
     */
    public void train() {
-      final boolean print = true;
+      final boolean print = false;
 
       // Split memory.
 //      List<List<Memory>> split = memoryModule.splitMemories();
       List<List<Memory>> split = memoryModule.naiveSplitMemories();
       List<Memory> trainingMemory = split.get(0);
       List<Memory> testMemory = split.get(1);
+
+      /*
+      List<Memory> temp = new ArrayList<Memory>();
+      temp.addAll(trainingMemory);
+      temp.addAll(testMemory);
+      trainingMemory.clear();
+      testMemory.clear();
+
+      int cutoff = (int) (temp.size() * (2.0 / 3));
+      trainingMemory.addAll(temp.subList(0, cutoff));
+      testMemory.addAll(temp.subList(cutoff, temp.size()));
+      */
+
+      /*  BASIC LEARNING TEST
+      Memory temp = testMemory.get(1);
+      System.out.println("In: " + Arrays.toString(temp.inputVector));
+      System.out.println("Exp: " + Arrays.toString(temp.outputVector));
+      for (int ctr = 0; ctr < 10; ++ctr) {
+         System.out.println("==========");
+         double[] out = fire(temp.inputVector);
+         System.out.println("  Before: " + Arrays.toString(out));
+
+         for (int i = 0; i < 50; ++i) {
+            learn(temp);
+         }
+
+         out = fire(temp.inputVector);
+         System.out.println("  After: " + Arrays.toString(out));
+         reset();
+      }
+      */
+
+
 
       if (testMemory.size() == 0) {
          System.out.println("Insufficient memory for training!");
@@ -410,15 +424,18 @@ public class Network implements Serializable {
       // Percentage of tests passed.
       double prevPercentCorrect = 0;
       double percentCorrect = calcPercentCorrect(testMemory);
+      double bestPercent = percentCorrect;
 
       System.out.println("Total test error before learning: " + testError);
       System.out.println("Passing percentage: %" + percentCorrect);
+      System.out.println("Training memory size: " + trainingMemory.size());
+      System.out.println("Test memory size: " + testMemory.size());
 
       // Teach the network until the error is acceptable.
       // Loop is broken when conditions are met.
       while (testError > parameters.acceptableTestError ||
           percentCorrect < parameters.acceptablePercentCorrect) {
-
+         // Set up previous values.
          prevTestError = testError;
          prevPercentCorrect = percentCorrect;
 
@@ -430,6 +447,10 @@ public class Network implements Serializable {
          // Calculate error and percentage correct.
          testError = calcTotalTestError(testMemory);
          percentCorrect = calcPercentCorrect(testMemory);
+         if (percentCorrect > bestPercent) {
+            bestPercent = percentCorrect;
+            System.out.println("Improvement: " + bestPercent);
+         }
 
 
          // Determine if the network needs to be reset.
@@ -448,6 +469,7 @@ public class Network implements Serializable {
          } else if ((Double.compare(testError, 100) != 0 && 
                      Double.compare(testError, prevTestError) == 0) ||
                     Double.compare(percentCorrect, prevPercentCorrect) == 0) {
+            if (print) System.out.print(".");
             ++staleCounter;
          } else {
             if (print) System.out.printf("Percent Correct: %.6f%%  |  ", percentCorrect);
@@ -490,6 +512,7 @@ public class Network implements Serializable {
     * Clones this network.
     * @return cloned network
     */
+   /*
    public Network clone() {
       ArrayList<Neuron[]> newLayers = new ArrayList<Neuron[]>();
 
@@ -509,6 +532,7 @@ public class Network implements Serializable {
       cloned.memoryModule = memoryModule.clone();
       return cloned;
    }
+   */
 
    /**
     * Returns a string representation of this network.

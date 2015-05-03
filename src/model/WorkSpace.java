@@ -43,25 +43,25 @@ public class WorkSpace extends Observable {
    }
 
    public void restoreNetwork() {
-      network = backupNetwork.clone();
+//      network = backupNetwork.clone();
       updateUI();
    }
 
    private void setNetwork(Network network) {
       this.network = network;
-      this.backupNetwork = network.clone();
+//      this.backupNetwork = network.clone();
       updateUI();
    }
 
    public void newNetwork() {
       network = new Network(new ColorSchema());
-      backupNetwork = network.clone();
+//      backupNetwork = network.clone();
       updateUI();
    }
 
    public void closeNetwork() {
       network = null;
-      backupNetwork = null;
+//      backupNetwork = null;
       updateUI();
    }
 

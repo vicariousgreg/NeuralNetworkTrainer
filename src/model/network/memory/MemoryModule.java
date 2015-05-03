@@ -97,7 +97,7 @@ public class MemoryModule implements Serializable {
    }
 
    public List<List<Memory>> splitMemories() {
-      final double kCutoffPoint = 2 / 3;
+      final double kCutoffPoint = 2.0 / 3;
 
       List<List<Memory>> split = new ArrayList<List<Memory>>();
       List<Memory> trainingMemory = new ArrayList<Memory>();

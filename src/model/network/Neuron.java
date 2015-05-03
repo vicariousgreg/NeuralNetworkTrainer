@@ -3,61 +3,57 @@ package model.network;
 import model.network.activation.ActivationFunction;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Represents a neural network neuron.
  * TODO: transform to observer/observable
  */
-public class Neuron implements Serializable {
+public class Neuron extends Observable implements Serializable, Observer {
+   private double learningConstant;
+
    /** Activation function. */
    private ActivationFunction activationFunction;
    /** Number of inputs. */
    private int numInputs;
-   /** Array of weight values. */
-   private double[] weights;
+   private int numOutputs;
+
    /** Bias weight. */
    private double bias;
-
-   /** Delta of weight changes for backpropagation. */
-   private double[] weightDeltas;
    /** Delta of bias change for backpropagation. */
    private double biasDelta;
+
+   private Map<Observable, Double> weights;
+   private Map<Observable, Double> inputs;
+
+   private int inputCounter;
+   private int errorCounter;
+   private double output;
+   private double errorSigma;
 
    /**
     * Randomized constructor.
     * Randomizes weights and bias.
     *
-    * @param activ activation function
-    * @param numInputs number of node inputs
+    * @param params network parameters
     */
-   public Neuron(ActivationFunction activ, int numInputs) {
-      this.numInputs = numInputs;
-      this.activationFunction = activ;
-      this.weights = new double[numInputs];
-      this.weightDeltas = new double[numInputs];
-      randomize();
+   public Neuron(Parameters params) {
+      this.numInputs = 0;
+      this.learningConstant = params.learningConstant;
+      this.activationFunction = params.activationFunction;
+      this.weights = new HashMap<Observable, Double>();
+      this.inputs = new HashMap<Observable, Double>();
    }
 
-   /**
-    * Explicit constructor.
-    * Initializes weights and bias, deep copying weights.
-    * Useful for copying.
-    *
-    * @param activ activation function
-    * @param weights initial weights
-    * @param bias initial bias
-    */
-   private Neuron(ActivationFunction activ, double[] weights, double bias) {
-      this.activationFunction = activ;
-      this.numInputs = weights.length;
-      this.bias = bias;
-      this.weightDeltas = new double[weights.length];
+   public void addObserver(Observer obs) {
+      super.addObserver(obs);
+      ++numOutputs;
+   }
 
-      // Copy weights.
-      this.weights = new double[weights.length];
-      System.arraycopy(weights, 0, this.weights, 0, weights.length);
+   public void addInputNeuron(Observable obs) {
+      ++numInputs;
+      weights.put(obs, new Double(0.0));
+      inputs.put(obs, new Double(0.0));
    }
 
    /**
@@ -65,70 +61,55 @@ public class Neuron implements Serializable {
     */
    public void randomize() {
       Random rand = new Random();
-
-      // Randomize weights.
-      for (int i = 0; i < numInputs; ++i) {
-         this.weights[i] = rand.nextDouble() * 2 - 1;
+      for (Observable key : weights.keySet()) {
+         weights.put(key, rand.nextDouble() * 2 - 1);
       }
+
       this.bias = rand.nextDouble() * 2 - 1;
    }
 
    /**
     * Fires the neuron.
-    * @param inputs array of input signals
     * @return output signal
     */
-   public double fire(double[] inputs) {
-      // Ensure input is of proper length.
-      if (inputs.length != numInputs)
-         throw new RuntimeException("Neuron received invalid number of inputs!");
+   public void fire(double out) {
+      output = out;
+      setChanged();
+      notifyObservers(out);
+   }
 
-      double x = 0.0;
+   public void backPropagate(double bpError) {
+      if (numInputs == 0) return;
+      ++errorCounter;
 
-      // Calculate sigmoid input.
-      for (int i = 0; i < numInputs; ++i) {
-         x += inputs[i] * weights[i];
+      errorSigma += bpError;
+
+      // Once we receive all errors...
+      if (numOutputs == 0 || errorCounter == numOutputs) {
+         errorCounter = 0;
+         double error = errorSigma * activationFunction.calculateDerivative(output);
+
+         // Backpropagate error to input neurons.
+         for (Observable key : inputs.keySet()) {
+            ((Neuron) key).backPropagate(inputs.get(key) * weights.get(key));
+         }
+
+         // Update weights.
+         for (Observable key : inputs.keySet()) {
+            double delta = learningConstant * error * inputs.get(key);
+            weights.put(key, weights.get(key) + delta);
+         }
+         bias += learningConstant * error;
+
+         errorSigma = 0;
       }
-      x += bias;
-
-      // Calculate signal output.
-      return activationFunction.calculate(x);
-   }
-
-   /**
-    * Sets the weight delta of a particular weight.
-    * @param weightIndex weight index
-    * @param offset weight offset
-    */
-   public void setWeightDelta(int weightIndex, double offset) {
-      weightDeltas[weightIndex] = offset;
-   }
-
-   /**
-    * Sets the bias delta.
-    * @param offset bias offset
-    */
-   public void setBiasDelta(double offset) {
-      biasDelta = offset;
-   }
-
-   /**
-    * Commits any pending weight deltas.
-    */
-   public void commitDeltas() {
-      for (int i = 0; i < numInputs; ++i) {
-         weights[i] += weightDeltas[i];
-         weightDeltas[i] = 0;
-      }
-      bias += biasDelta;
-      biasDelta = 0;
    }
 
    /**
     * Getter for weights.
     * @return weights
     */
-   public double[] getWeights() {
+   public Map<Observable, Double> getWeights() {
       return weights;
    }
 
@@ -141,21 +122,31 @@ public class Neuron implements Serializable {
    }
 
    /**
-    * Clones this neuron.
-    * @return clone
+    * Gets the last fired output.
+    * @return output
     */
-   public Neuron clone() {
-      return new Neuron(this.activationFunction, this.weights, this.bias);
+   public double getOutput() {
+      return output;
    }
 
-   /**
-    * Returns a string representation of this neuron.
-    * @return string representation
-    */
-   public String toString() {
-      StringBuilder sb = new StringBuilder("     NEURON:\n");
-      sb.append("        WEIGHTS: " + Arrays.toString(weights) + "\n");
-      sb.append("        BIAS: " + bias);
-      return sb.toString();
+   @Override
+   public void update(Observable o, Object arg) {
+      ++inputCounter;
+      inputs.put(o, (Double) arg);
+
+      // Once we receive all inputs...
+      if (inputCounter == numInputs) {
+         inputCounter = 0;
+         double x = 0.0;
+
+         // Calculate net for activation function.
+         for (Observable key : weights.keySet()) {
+            x += inputs.get(key) * weights.get(key);
+         }
+         x += bias;
+
+         // Calculate and fire signal output.
+         fire(activationFunction.calculate(x));
+      }
    }
 }

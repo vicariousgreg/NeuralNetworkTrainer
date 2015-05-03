@@ -17,7 +17,7 @@ public class SerializeTest {
          Sigmoid activ = new SigmoidEstimate(1, 1000);
          Schema schema = new ColorSchema();
          Parameters params = new Parameters();
-         Neuron neuron = new Neuron(activ, 5);
+         Neuron neuron = new Neuron(params);
          Memory exp = new Memory(schema, new double[] {0.5, 0.5, 0.5}, "Red");
 
          HashMap<String, Serializable> map = new HashMap<String, Serializable>();
