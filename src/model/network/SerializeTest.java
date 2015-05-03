@@ -1,6 +1,7 @@
 package model.network;
 
 import model.network.activation.*;
+import model.network.memory.Memory;
 import model.network.schema.ColorSchema;
 import model.network.schema.Schema;
 

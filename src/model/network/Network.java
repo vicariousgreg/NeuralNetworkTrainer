@@ -1,10 +1,12 @@
 package model.network;
 
+import model.network.memory.Memory;
+import model.network.memory.MemoryModule;
 import model.network.schema.Schema;
 
-import java.util.Collections;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents a neural network.
@@ -20,7 +22,7 @@ public class Network implements Serializable {
    private ArrayList<Neuron[]> layers;
 
    /** Memory of inputs and output test cases. */
-   private final ArrayList<Memory> memories;
+   private MemoryModule memoryModule;
 
    /**
     * Constructor.
@@ -39,7 +41,7 @@ public class Network implements Serializable {
    public Network(Schema schema, Parameters params) {
       this.schema = schema;
       this.parameters = params;
-      this.memories = new ArrayList<Memory>();
+      this.memoryModule = new MemoryModule(schema);
       buildNetwork();
    }
 
@@ -98,35 +100,49 @@ public class Network implements Serializable {
    }
 
    /**
-    * Returns this network's memories.
-    * @return memories
+    * Returns this network's memory module.
+    * @return memory module
     */
-   public ArrayList<Memory> getMemories() {
-      return memories;
+   public MemoryModule getMemoryModule() {
+      return memoryModule;
    }
 
-   /**
-    * Adds new memories to the network's memories.
-    * @param newMemories new memories to add
-    */
-   public void addMemories(ArrayList<Memory> newMemories) {
-      memories.addAll(newMemories);
+   public void setMemoryModule(MemoryModule mem) {
+      this.memoryModule = mem;
    }
 
+
    /**
-    * Wipes the network's memories.
+    * Wipes the network's memory.
     */
    public void wipeMemory() {
-      memories.clear();
+      memoryModule.wipeShortTermMemory();
+      memoryModule.wipeLongTermMemory();
    }
 
    /**
-    * Creates a memory using the network's schema.
+    * Adds a memory to the network's memory module using the network's schema.
     * @param in input object
     * @param result resulting classification
     */
    public void addMemory(Object in, Object result) throws Exception {
-      memories.add(schema.createMemory(in, result));
+      memoryModule.add(in, result);
+   }
+
+   /**
+    * Adds a new memory to the network's memory module.
+    * @param mem memory to add
+    */
+   public void addMemory(Memory mem) throws Exception {
+      memoryModule.add(mem);
+   }
+
+   /**
+    * Adds new memories to the network's memory module.
+    * @param newMemories new memories to add
+    */
+   public void addMemories(List<Memory> newMemories) throws Exception {
+      memoryModule.add(newMemories);
    }
 
    /**
@@ -223,7 +239,7 @@ public class Network implements Serializable {
     * @param tests test suite
     * @return total test error
     */
-   private double calcTotalTestError(ArrayList<Memory> tests) {
+   private double calcTotalTestError(List<Memory> tests) {
       double totalTestError = 0.0;
       for (int i = 0; i < tests.size(); ++i) {
          totalTestError += calcTestError(tests.get(i));
@@ -241,8 +257,8 @@ public class Network implements Serializable {
       double totalError = 0.0;
       try {
          // Get quadratic deviations for each output neuron
-         double[] errors = calcError(fire(test.getInputVector()),
-               test.getOutputVector());
+         double[] errors = calcError(fire(test.inputVector),
+               test.outputVector);
 
          // Total deviations.
          for (int i = 0; i < errors.length; ++i) {
@@ -298,13 +314,13 @@ public class Network implements Serializable {
     */
    private void learn(Memory memory) {
       // Fire network and gather outputs.
-      ArrayList<double[]> outputs = getOutputs(memory.getInputVector());
+      ArrayList<double[]> outputs = getOutputs(memory.inputVector);
 
       // Calculate error for output layer
       // The output layer derives its error from the error function.
       // Backpropagation requires calculation of the derivative.
       double[] output = outputs.get(outputs.size() - 1);
-      double[] errors = calcBPError(output, memory.getOutputVector());
+      double[] errors = calcBPError(output, memory.outputVector);
 
       // Backpropagate through layers.
       for (int layerIndex = layers.size() - 1; layerIndex >= 0; --layerIndex) {
@@ -312,7 +328,7 @@ public class Network implements Serializable {
          // For input layer, this is the memory input.
          output = (layerIndex > 0)
             ? outputs.get(layerIndex - 1)
-            : memory.getInputVector();
+            : memory.inputVector;
 
          // Get current layer.
          Neuron[] currLayer = layers.get(layerIndex);
@@ -373,26 +389,14 @@ public class Network implements Serializable {
    public void train() {
       final boolean print = false;
 
-      if (memories.size() == 0) {
-         System.out.println("No memory!");
+      // Split memory.
+      List<List<Memory>> split = memoryModule.splitMemories();
+      List<Memory> trainingMemory = split.get(0);
+      List<Memory> testMemory = split.get(1);
+
+      if (testMemory.size() == 0) {
+         System.out.println("Insufficient memory for training!");
          return;
-      }
-
-      // Shuffle memories.
-      ArrayList<Memory> shuffled = new ArrayList<Memory>(memories);
-      Collections.shuffle(shuffled);
-
-      // Split up memories into training and test sets.
-      ArrayList<Memory> trainingMemory = new ArrayList<Memory>();
-      ArrayList<Memory> testMemory = new ArrayList<Memory>();
-
-      // Use a 2/3rds cutoff.
-      int cutoffIndex = (int) (shuffled.size() * 2 / 3);
-      for (int index = 0; index < cutoffIndex; ++index) {
-         trainingMemory.add(shuffled.get(index));
-      }
-      for (int index = cutoffIndex; index < shuffled.size(); ++index) {
-         testMemory.add(shuffled.get(index));
       }
 
       // Counter for stale networks.
@@ -454,20 +458,23 @@ public class Network implements Serializable {
       System.out.println();
 
       if (print) System.out.println(toString());
+
+      // Commit short term memory.
+      memoryModule.commitShortTermMemories();
    }
 
    /**
     * Calculates the percentage of test cases passed.
     * @return percentage of tests passed
     */
-   private double calcPercentCorrect(ArrayList<Memory> tests) {
+   private double calcPercentCorrect(List<Memory> tests) {
       int correct = 0;
 
       // Run each test.
       for (int i = 0; i < tests.size(); ++i) {
          try {
             Memory test = tests.get(i);
-            Object out = query(schema.encodeInput(test.getInputVector()));
+            Object out = query(schema.encodeInput(test.inputVector));
             if (out.equals(schema.translateOutput(test.outputVector))) ++correct;
          } catch (Exception e) { e.printStackTrace(); }
       }
@@ -494,9 +501,7 @@ public class Network implements Serializable {
 
       Network cloned = new Network(this.schema, this.parameters);
       cloned.layers = newLayers;
-      for (Memory exp : memories) {
-         cloned.memories.add(exp);
-      }
+      cloned.memoryModule = memoryModule.clone();
       return cloned;
    }
 

@@ -2,12 +2,11 @@ package model;
 
 import gui.controller.MainController;
 import javafx.application.Platform;
-import model.network.Memory;
 import model.network.Network;
+import model.network.memory.MemoryModule;
 import model.network.schema.ColorSchema;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.Observable;
 
 /**
@@ -100,7 +99,7 @@ public class WorkSpace extends Observable {
       try {
          FileOutputStream fos = new FileOutputStream(file);
          ObjectOutputStream out = new ObjectOutputStream(fos);
-         out.writeObject(network.getMemories());
+         out.writeObject(network.getMemoryModule());
          out.close();
          updateUI();
       } catch (Exception e) {
@@ -112,7 +111,7 @@ public class WorkSpace extends Observable {
       try {
          FileInputStream fin = new FileInputStream(file);
          ObjectInputStream ois = new ObjectInputStream(fin);
-         network.addMemories(((ArrayList<Memory>) ois.readObject()));
+         network.setMemoryModule(((MemoryModule) ois.readObject()));
          ois.close();
          updateUI();
       } catch (Exception e) {
@@ -128,6 +127,7 @@ public class WorkSpace extends Observable {
    public void addMemory(Object input, Object output) {
       try {
          network.addMemory(input, output);
+         updateUI();
       } catch (Exception e) {
          signalUIError("Error adding memory!");
       }

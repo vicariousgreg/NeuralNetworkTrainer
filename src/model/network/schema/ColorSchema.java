@@ -2,7 +2,7 @@ package model.network.schema;
 
 import javafx.scene.Node;
 import javafx.scene.shape.Rectangle;
-import model.network.Memory;
+import model.network.memory.Memory;
 
 /**
  * A Neural Network schema for color identification.

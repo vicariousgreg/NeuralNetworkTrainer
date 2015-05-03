@@ -21,8 +21,8 @@ public class Examine implements Observer {
    public void update(Observable o, Object arg) {
       this.network = WorkSpace.instance.getNetwork();
       if (network != null)
-         controller.setMemories(network.schema, network.getMemories());
+         controller.setMemory(network.getMemoryModule());
       else
-         controller.clearMemories();
+         controller.clearMemory();
    }
 }

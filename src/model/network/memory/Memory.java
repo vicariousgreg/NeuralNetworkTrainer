@@ -1,4 +1,4 @@
-package model.network;
+package model.network.memory;
 
 import model.network.schema.Schema;
 
@@ -24,22 +24,6 @@ public class Memory implements Serializable {
    public Memory(Schema schema, Object in, Object out) throws Exception {
       this.inputVector = schema.encodeInput(in);
       this.outputVector = schema.encodeOutput(out);
-   }
-
-   /**
-    * Gets the input vector for this memory.
-    * @return input vector
-    */
-   public double[] getInputVector() {
-      return inputVector;
-   }
-
-   /**
-    * Gets the output vector for this memory.
-    * @return output vector
-    */
-   public double[] getOutputVector() {
-      return outputVector;
    }
 
    /**

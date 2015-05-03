@@ -1,7 +1,7 @@
 package model.network.schema;
 
 import javafx.scene.Node;
-import model.network.Memory;
+import model.network.memory.Memory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -129,6 +129,16 @@ public abstract class Schema implements Serializable {
          }
       }
       return classifications[maxIndex];
+   }
+
+   /**
+    * Checks whether a memory fits this schema.
+    * @param mem memory to check
+    * @return whether the memory fits the schema
+    */
+   public final boolean fits(Memory mem) {
+      return (mem.inputVector.length == inputSize &&
+         mem.outputVector.length == outputSize);
    }
 
    /**

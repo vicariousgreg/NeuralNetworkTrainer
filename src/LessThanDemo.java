@@ -1,5 +1,5 @@
 import javafx.scene.Node;
-import model.network.Memory;
+import model.network.memory.Memory;
 import model.network.Network;
 import model.network.Parameters;
 import model.network.schema.Schema;
