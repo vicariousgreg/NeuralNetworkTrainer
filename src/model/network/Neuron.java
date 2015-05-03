@@ -91,7 +91,7 @@ public class Neuron extends Observable implements Serializable, Observer {
 
          // Backpropagate error to input neurons.
          for (Observable key : inputs.keySet()) {
-            ((Neuron) key).backPropagate(inputs.get(key) * weights.get(key));
+            ((Neuron) key).backPropagate(error * weights.get(key));
          }
 
          // Update weights.
