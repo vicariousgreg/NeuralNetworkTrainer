@@ -5,8 +5,10 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
 import model.SetParameters;
 import model.WorkSpace;
+import model.network.Network;
 import model.network.Parameters;
 import model.network.activation.ActivationFunction;
 
@@ -41,6 +43,10 @@ public class ParametersController implements Initializable {
       for (Class function : Parameters.activationFunctions) {
          activationFunctionsField.getItems().add(function.getSimpleName());
       }
+
+      Network network = WorkSpace.instance.getNetwork();
+      if (network != null)
+         setFields(network.getParameters());
    }
 
    public void clearFields() {
@@ -187,13 +193,14 @@ public class ParametersController implements Initializable {
                      regression,
                      error,
                      percent));
+         Stage stage = (Stage) pane.getScene().getWindow();
+         stage.close();
       } catch (Exception e) {
          Alert alert = new Alert(Alert.AlertType.ERROR);
          alert.setTitle("Invalid Parameters!");
          alert.setHeaderText("Invalid parameter: " + invalidField);
          alert.setContentText(null);
          alert.showAndWait();
-         e.printStackTrace();
       }
    }
 }

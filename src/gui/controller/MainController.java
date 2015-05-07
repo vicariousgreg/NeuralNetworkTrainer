@@ -2,7 +2,10 @@ package gui.controller;
 
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TabPane;
@@ -18,30 +21,43 @@ import java.util.Observer;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable, Observer {
+   public static MainController instance;
    public static Stage stage;
+   public static Stage loaderStage;
    public static ProgressBar progress;
 
    @FXML Pane interact;
    @FXML Pane examine;
-   @FXML Pane parameters;
-   @FXML TabPane tabPane;
    @FXML ProgressBar progressBar;
 
    public void initialize(URL location, ResourceBundle resources) {
+      instance = this;
       WorkSpace.instance.setController(this);
       stage = new Stage();
-      tabPane.setVisible(false);
+      loaderStage = new Stage();
       this.progress = progressBar;
+
+   }
+
+   public void openLoader() {
+      try {
+         Parent root = FXMLLoader.load(getClass().getResource("../view/loader.fxml"));
+         loaderStage.setTitle("Load Network");
+         loaderStage.setScene(new Scene(root));
+         loaderStage.show();
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+
    }
 
    public void newNetwork() {
       WorkSpace.instance.newNetwork();
-      tabPane.setVisible(true);
    }
 
    public void closeNetwork() {
       WorkSpace.instance.closeNetwork();
-      tabPane.setVisible(false);
+      openLoader();
    }
 
    public void loadNetwork() {
@@ -76,61 +92,13 @@ public class MainController implements Initializable, Observer {
       }
    }
 
-   public void consolidateMemory() {
-      Task<Void> task = new Task<Void>() {
-         @Override
-         public Void call() {
-            System.out.println("Rebuilding network...");
-            WorkSpace.instance.consolidateMemory();
-            return null;
-         }
-      };
-      progressBar.progressProperty().bind(task.progressProperty());
-      new Thread(task).start();
-   }
 
-   public void saveMemory() {
-      FileChooser fileChooser = new FileChooser();
-      final File file = fileChooser.showSaveDialog(MainController.stage);
-      if (file != null) {
-         Task<Void> task = new Task<Void>() {
-            @Override
-            public Void call() {
-               WorkSpace.instance.saveMemory(file);
-               return null;
-            }
-         };
-         progressBar.progressProperty().bind(task.progressProperty());
-         new Thread(task).start();
-      }
-   }
-
-   public void loadMemory() {
-      FileChooser fileChooser = new FileChooser();
-      final File file = fileChooser.showOpenDialog(MainController.stage);
-      if (file != null) {
-         Task<Void> task = new Task<Void>() {
-            @Override
-            public Void call() {
-               WorkSpace.instance.loadMemory(file);
-               return null;
-            }
-         };
-         progressBar.progressProperty().bind(task.progressProperty());
-         new Thread(task).start();
-      }
-   }
-
-   public void wipeMemory() {
-      Task<Void> task = new Task<Void>() {
-         @Override
-         public Void call() {
-            WorkSpace.instance.wipeMemory();
-            return null;
-         }
-      };
-      progressBar.progressProperty().bind(task.progressProperty());
-      new Thread(task).start();
+   public void editParameters() throws IOException {
+      Parent root = FXMLLoader.load(
+            MainController.class.getResource("../view/parameters.fxml"));
+      stage.setTitle("Edit Parameters");
+      stage.setScene(new Scene(root));
+      stage.show();
    }
 
    @Override
@@ -147,9 +115,9 @@ public class MainController implements Initializable, Observer {
          alert.showAndWait();
       } else {
          if (WorkSpace.instance.getNetwork() == null) {
-            tabPane.setVisible(false);
+            loaderStage.show();
          } else {
-            tabPane.setVisible(true);
+            loaderStage.close();
          }
       }
    }

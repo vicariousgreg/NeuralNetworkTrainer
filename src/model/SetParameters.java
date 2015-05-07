@@ -29,9 +29,11 @@ public class SetParameters implements Observer {
    @Override
    public void update(Observable o, Object arg) {
       this.network = WorkSpace.instance.getNetwork();
-      if (network != null)
-         controller.setFields(network.getParameters());
-      else
-         controller.clearFields();
+      if (controller != null) {
+         if (network != null)
+            controller.setFields(network.getParameters());
+         else
+            controller.clearFields();
+      }
    }
 }

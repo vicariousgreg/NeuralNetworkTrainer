@@ -28,9 +28,11 @@ public class Interact implements Observer {
    @Override
    public void update(Observable o, Object arg) {
       this.network = WorkSpace.instance.getNetwork();
-      if (network != null)
-         controller.setClassifications(network.schema.getOutputClassifications());
-      else
-         controller.clearClassifications();
+      if (controller != null) {
+         if (network != null)
+            controller.setClassifications(network.schema.getOutputClassifications());
+         else
+            controller.clearClassifications();
+      }
    }
 }

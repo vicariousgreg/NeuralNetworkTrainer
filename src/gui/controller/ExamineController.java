@@ -1,15 +1,18 @@
 package gui.controller;
 
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
+import javafx.stage.FileChooser;
 import model.WorkSpace;
 import model.network.memory.Memory;
 import model.network.memory.MemoryModule;
 import model.network.schema.Schema;
 
+import java.io.File;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +24,63 @@ public class ExamineController implements Initializable {
 
    public void initialize(URL location, ResourceBundle resources) {
       WorkSpace.instance.examine.setController(this);
+   }
+
+   public void consolidateMemory() {
+      Task<Void> task = new Task<Void>() {
+         @Override
+         public Void call() {
+            System.out.println("Rebuilding network...");
+            WorkSpace.instance.consolidateMemory();
+            return null;
+         }
+      };
+      MainController.progress.progressProperty().bind(task.progressProperty());
+      new Thread(task).start();
+   }
+
+   public void saveMemory() {
+      FileChooser fileChooser = new FileChooser();
+      final File file = fileChooser.showSaveDialog(MainController.stage);
+      if (file != null) {
+         Task<Void> task = new Task<Void>() {
+            @Override
+            public Void call() {
+               WorkSpace.instance.saveMemory(file);
+               return null;
+            }
+         };
+         MainController.progress.progressProperty().bind(task.progressProperty());
+         new Thread(task).start();
+      }
+   }
+
+   public void loadMemory() {
+      FileChooser fileChooser = new FileChooser();
+      final File file = fileChooser.showOpenDialog(MainController.stage);
+      if (file != null) {
+         Task<Void> task = new Task<Void>() {
+            @Override
+            public Void call() {
+               WorkSpace.instance.loadMemory(file);
+               return null;
+            }
+         };
+         MainController.progress.progressProperty().bind(task.progressProperty());
+         new Thread(task).start();
+      }
+   }
+
+   public void wipeMemory() {
+      Task<Void> task = new Task<Void>() {
+         @Override
+         public Void call() {
+            WorkSpace.instance.wipeMemory();
+            return null;
+         }
+      };
+      MainController.progress.progressProperty().bind(task.progressProperty());
+      new Thread(task).start();
    }
 
    public void clearMemory() {

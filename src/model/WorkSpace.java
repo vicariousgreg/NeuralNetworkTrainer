@@ -115,7 +115,7 @@ public class WorkSpace extends Observable {
          ois.close();
          updateUI();
       } catch (Exception e) {
-         signalUIError("Error loading network!");
+         signalUIError("Error loading memories!");
       }
    }
 
