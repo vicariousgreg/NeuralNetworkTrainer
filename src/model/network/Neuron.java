@@ -8,7 +8,7 @@ import java.util.*;
 /**
  * Represents a neural network neuron.
  */
-public class Neuron extends Observable implements Serializable, Observer {
+public class Neuron implements Serializable {
    /** Learning constant. */
    private double learningConstant;
 
@@ -23,9 +23,12 @@ public class Neuron extends Observable implements Serializable, Observer {
    private double bias;
 
    /** Map of input neurons to weights. */
-   private Map<Observable, Double> weights;
+   private Map<Neuron, Double> weights;
    /** Map of last inputs observed. */
-   private Map<Observable, Double> inputs;
+   private Map<Neuron, Double> inputs;
+
+   /** Output neurons. */
+   private List<Neuron> outputNeurons;
 
    /** Counter for input. */
    private int inputCounter;
@@ -46,19 +49,20 @@ public class Neuron extends Observable implements Serializable, Observer {
       this.numInputs = 0;
       this.learningConstant = params.learningConstant;
       this.activationFunction = params.activationFunction;
-      this.weights = new HashMap<Observable, Double>();
-      this.inputs = new HashMap<Observable, Double>();
+      this.weights = new HashMap<Neuron, Double>();
+      this.inputs = new HashMap<Neuron, Double>();
+      this.outputNeurons = new ArrayList<Neuron>();
    }
 
-   public void addObserver(Observer obs) {
-      super.addObserver(obs);
+   public void addOutputNeuron(Neuron neuron) {
+      outputNeurons.add(neuron);
       ++numOutputs;
    }
 
-   public void addInputNeuron(Observable obs) {
+   public void addInputNeuron(Neuron neuron) {
       ++numInputs;
-      weights.put(obs, new Double(0.0));
-      inputs.put(obs, new Double(0.0));
+      weights.put(neuron, new Double(0.0));
+      inputs.put(neuron, new Double(0.0));
    }
 
    /**
@@ -66,7 +70,7 @@ public class Neuron extends Observable implements Serializable, Observer {
     */
    public void randomize() {
       Random rand = new Random();
-      for (Observable key : weights.keySet()) {
+      for (Neuron key : weights.keySet()) {
          weights.put(key, rand.nextDouble() * 2 - 1);
       }
 
@@ -79,8 +83,9 @@ public class Neuron extends Observable implements Serializable, Observer {
     */
    public void fire(double out) {
       output = out;
-      setChanged();
-      notifyObservers(out);
+      for (Neuron neuron : outputNeurons) {
+         neuron.update(this, out);
+      }
    }
 
    public void backPropagate(double bpError) {
@@ -96,12 +101,12 @@ public class Neuron extends Observable implements Serializable, Observer {
             activationFunction.calculateDerivative(output);
 
          // Backpropagate error to input neurons.
-         for (Observable key : inputs.keySet()) {
+         for (Neuron key : inputs.keySet()) {
             ((Neuron) key).backPropagate(error * weights.get(key));
          }
 
          // Update weights.
-         for (Observable key : inputs.keySet()) {
+         for (Neuron key : inputs.keySet()) {
             double delta = learningConstant * error * inputs.get(key);
             weights.put(key, weights.get(key) + delta);
          }
@@ -115,7 +120,7 @@ public class Neuron extends Observable implements Serializable, Observer {
     * Getter for weights.
     * @return weights
     */
-   public Map<Observable, Double> getWeights() {
+   public Map<Neuron, Double> getWeights() {
       return weights;
    }
 
@@ -135,8 +140,7 @@ public class Neuron extends Observable implements Serializable, Observer {
       return output;
    }
 
-   @Override
-   public void update(Observable o, Object arg) {
+   public void update(Neuron o, Object arg) {
       ++inputCounter;
       inputs.put(o, (Double) arg);
 
@@ -146,7 +150,7 @@ public class Neuron extends Observable implements Serializable, Observer {
          double x = 0.0;
 
          // Calculate net for activation function.
-         for (Observable key : weights.keySet()) {
+         for (Neuron key : weights.keySet()) {
             x += inputs.get(key) * weights.get(key);
          }
          x += bias;

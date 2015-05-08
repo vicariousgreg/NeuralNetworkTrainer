@@ -14,9 +14,9 @@ public class Main extends Application {
              Main.class.getResource("gui/view/main.fxml"));
        primaryStage.setTitle("Load Network");
        primaryStage.setScene(new Scene(root));
-       primaryStage.show();
 
-       MainController.instance.openLoader();
+       MainController.setStage(primaryStage);
+       MainController.openLoader();
     }
 
 

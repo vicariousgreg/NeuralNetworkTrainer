@@ -1,6 +1,5 @@
 package gui.controller;
 
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -8,7 +7,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.control.TabPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -26,6 +24,16 @@ public class MainController implements Initializable, Observer {
    public static Stage loaderStage;
    public static ProgressBar progress;
 
+   private static Parent loader;
+   static {
+      try {
+         loader = FXMLLoader.load(MainController.class
+               .getResource("../view/loader.fxml"));
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+   }
+
    @FXML Pane interact;
    @FXML Pane examine;
    @FXML ProgressBar progressBar;
@@ -33,65 +41,44 @@ public class MainController implements Initializable, Observer {
    public void initialize(URL location, ResourceBundle resources) {
       instance = this;
       WorkSpace.instance.setController(this);
-      stage = new Stage();
       loaderStage = new Stage();
       this.progress = progressBar;
 
-   }
-
-   public void openLoader() {
       try {
-         Parent root = FXMLLoader.load(getClass().getResource("../view/loader.fxml"));
-         loaderStage.setTitle("Load Network");
-         loaderStage.setScene(new Scene(root));
-         loaderStage.show();
+         loader = FXMLLoader.load(getClass().getResource("../view/loader.fxml"));
       } catch (Exception e) {
          e.printStackTrace();
       }
-
    }
 
-   public void newNetwork() {
-      WorkSpace.instance.newNetwork();
+   public static void setStage(Stage newStage) {
+      stage = newStage;
+   }
+
+   public static void openLoader() {
+      loaderStage.setTitle("Load Network");
+      loaderStage.setScene(new Scene(loader));
+      loaderStage.showAndWait();
    }
 
    public void closeNetwork() {
       WorkSpace.instance.closeNetwork();
-      openLoader();
-   }
-
-   public void loadNetwork() {
-      FileChooser fileChooser = new FileChooser();
-      final File file = fileChooser.showOpenDialog(stage);
-      if (file != null) {
-         Task<Void> task = new Task<Void>() {
-            @Override
-            public Void call() {
-               WorkSpace.instance.loadNetwork(file);
-               return null;
-            }
-         };
-         progressBar.progressProperty().bind(task.progressProperty());
-         new Thread(task).start();
-      }
    }
 
    public void saveNetwork() {
       FileChooser fileChooser = new FileChooser();
       final File file = fileChooser.showSaveDialog(stage);
       if (file != null) {
-         Task<Void> task = new Task<Void>() {
-            @Override
-            public Void call() {
-               WorkSpace.instance.saveNetwork(file);
-               return null;
-            }
-         };
-         progressBar.progressProperty().bind(task.progressProperty());
-         new Thread(task).start();
+         try {
+            WorkSpace.instance.saveNetwork(file);
+         } catch (Exception e) {
+            e.printStackTrace();
+         }
       }
    }
 
+   public void exportNetwork() {
+   }
 
    public void editParameters() throws IOException {
       Parent root = FXMLLoader.load(
@@ -103,7 +90,6 @@ public class MainController implements Initializable, Observer {
 
    @Override
    public void update(Observable o, Object arg) {
-      System.out.println("Main Controller update!");
       progressBar.progressProperty().unbind();
       progressBar.setProgress(0);
 
@@ -116,8 +102,12 @@ public class MainController implements Initializable, Observer {
       } else {
          if (WorkSpace.instance.getNetwork() == null) {
             loaderStage.show();
+            stage.hide();
+            loaderStage.requestFocus();
          } else {
             loaderStage.close();
+            stage.show();
+            stage.requestFocus();
          }
       }
    }

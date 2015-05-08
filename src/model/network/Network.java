@@ -79,7 +79,7 @@ public class Network implements Serializable {
                // Tell current neuron to expect input from previous.
                currLayer[currIndex].addInputNeuron(prevLayer[prevIndex]);
                // Tell previous neuron to notify current neuron.
-               prevLayer[prevIndex].addObserver(currLayer[currIndex]);
+               prevLayer[prevIndex].addOutputNeuron(currLayer[currIndex]);
             }
             // Randomize neuron.
             currLayer[currIndex].randomize();
@@ -100,7 +100,7 @@ public class Network implements Serializable {
             // Tell current neuron to expect input from previous.
             outputLayer[outIndex].addInputNeuron(prevLayer[prevIndex]);
             // Tell previous neuron to notify current neuron.
-            prevLayer[prevIndex].addObserver(outputLayer[outIndex]);
+            prevLayer[prevIndex].addOutputNeuron(outputLayer[outIndex]);
          }
          // Randomize neuron.
          outputLayer[outIndex].randomize();

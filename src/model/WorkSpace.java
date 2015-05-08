@@ -65,27 +65,19 @@ public class WorkSpace extends Observable {
       updateUI();
    }
 
-   public void loadNetwork(File file) {
-      try {
-         FileInputStream fin = new FileInputStream(file);
-         ObjectInputStream ois = new ObjectInputStream(fin);
-         setNetwork((Network) ois.readObject());
-         ois.close();
-      } catch (Exception e) {
-         signalUIError("Error loading network!");
-      }
+   public void loadNetwork(File file) throws Exception {
+      FileInputStream fin = new FileInputStream(file);
+      ObjectInputStream ois = new ObjectInputStream(fin);
+      setNetwork((Network) ois.readObject());
+      ois.close();
    }
 
-   public void saveNetwork(File file) {
-      try {
-         FileOutputStream fos = new FileOutputStream(file);
-         ObjectOutputStream out = new ObjectOutputStream(fos);
-         out.writeObject(network);
-         out.close();
-         updateUI();
-      } catch (Exception e) {
-         signalUIError("Error saving network!");
-      }
+   public void saveNetwork(File file) throws Exception {
+      FileOutputStream fos = new FileOutputStream(file);
+      ObjectOutputStream out = new ObjectOutputStream(fos);
+      out.writeObject(network);
+      out.close();
+      updateUI();
    }
 
    public void consolidateMemory() {
