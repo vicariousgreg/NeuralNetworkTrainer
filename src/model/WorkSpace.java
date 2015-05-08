@@ -3,10 +3,8 @@ package model;
 import gui.controller.MainController;
 import javafx.application.Platform;
 import model.network.Network;
-import model.network.Parameters;
 import model.network.memory.MemoryModule;
-import model.network.schema.ColorSchema;
-import model.network.schema.Schema;
+import model.network.schema.*;
 
 import java.io.*;
 import java.util.Observable;
@@ -50,24 +48,10 @@ public class WorkSpace extends Observable {
       return network != null;
    }
 
-   public MemoryModule getNetworkMemory() {
-      if (network != null)
-         return network.getMemoryModule();
-      else
-         return null;
+   public Network getNetwork() {
+      return network;
    }
-   public Schema getNetworkSchema() {
-      if (network != null)
-         return network.schema;
-      else
-         return null;
-   }
-   public Parameters getNetworkParameters() {
-      if (network != null)
-         return network.getParameters();
-      else
-         return null;
-   }
+
    public void restoreNetwork() {
       network = backupNetwork.clone();
       updateUI();

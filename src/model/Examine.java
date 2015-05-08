@@ -20,9 +20,8 @@ public class Examine implements Observer {
    @Override
    public void update(Observable o, Object arg) {
       if (controller != null) {
-         MemoryModule memory = WorkSpace.instance.getNetworkMemory();
-         if (memory != null)
-            controller.setMemory(memory);
+         if (WorkSpace.instance.openNetwork())
+            controller.setMemory(WorkSpace.instance.getNetwork().getMemoryModule());
          else
             controller.clearMemory();
       }

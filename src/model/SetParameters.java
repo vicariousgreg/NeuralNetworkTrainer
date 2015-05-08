@@ -11,7 +11,6 @@ import java.util.Observer;
  * Created by gpdavis on 5/2/15.
  */
 public class SetParameters implements Observer {
-   private Network network;
    private ParametersController controller;
 
    public void setController(ParametersController controller) {
@@ -19,17 +18,17 @@ public class SetParameters implements Observer {
    }
 
    public Parameters getParameters() {
-      return network.getParameters();
+      return WorkSpace.instance.getNetwork().getParameters();
    }
 
    public void setParameters(Parameters newParams) {
-      network.setParameters(newParams);
+      WorkSpace.instance.getNetwork().setParameters(newParams);
    }
 
    @Override
    public void update(Observable o, Object arg) {
       if (controller != null) {
-         Parameters params = WorkSpace.instance.getNetworkParameters();
+         Parameters params = WorkSpace.instance.getNetwork().getParameters();
          if (params != null)
             controller.setFields(params);
          else

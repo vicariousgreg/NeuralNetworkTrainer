@@ -44,9 +44,8 @@ public class ParametersController implements Initializable {
          activationFunctionsField.getItems().add(function.getSimpleName());
       }
 
-      Parameters params = WorkSpace.instance.getNetworkParameters();
-      if (params != null)
-         setFields(params);
+      if (WorkSpace.instance.openNetwork())
+         setFields(WorkSpace.instance.getNetwork().getParameters());
    }
 
    public void clearFields() {

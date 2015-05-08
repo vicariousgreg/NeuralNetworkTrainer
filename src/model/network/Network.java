@@ -324,6 +324,9 @@ public class Network implements Serializable {
          return;
       }
 
+      // Counter for master reset.
+      int masterCounter = 0;
+
       // Counter for stale networks.
       int staleCounter = 0;
 
@@ -385,6 +388,17 @@ public class Network implements Serializable {
             if (print) System.out.printf("Percent Correct: %.6f%%  |  ", percentCorrect);
             if (print) System.out.printf("Test error: %.6f\n", testError);
             staleCounter = 0;
+         }
+
+         if(++masterCounter > 200000) {
+            System.out.println("\nPassed 200,000 iterations.  Resetting memory split.");
+            masterCounter = 0;
+
+            split = memoryModule.splitMemories();
+            trainingMemory = split.get(0);
+            testMemory = split.get(1);
+         } else if (masterCounter % 10000 == 0) {
+            System.out.print(".");
          }
       }
 

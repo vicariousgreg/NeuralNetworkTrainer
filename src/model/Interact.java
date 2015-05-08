@@ -27,9 +27,9 @@ public class Interact implements Observer {
    @Override
    public void update(Observable o, Object arg) {
       if (controller != null) {
-         Schema schema = WorkSpace.instance.getNetworkSchema();
-         if (schema != null)
-            controller.setClassifications(schema.getOutputClassifications());
+         if (WorkSpace.instance.openNetwork())
+            controller.setClassifications(
+                  WorkSpace.instance.getNetwork().schema.getOutputClassifications());
          else
             controller.clearClassifications();
       }
