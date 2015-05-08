@@ -12,7 +12,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
        Parent root = FXMLLoader.load(
              Main.class.getResource("gui/view/main.fxml"));
-       primaryStage.setTitle("Load Network");
+       primaryStage.setTitle("Neural Network Trainer");
        primaryStage.setScene(new Scene(root));
 
        MainController.setStage(primaryStage);

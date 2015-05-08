@@ -6,6 +6,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
@@ -16,19 +17,29 @@ import java.io.*;
 import java.net.URL;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable, Observer {
    public static MainController instance;
    public static Stage stage;
    public static Stage loaderStage;
+   public static Stage parameterStage;
    public static ProgressBar progress;
 
-   private static Parent loader;
    static {
       try {
-         loader = FXMLLoader.load(MainController.class
+         loaderStage = new Stage();
+         parameterStage = new Stage();
+         Parent loader = FXMLLoader.load(MainController.class
                .getResource("../view/loader.fxml"));
+         loaderStage.setTitle("Load Network");
+         loaderStage.setScene(new Scene(loader));
+
+         Parent parameterSetter = FXMLLoader.load(
+               MainController.class.getResource("../view/parameters.fxml"));
+         parameterStage.setTitle("Edit Parameters");
+         parameterStage.setScene(new Scene(parameterSetter));
       } catch (Exception e) {
          e.printStackTrace();
       }
@@ -40,15 +51,8 @@ public class MainController implements Initializable, Observer {
 
    public void initialize(URL location, ResourceBundle resources) {
       instance = this;
+      progress = progressBar;
       WorkSpace.instance.setController(this);
-      loaderStage = new Stage();
-      this.progress = progressBar;
-
-      try {
-         loader = FXMLLoader.load(getClass().getResource("../view/loader.fxml"));
-      } catch (Exception e) {
-         e.printStackTrace();
-      }
    }
 
    public static void setStage(Stage newStage) {
@@ -56,16 +60,36 @@ public class MainController implements Initializable, Observer {
    }
 
    public static void openLoader() {
-      loaderStage.setTitle("Load Network");
-      loaderStage.setScene(new Scene(loader));
       loaderStage.showAndWait();
    }
 
    public void closeNetwork() {
-      WorkSpace.instance.closeNetwork();
+      if (WorkSpace.instance.hasChanged()) {
+         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+         alert.setTitle("Warning: Unsaved Changes");
+         alert.setHeaderText("Closing will discard unsaved changes.  Continue?");
+         alert.setContentText(null);
+         Optional<ButtonType> result = alert.showAndWait();
+         if (result.isPresent() && result.get() == ButtonType.OK) {
+            WorkSpace.instance.closeNetwork();
+         }
+      } else {
+         WorkSpace.instance.closeNetwork();
+      }
    }
 
    public void saveNetwork() {
+      Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+      alert.setTitle("Confirm Save");
+      alert.setHeaderText("Are you sure?");
+      alert.setContentText(null);
+      Optional<ButtonType> result = alert.showAndWait();
+      if (result.isPresent() && result.get() == ButtonType.OK) {
+         LoaderController.instance.saveNetwork();
+      }
+   }
+
+   public void exportNetwork() {
       FileChooser fileChooser = new FileChooser();
       final File file = fileChooser.showSaveDialog(stage);
       if (file != null) {
@@ -77,15 +101,8 @@ public class MainController implements Initializable, Observer {
       }
    }
 
-   public void exportNetwork() {
-   }
-
    public void editParameters() throws IOException {
-      Parent root = FXMLLoader.load(
-            MainController.class.getResource("../view/parameters.fxml"));
-      stage.setTitle("Edit Parameters");
-      stage.setScene(new Scene(root));
-      stage.show();
+      parameterStage.showAndWait();
    }
 
    @Override
@@ -100,14 +117,14 @@ public class MainController implements Initializable, Observer {
          alert.setContentText(null);
          alert.showAndWait();
       } else {
-         if (WorkSpace.instance.getNetwork() == null) {
-            loaderStage.show();
-            stage.hide();
-            loaderStage.requestFocus();
-         } else {
+         if (WorkSpace.instance.openNetwork()) {
             loaderStage.close();
             stage.show();
             stage.requestFocus();
+         } else {
+            loaderStage.show();
+            stage.hide();
+            loaderStage.requestFocus();
          }
       }
    }

@@ -3,8 +3,10 @@ package model;
 import gui.controller.MainController;
 import javafx.application.Platform;
 import model.network.Network;
+import model.network.Parameters;
 import model.network.memory.MemoryModule;
 import model.network.schema.ColorSchema;
+import model.network.schema.Schema;
 
 import java.io.*;
 import java.util.Observable;
@@ -24,6 +26,8 @@ public class WorkSpace extends Observable {
    private Network network;
    private Network backupNetwork;
 
+   private boolean hasChanged = false;
+
    private WorkSpace() {
       interact = new Interact();
       examine = new Examine();
@@ -33,15 +37,37 @@ public class WorkSpace extends Observable {
       addObserver(setParameters);
    }
 
+   public boolean hasChanged() {
+      return hasChanged;
+   }
+
    public void setController(MainController controller) {
       this.controller = controller;
       addObserver(controller);
    }
 
-   public Network getNetwork() {
-      return network;
+   public boolean openNetwork() {
+      return network != null;
    }
 
+   public MemoryModule getNetworkMemory() {
+      if (network != null)
+         return network.getMemoryModule();
+      else
+         return null;
+   }
+   public Schema getNetworkSchema() {
+      if (network != null)
+         return network.schema;
+      else
+         return null;
+   }
+   public Parameters getNetworkParameters() {
+      if (network != null)
+         return network.getParameters();
+      else
+         return null;
+   }
    public void restoreNetwork() {
       network = backupNetwork.clone();
       updateUI();
@@ -54,18 +80,21 @@ public class WorkSpace extends Observable {
    }
 
    public void newNetwork() {
+      hasChanged = false;
       network = new Network(new ColorSchema());
       backupNetwork = network.clone();
       updateUI();
    }
 
    public void closeNetwork() {
+      hasChanged = false;
       network = null;
       backupNetwork = null;
       updateUI();
    }
 
    public void loadNetwork(File file) throws Exception {
+      hasChanged = false;
       FileInputStream fin = new FileInputStream(file);
       ObjectInputStream ois = new ObjectInputStream(fin);
       setNetwork((Network) ois.readObject());
@@ -73,16 +102,19 @@ public class WorkSpace extends Observable {
    }
 
    public void saveNetwork(File file) throws Exception {
+      hasChanged = false;
       FileOutputStream fos = new FileOutputStream(file);
       ObjectOutputStream out = new ObjectOutputStream(fos);
       out.writeObject(network);
       out.close();
-      updateUI();
    }
 
    public void consolidateMemory() {
       System.out.println("Training network...");
-      if (network != null) network.train();
+      if (network != null) {
+         network.train();
+         hasChanged = true;
+      }
       System.out.println("...done!");
       updateUI();
    }
@@ -105,6 +137,7 @@ public class WorkSpace extends Observable {
          ObjectInputStream ois = new ObjectInputStream(fin);
          network.setMemoryModule(((MemoryModule) ois.readObject()));
          ois.close();
+         hasChanged = true;
          updateUI();
       } catch (Exception e) {
          signalUIError("Error loading memories!");
@@ -113,12 +146,14 @@ public class WorkSpace extends Observable {
 
    public void wipeMemory() {
       network.wipeMemory();
+      hasChanged = true;
       updateUI();
    }
 
    public void addMemory(Object input, Object output) {
       try {
          network.addMemory(input, output);
+         hasChanged = true;
          updateUI();
       } catch (Exception e) {
          signalUIError("Error adding memory!");
