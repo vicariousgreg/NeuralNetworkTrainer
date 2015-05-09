@@ -12,20 +12,9 @@ public class AdvancedColorSchema extends Schema {
    /**
     * Constructor.
     */
-   public AdvancedColorSchema() {
+   public AdvancedColorSchema(String[] classifications) {
       super(new Class[] { java.awt.Color.class, javafx.scene.paint.Color.class },
-            3, new String[] {
-                  "Red",
-                  "Orange",
-                  "Yellow",
-                  "Green",
-                  "Teal",
-                  "Blue",
-                  "Purple",
-                  "Pink",
-                  "Black",
-                  "White"
-            });
+            3, classifications);
    }
 
    @Override

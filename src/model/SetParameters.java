@@ -1,7 +1,6 @@
 package model;
 
 import gui.controller.ParametersController;
-import model.network.Network;
 import model.network.Parameters;
 
 import java.util.Observable;
@@ -28,9 +27,8 @@ public class SetParameters implements Observer {
    @Override
    public void update(Observable o, Object arg) {
       if (controller != null) {
-         Parameters params = WorkSpace.instance.getNetwork().getParameters();
-         if (params != null)
-            controller.setFields(params);
+         if (WorkSpace.instance.openNetwork())
+            controller.setFields(WorkSpace.instance.getNetwork().getParameters());
          else
             controller.clearFields();
       }
