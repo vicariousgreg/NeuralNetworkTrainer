@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<Pane fx:id="pane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="433.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.controller.InteractController">
+   <children>
+      <ColorPicker fx:id="colorPicker" layoutX="46.0" layoutY="54.0" onAction="#setColor" />
+      <Rectangle fx:id="rectangle" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="200.0" layoutX="46.0" layoutY="106.0" stroke="BLACK" strokeType="INSIDE" width="220.0" />
+      <Button layoutX="233.0" layoutY="352.0" mnemonicParsing="false" onAction="#clickSkip" prefHeight="25.0" prefWidth="100.0" text="Skip" />
+      <Text fx:id="answer" layoutX="67.0" layoutY="336.0" strokeType="OUTSIDE" strokeWidth="0.0" textAlignment="CENTER" wrappingWidth="177.7294921875">
+         <font>
+            <Font size="16.0" />
+         </font></Text>
+
+      <Button fx:id="correctbutton" layoutX="105.0" layoutY="352.0" mnemonicParsing="false" onAction="#clickCorrect" prefHeight="25.0" prefWidth="100.0" text="Correct!" />
+       <TilePane fx:id="buttonPane" alignment="CENTER" hgap="30.0" layoutX="283.0" layoutY="161.0" prefHeight="143.0" prefWidth="295.0" vgap="20.0" />
+   </children>
+</Pane>

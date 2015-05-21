@@ -1,21 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.text.*?>
 <?import javafx.scene.shape.*?>
+<?import javafx.scene.effect.*?>
 <?import javafx.scene.control.*?>
+<?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<Pane fx:id="pane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="433.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.controller.InteractController">
-   <children>
-      <ColorPicker fx:id="colorPicker" layoutX="46.0" layoutY="54.0" onAction="#setColor" />
-      <Rectangle fx:id="rectangle" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="200.0" layoutX="46.0" layoutY="106.0" stroke="BLACK" strokeType="INSIDE" width="220.0" />
-      <Button layoutX="233.0" layoutY="352.0" mnemonicParsing="false" onAction="#clickSkip" prefHeight="25.0" prefWidth="100.0" text="Skip" />
-      <Text fx:id="answer" layoutX="67.0" layoutY="336.0" strokeType="OUTSIDE" strokeWidth="0.0" textAlignment="CENTER" wrappingWidth="177.7294921875">
-         <font>
-            <Font size="16.0" />
-         </font></Text>
-
-      <Button fx:id="correctbutton" layoutX="105.0" layoutY="352.0" mnemonicParsing="false" onAction="#clickCorrect" prefHeight="25.0" prefWidth="100.0" text="Correct!" />
-       <TilePane fx:id="buttonPane" alignment="CENTER" hgap="30.0" layoutX="283.0" layoutY="161.0" prefHeight="143.0" prefWidth="295.0" vgap="20.0" />
-   </children>
-</Pane>
+<SplitPane dividerPositions="0.29797979797979796" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="646.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.controller.InteractController">
+  <items>
+    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+         <children>
+            <ScrollPane layoutX="3.0" layoutY="-3.0" prefHeight="644.0" prefViewportHeight="398.0" prefViewportWidth="174.0" prefWidth="264.0">
+               <content>
+                  <ListView fx:id="networkList" layoutX="3.0" layoutY="-3.0" prefHeight="637.0" prefWidth="261.0" />
+               </content>
+            </ScrollPane>
+         </children></AnchorPane>
+    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+         <children>
+            <SplitPane dividerPositions="0.7230769230769231" layoutX="-1.0" layoutY="2.0" orientation="VERTICAL" prefHeight="644.0" prefWidth="626.0">
+              <items>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                     <children>
+                        <SplitPane dividerPositions="0.40064102564102566" prefHeight="460.0" prefWidth="626.0">
+                          <items>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                 <children>
+                                    <ScrollPane prefHeight="458.0" prefWidth="246.0">
+                                       <content>
+                                          <ListView fx:id="classificationList" prefHeight="453.0" prefWidth="237.0" />
+                                       </content>
+                                    </ScrollPane>
+                                 </children>
+                              </AnchorPane>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                 <children>
+                                    <VBox>
+                                       <children>
+                                          <Rectangle fx:id="colorBox" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="431.0" stroke="BLACK" strokeType="INSIDE" width="370.0" />
+                                       </children>
+                                    </VBox>
+                                    <ColorPicker fx:id="colorPicker" layoutY="432.0" onAction="#setColor" prefHeight="25.0" prefWidth="370.0" />
+                                 </children>
+                              </AnchorPane>
+                          </items>
+                        </SplitPane>
+                     </children>
+                  </AnchorPane>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                     <children>
+                        <VBox prefHeight="174.0" prefWidth="624.0">
+                           <children>
+                              <HBox spacing="300.0">
+                                 <children>
+                                    <Label prefHeight="25.0" prefWidth="141.0" text="Short Term Memory:" />
+                                    <Button fx:id="memoryButton" mnemonicParsing="false" onAction="#viewMemory" text="View Memory" />
+                                 </children>
+                              </HBox>
+                              <ScrollPane prefHeight="145.0" prefViewportHeight="159.0" prefViewportWidth="624.0" prefWidth="624.0">
+                                 <content>
+                                    <FlowPane fx:id="shortTermMemoryBox" prefHeight="137.0" prefWidth="616.0" />
+                                 </content>
+                              </ScrollPane>
+                           </children>
+                        </VBox>
+                     </children>
+                  </AnchorPane>
+              </items>
+            </SplitPane>
+         </children></AnchorPane>
+  </items>
+</SplitPane>

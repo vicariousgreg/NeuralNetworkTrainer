@@ -1,176 +1,83 @@
 package model;
 
-import gui.controller.MainController;
-import javafx.application.Platform;
 import model.network.Network;
-import model.network.memory.MemoryModule;
-import model.network.schema.*;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 
 /**
  * Created by gpdavis on 5/2/15.
  */
 public class WorkSpace extends Observable {
+   private static final String kDataPath = "src/gui/controller/data/";
    public static final WorkSpace instance = new WorkSpace();
 
-   private MainController controller;
-
-   public final Interact interact;
-   public final Examine examine;
-   public final SetParameters setParameters;
-
-   private Network network;
-   private Network backupNetwork;
-
-   private boolean hasChanged = false;
+   private List<NetworkData> networks;
 
    private WorkSpace() {
-      interact = new Interact();
-      examine = new Examine();
-      setParameters = new SetParameters();
-      addObserver(interact);
-      addObserver(examine);
-      addObserver(setParameters);
+      this.networks = new ArrayList<NetworkData>();
    }
 
-   public boolean hasChanged() {
-      return hasChanged;
-   }
+   public void loadNetworks() throws Exception {
+      File dataFile = new File(kDataPath);
+      File[] networkFiles = dataFile.listFiles();
 
-   public void setController(MainController controller) {
-      this.controller = controller;
-      addObserver(controller);
-   }
-
-   public boolean openNetwork() {
-      return network != null;
-   }
-
-   public Network getNetwork() {
-      return network;
-   }
-
-   public void restoreNetwork() {
-      network = backupNetwork.clone();
-      updateUI();
-   }
-
-   private void setNetwork(Network network) {
-      this.network = network;
-      this.backupNetwork = network.clone();
-      updateUI();
-   }
-
-   public void newNetwork() {
-      hasChanged = false;
-      network = new Network(new ColorSchema());
-      backupNetwork = network.clone();
-      updateUI();
-   }
-
-   public void closeNetwork() {
-      hasChanged = false;
-      network = null;
-      backupNetwork = null;
-      updateUI();
-   }
-
-   public void loadNetwork(File file) throws Exception {
-      hasChanged = false;
-      FileInputStream fin = new FileInputStream(file);
-      ObjectInputStream ois = new ObjectInputStream(fin);
-      setNetwork((Network) ois.readObject());
-      ois.close();
-   }
-
-   public void saveNetwork(File file) throws Exception {
-      hasChanged = false;
-      FileOutputStream fos = new FileOutputStream(file);
-      ObjectOutputStream out = new ObjectOutputStream(fos);
-      out.writeObject(network);
-      out.close();
-   }
-
-   public void consolidateMemory() {
-      System.out.println("Training network...");
-      if (network != null) {
-         network.train();
-         hasChanged = true;
-      }
-      System.out.println("...done!");
-      updateUI();
-   }
-
-   public void saveMemory(File file) {
-      try {
-         FileOutputStream fos = new FileOutputStream(file);
-         ObjectOutputStream out = new ObjectOutputStream(fos);
-         out.writeObject(network.getMemoryModule());
-         out.close();
-         updateUI();
-      } catch (Exception e) {
-         signalUIError("Error saving memories!");
-      }
-   }
-
-   public void loadMemory(File file) {
-      try {
+      for (File file : networkFiles) {
          FileInputStream fin = new FileInputStream(file);
          ObjectInputStream ois = new ObjectInputStream(fin);
-         network.setMemoryModule(((MemoryModule) ois.readObject()));
+         Network net = (Network) ois.readObject();
          ois.close();
-         hasChanged = true;
-         updateUI();
-      } catch (Exception e) {
-         signalUIError("Error loading memories!");
+
+         networks.add(new NetworkData(file.getName(), net));
       }
+      setChanged();
+      notifyObservers();
    }
 
-   public void wipeMemory() {
-      network.wipeMemory();
-      hasChanged = true;
-      updateUI();
-   }
+   /**
+    * Gets a list of tracked file names.
+    * @return filenames list
+    */
+   public List<String> getNetworkNames() {
+      List<String> out = new ArrayList<String>();
 
-   public void addMemory(Object input, Object output) {
-      try {
-         network.addMemory(input, output);
-         hasChanged = true;
-         updateUI();
-      } catch (Exception e) {
-         signalUIError("Error adding memory!");
+      for (NetworkData data : networks) {
+         out.add(data.fileName);
       }
+
+      return out;
    }
 
-   public Object queryNetwork(Object input) {
-      try {
-         return network.query(input);
-      } catch(Exception e) {
-         signalUIError("Error querying network!");
-         return "Unknown";
+   /**
+    * Gets a network based on its filename.
+    * Returns null if not found.
+    *
+    * @param name
+    * @return network
+    */
+   public Network getNetwork(String name) {
+      for (NetworkData data : networks) {
+         if (data.fileName.equals(name))
+            return data.network;
       }
+      return null;
    }
 
-   private void updateUI() {
-       Platform.runLater(new Runnable() {
-         @Override
-         public void run() {
-            setChanged();
-            notifyObservers();
-         }
-      });
-   }
+   /**
+    * Network data entry.
+    * Holds the network, its associated filename, and a changed flag.
+    */
+   private class NetworkData {
+      public Network network;
+      public String fileName;
+      public boolean changed;
 
-   private void signalUIError(String message) {
-      final String errorMessage = message;
-      Platform.runLater(new Runnable() {
-         @Override
-         public void run() {
-            setChanged();
-            notifyObservers(errorMessage);
-         }
-      });
+      public NetworkData(String name, Network net) {
+         this.fileName = name;
+         this.network = net;
+         this.changed = false;
+      }
    }
 }
