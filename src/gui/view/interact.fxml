@@ -7,27 +7,39 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-
 <HBox prefHeight="644.0" prefWidth="897.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.controller.InteractController">
    <children>
-      <ScrollPane layoutX="3.0" layoutY="-3.0" prefHeight="644.0" prefViewportHeight="398.0" prefViewportWidth="174.0" prefWidth="264.0">
-         <content>
-            <ListView fx:id="networkList" layoutX="3.0" layoutY="-3.0" prefHeight="641.0" prefWidth="261.0" />
-         </content>
-      </ScrollPane>
+      <VBox alignment="CENTER" spacing="5.0">
+         <children>
+            <Button mnemonicParsing="false" onAction="#newNetwork" prefHeight="25.0" prefWidth="246.0" text="New Network..." />
+            <ScrollPane layoutX="3.0" layoutY="-3.0" prefHeight="644.0" prefViewportHeight="398.0" prefViewportWidth="174.0" prefWidth="264.0">
+               <content>
+                  <ListView fx:id="networkList" layoutX="3.0" layoutY="-3.0" prefHeight="602.0" prefWidth="261.0" />
+               </content>
+            </ScrollPane>
+         </children>
+         <HBox.margin>
+            <Insets top="5.0" />
+         </HBox.margin>
+      </VBox>
       <VBox alignment="CENTER" layoutX="-1.0" layoutY="2.0" prefHeight="644.0" prefWidth="630.0" spacing="5.0">
          <children>
             <HBox>
                <children>
-                  <ScrollPane prefHeight="458.0" prefWidth="246.0">
-                     <content>
-                        <ListView fx:id="classificationList" prefHeight="453.0" prefWidth="237.0" />
-                     </content>
-                  </ScrollPane>
-                  <VBox alignment="CENTER" prefHeight="458.0" prefWidth="381.0">
+                  <VBox spacing="5.0">
                      <children>
-                        <Rectangle fx:id="colorBox" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="428.0" stroke="BLACK" strokeType="INSIDE" width="379.0" />
+                        <Button mnemonicParsing="false" onAction="#correct" prefHeight="25.0" prefWidth="242.0" text="Correct!" />
+                        <ScrollPane prefHeight="430.0" prefWidth="246.0">
+                           <content>
+                              <ListView fx:id="classificationList" prefHeight="426.0" prefWidth="237.0" />
+                           </content>
+                        </ScrollPane>
+                     </children>
+                  </VBox>
+                  <VBox alignment="TOP_CENTER" prefHeight="458.0" prefWidth="381.0" spacing="5.0">
+                     <children>
                         <ColorPicker fx:id="colorPicker" onAction="#setColor" prefHeight="25.0" prefWidth="390.0" />
+                        <Rectangle fx:id="colorBox" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="428.0" stroke="BLACK" strokeType="INSIDE" width="379.0" />
                      </children>
                   </VBox>
                </children>
@@ -43,9 +55,9 @@
                         <Insets left="5.0" />
                      </VBox.margin>
                   </HBox>
-                  <ScrollPane prefHeight="145.0" prefViewportHeight="159.0" prefViewportWidth="624.0" prefWidth="624.0">
+                  <ScrollPane prefHeight="124.0" prefViewportHeight="159.0" prefViewportWidth="624.0" prefWidth="630.0">
                      <content>
-                        <FlowPane fx:id="shortTermMemoryBox" prefHeight="137.0" prefWidth="616.0" />
+                        <FlowPane fx:id="shortTermMemoryBox" prefHeight="117.0" prefWidth="605.0" />
                      </content>
                   </ScrollPane>
                </children>

@@ -3,17 +3,17 @@ package gui.controller;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.ColorPicker;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
+import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.stage.Stage;
 import model.WorkSpace;
+import model.network.Network;
 import model.network.memory.Memory;
 import model.network.memory.MemoryModule;
 
@@ -39,6 +39,31 @@ public class InteractController extends NetworkController implements Initializab
    public void initialize(URL location, ResourceBundle resources) {
       this.rand = new Random();
       WorkSpace.instance.addObserver(this);
+
+      // Set up network list context menu.
+      ContextMenu context = new ContextMenu();
+
+      MenuItem parametersItem = new MenuItem("Edit Parameters");
+      parametersItem.setOnAction(new EventHandler<ActionEvent>() {
+         public void handle(ActionEvent e) {
+            String selected = (String) networkList.getSelectionModel().getSelectedItem();
+            System.out.println(selected);
+            Network net = WorkSpace.instance.getNetwork(selected);
+
+            if (net != null) {
+               try {
+                  NetworkControllerStack.instance.push(
+                        getClass().getResource(
+                              "../view/parameters.fxml"));
+               } catch (IOException ex) {
+                  ex.printStackTrace();
+               }
+
+            }
+         }
+      });
+      context.getItems().add(parametersItem);
+      networkList.setContextMenu(context);
 
       // Set up event handler for network list.
       networkList.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -75,6 +100,12 @@ public class InteractController extends NetworkController implements Initializab
    @Override
    public void display() {
       loadNetworks();
+      try {
+         loadClassifications();
+         loadMemory();
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
    }
 
    /**
@@ -120,27 +151,18 @@ public class InteractController extends NetworkController implements Initializab
       }
    }
 
-   private void loadClassifications() throws Exception {
-      // Populate classification list.
-      ObservableList data = FXCollections.observableArrayList();
-      Object[] classifications = network.schema.getOutputClassifications();
-      for (int i = 0; i < classifications.length; ++i) {
-         data.add(classifications[i]);
-      }
-      classificationList.setItems(data);
-   }
-
-   private void loadMemory() throws Exception {
-      // Populate memory box.
-      shortTermMemoryBox.getChildren().clear();
-      MemoryModule mem = network.getMemoryModule();
-      Map<Object, List<Memory>> shortTermMemory = mem.getShortTermMemory();
-
-      for (Object key : shortTermMemory.keySet()) {
-         for (Memory memory : shortTermMemory.get(key)) {
-            shortTermMemoryBox.getChildren().add(
-                  network.schema.toFXNode(memory, 25, 25));
+   /**
+    * Loads the network's schema classifications.
+    */
+   private void loadClassifications() {
+      if (network != null) {
+         // Populate classification list.
+         ObservableList data = FXCollections.observableArrayList();
+         Object[] classifications = network.schema.getOutputClassifications();
+         for (int i = 0; i < classifications.length; ++i) {
+            data.add(classifications[i]);
          }
+         classificationList.setItems(data);
       }
    }
 
@@ -159,6 +181,14 @@ public class InteractController extends NetworkController implements Initializab
       }
 
       randomize();
+   }
+
+   /**
+    * Commits the guessed classification to memory.
+    */
+   public void correct() {
+      selectClassification((String) classificationList
+            .getSelectionModel().getSelectedItem());
    }
 
    /**
@@ -197,6 +227,26 @@ public class InteractController extends NetworkController implements Initializab
    }
 
    /**
+    * Loads the network's memories.
+    * @throws Exception
+    */
+   private void loadMemory() throws Exception {
+      if (network != null) {
+         // Populate memory box.
+         shortTermMemoryBox.getChildren().clear();
+         MemoryModule mem = network.getMemoryModule();
+         Map<Object, List<Memory>> shortTermMemory = mem.getShortTermMemory();
+
+         for (Object key : shortTermMemory.keySet()) {
+            for (Memory memory : shortTermMemory.get(key)) {
+               shortTermMemoryBox.getChildren().add(
+                     network.schema.toFXNode(memory, 25, 25));
+            }
+         }
+      }
+   }
+
+   /**
     * Loads up the memory screen.
     */
    public void viewMemory() {
@@ -209,6 +259,12 @@ public class InteractController extends NetworkController implements Initializab
             e.printStackTrace();
          }
       }
+   }
+
+   /**
+    * Loads up the new network screen.
+    */
+   public void newNetwork() {
    }
 
    @Override

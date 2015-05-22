@@ -17,7 +17,6 @@ public class Main extends Application {
 
        primaryStage.setTitle("Neural Network Trainer");
        primaryStage.setScene(new Scene((Parent)loader.load()));
-       primaryStage.show();
        NetworkControllerStack.instance.setStage(primaryStage);
 
        // Push main interaction screen.

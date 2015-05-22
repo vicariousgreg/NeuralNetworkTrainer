@@ -1,19 +1,20 @@
 package gui.controller;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Scene;
 import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
-import javafx.stage.Stage;
-import model.network.Network;
+import javafx.stage.FileChooser;
 import model.network.memory.Memory;
 import model.network.memory.MemoryModule;
 
+import java.io.*;
 import java.net.URL;
 import java.util.*;
 
@@ -42,6 +43,9 @@ public class MemoryController extends NetworkController implements Initializable
       });
    }
 
+   /**
+    * Loads up the network data.
+    */
    public void display() {
       try {
          loadClassifications();
@@ -52,6 +56,10 @@ public class MemoryController extends NetworkController implements Initializable
       }
    }
 
+   /**
+    * Loads the network's schema classifications.
+    * @throws Exception
+    */
    private void loadClassifications() throws Exception {
       // Populate classification list.
       ObservableList data = FXCollections.observableArrayList();
@@ -63,6 +71,11 @@ public class MemoryController extends NetworkController implements Initializable
       classificationList.setItems(data);
    }
 
+   /**
+    * Loads the network's memories for the given classification.
+    * @param classification classification of memories to load
+    * @throws Exception
+    */
    private void loadMemory(String classification) throws Exception {
       // Populate short term memory box.
       shortTermMemoryBox.getChildren().clear();
@@ -103,6 +116,89 @@ public class MemoryController extends NetworkController implements Initializable
          loadMemory(classification);
       } catch (Exception e) {
          e.printStackTrace();
+      }
+   }
+
+   /**
+    * Consolidates the network's memories.
+    */
+   public void consolidate() {
+      System.out.println("Consolidate");
+      NetworkControllerStack.instance.postTask(new Task<Void>() {
+         @Override
+         public Void call() {
+            System.out.println("Rebuilding network...");
+            network.train();
+            Platform.runLater(new Runnable() {
+               @Override
+               public void run() {
+                  display();
+               }
+            });
+            return null;
+         }
+      });
+   }
+
+   /**
+    * Exports the network's memory to a file of the user's choice.
+    */
+   public void exportMemory() {
+      FileChooser fileChooser = new FileChooser();
+      final File file = fileChooser.showOpenDialog(NetworkControllerStack.instance.getStage());
+      if (file != null) {
+         NetworkControllerStack.instance.postTask(new Task<Void>() {
+            @Override
+            public Void call() {
+               try {
+                  FileOutputStream fos = new FileOutputStream(file);
+                  ObjectOutputStream out = new ObjectOutputStream(fos);
+                  out.writeObject(network.getMemoryModule());
+                  out.close();
+                  Platform.runLater(new Runnable() {
+                     @Override
+                     public void run() {
+                        display();
+                     }
+                  });
+               } catch (Exception e) {
+                  e.printStackTrace();
+               }
+
+               return null;
+            }
+         });
+      }
+   }
+
+   /**
+    * Imports the network's memory from a file of the user's choice.
+    */
+   public void importMemory() {
+      FileChooser fileChooser = new FileChooser();
+      final File file = fileChooser.showOpenDialog(NetworkControllerStack.instance.getStage());
+      if (file != null) {
+         NetworkControllerStack.instance.postTask(new Task<Void>() {
+            @Override
+            public Void call() {
+               try {
+                  FileInputStream fin = new FileInputStream(file);
+                  ObjectInputStream ois = new ObjectInputStream(fin);
+                  network.setMemoryModule(((MemoryModule) ois.readObject()));
+                  ois.close();
+                  Platform.runLater(new Runnable() {
+                     @Override
+                     public void run() {
+                        display();
+                     }
+                  });
+               } catch (Exception e) {
+                  e.printStackTrace();
+               }
+
+               return null;
+            }
+         });
       }
    }
 }
