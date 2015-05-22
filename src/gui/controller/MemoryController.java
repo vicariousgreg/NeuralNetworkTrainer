@@ -17,27 +17,19 @@ import model.network.memory.MemoryModule;
 import java.net.URL;
 import java.util.*;
 
-public class MemoryController implements Initializable {
+public class MemoryController extends NetworkController implements Initializable {
    @FXML ListView classificationList;
    @FXML FlowPane shortTermMemoryBox;
    @FXML FlowPane longTermMemoryBox;
 
-   private Stage stage;
-   private Scene oldScene;
-
    /** All Classification item. */
    private static final String kAll = "=== ALL ===";
-
-   /** Selected Network. */
-   private Network network;
 
    /**
     * Initialization.
     * Sets up listeners for GUI.
     */
    public void initialize(URL location, ResourceBundle resources) {
-      this.network = null;
-
       // Set up event handler for classification list.
       classificationList.setOnMouseClicked(new EventHandler<MouseEvent>() {
          @Override
@@ -50,11 +42,7 @@ public class MemoryController implements Initializable {
       });
    }
 
-   public void display(Stage stage, Scene oldScene, Network network) {
-      this.network = network;
-      this.stage = stage;
-      this.oldScene = oldScene;
-
+   public void display() {
       try {
          loadClassifications();
          selectClassification(kAll);
@@ -102,7 +90,6 @@ public class MemoryController implements Initializable {
             }
          }
       }
-
    }
 
    /**
@@ -117,9 +104,5 @@ public class MemoryController implements Initializable {
       } catch (Exception e) {
          e.printStackTrace();
       }
-   }
-
-   public void close() {
-      stage.setScene(oldScene);
    }
 }

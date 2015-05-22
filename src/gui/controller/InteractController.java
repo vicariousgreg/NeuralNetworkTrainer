@@ -4,10 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ListView;
@@ -17,7 +14,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import model.WorkSpace;
-import model.network.Network;
 import model.network.memory.Memory;
 import model.network.memory.MemoryModule;
 
@@ -25,7 +21,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
-public class InteractController implements Initializable, Observer {
+public class InteractController extends NetworkController implements Initializable, Observer {
    @FXML ListView networkList;
    @FXML ListView classificationList;
    @FXML Rectangle colorBox;
@@ -33,13 +29,8 @@ public class InteractController implements Initializable, Observer {
    @FXML FlowPane shortTermMemoryBox;
    @FXML Button memoryButton;
 
-   private Stage stage;
-
    /** Random generator for color generation. */
    private Random rand;
-
-   /** Selected Network. */
-   private Network selectedNetwork;
 
    /**
     * Initialization.
@@ -47,7 +38,6 @@ public class InteractController implements Initializable, Observer {
     */
    public void initialize(URL location, ResourceBundle resources) {
       this.rand = new Random();
-      this.selectedNetwork = null;
       WorkSpace.instance.addObserver(this);
 
       // Set up event handler for network list.
@@ -82,8 +72,9 @@ public class InteractController implements Initializable, Observer {
       });
    }
 
-   public void setStage(Stage stage) {
-      this.stage = stage;
+   @Override
+   public void display() {
+      loadNetworks();
    }
 
    /**
@@ -111,10 +102,10 @@ public class InteractController implements Initializable, Observer {
    private void selectNetwork(String networkName) {
       // Query workspace for network
       //   Set to selected
-      selectedNetwork = WorkSpace.instance.getNetwork(networkName);
+      network = WorkSpace.instance.getNetwork(networkName);
 
       // Null check
-      if (selectedNetwork != null) {
+      if (network != null) {
          System.out.println("Loaded network: " + networkName);
 
          try {
@@ -132,7 +123,7 @@ public class InteractController implements Initializable, Observer {
    private void loadClassifications() throws Exception {
       // Populate classification list.
       ObservableList data = FXCollections.observableArrayList();
-      Object[] classifications = selectedNetwork.schema.getOutputClassifications();
+      Object[] classifications = network.schema.getOutputClassifications();
       for (int i = 0; i < classifications.length; ++i) {
          data.add(classifications[i]);
       }
@@ -142,13 +133,13 @@ public class InteractController implements Initializable, Observer {
    private void loadMemory() throws Exception {
       // Populate memory box.
       shortTermMemoryBox.getChildren().clear();
-      MemoryModule mem = selectedNetwork.getMemoryModule();
+      MemoryModule mem = network.getMemoryModule();
       Map<Object, List<Memory>> shortTermMemory = mem.getShortTermMemory();
 
       for (Object key : shortTermMemory.keySet()) {
          for (Memory memory : shortTermMemory.get(key)) {
             shortTermMemoryBox.getChildren().add(
-                  selectedNetwork.schema.toFXNode(memory, 25, 25));
+                  network.schema.toFXNode(memory, 25, 25));
          }
       }
    }
@@ -161,7 +152,7 @@ public class InteractController implements Initializable, Observer {
       System.out.println("Selected " + classification);
 
       try {
-         selectedNetwork.addMemory(colorBox.getFill(), classification);
+         network.addMemory(colorBox.getFill(), classification);
          loadMemory();
       } catch (Exception e) {
          e.printStackTrace();
@@ -197,7 +188,7 @@ public class InteractController implements Initializable, Observer {
     */
    private void guess() {
       try {
-         String answer = (String) selectedNetwork.query(colorBox.getFill());
+         String answer = (String) network.query(colorBox.getFill());
          classificationList.getSelectionModel().select(answer);
          classificationList.requestFocus();
       } catch (Exception e) {
@@ -205,21 +196,15 @@ public class InteractController implements Initializable, Observer {
       }
    }
 
+   /**
+    * Loads up the memory screen.
+    */
    public void viewMemory() {
-      if (selectedNetwork != null) {
+      if (network != null) {
          try {
-            FXMLLoader loader = new FXMLLoader(
+            NetworkControllerStack.instance.push(
                   getClass().getResource(
-                        "../view/memory.fxml"
-                  )
-            );
-
-            Scene thisScene = stage.getScene();
-
-            stage.setScene(new Scene((Parent) loader.load()));
-
-            MemoryController controller = loader.getController();
-            controller.display(stage, thisScene, selectedNetwork);
+                        "../view/memory.fxml"));
          } catch (IOException e) {
             e.printStackTrace();
          }

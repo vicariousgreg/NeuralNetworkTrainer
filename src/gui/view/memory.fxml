@@ -8,56 +8,51 @@
 <?import javafx.scene.layout.*?>
 
 
-<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.controller.MemoryController">
-   <children>
-      <Button mnemonicParsing="false" onAction="#close" text="&lt;&lt;&lt;&lt;" />
-      <SplitPane dividerPositions="0.844311377245509" orientation="VERTICAL">
+<SplitPane dividerPositions="0.844311377245509" orientation="VERTICAL" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.controller.MemoryController">
+   <items>
+      <SplitPane dividerPositions="0.29797979797979796" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="497.0" prefWidth="900.0">
          <items>
-            <SplitPane dividerPositions="0.29797979797979796" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="497.0" prefWidth="900.0">
-               <items>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
-                     <children>
-                        <ScrollPane layoutX="3.0" layoutY="-3.0" prefHeight="511.0" prefViewportHeight="398.0" prefViewportWidth="174.0" prefWidth="264.0">
-                           <content>
-                              <ListView fx:id="classificationList" layoutX="3.0" layoutY="-3.0" prefHeight="500.0" prefWidth="261.0" />
-                           </content>
-                        </ScrollPane>
-                     </children>
-                  </AnchorPane>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
-                     <children>
-                        <ScrollPane prefHeight="497.0" prefViewportHeight="159.0" prefViewportWidth="624.0" prefWidth="624.0">
-                           <content>
-                              <FlowPane fx:id="longTermMemoryBox" prefHeight="489.0" prefWidth="606.0" />
-                           </content>
-                        </ScrollPane>
-                     </children>
-                  </AnchorPane>
-               </items>
-            </SplitPane>
-            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="197.0" prefWidth="900.0">
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                <children>
-                  <HBox alignment="CENTER" layoutX="7.0" prefHeight="197.0" prefWidth="900.0" spacing="50.0">
-                     <children>
-                        <VBox layoutX="23.0" prefHeight="174.0" prefWidth="601.0">
-                           <children>
-                              <Label prefHeight="25.0" prefWidth="141.0" text="Short Term Memory:" />
-                              <ScrollPane prefHeight="145.0" prefViewportHeight="159.0" prefViewportWidth="624.0" prefWidth="624.0">
-                                 <content>
-                                    <FlowPane fx:id="shortTermMemoryBox" prefHeight="137.0" prefWidth="590.0" />
-                                 </content>
-                              </ScrollPane>
-                           </children>
-                        </VBox>
-                        <Button alignment="CENTER" mnemonicParsing="false" prefHeight="109.0" prefWidth="153.0" text="Consolidate" />
-                     </children>
-                     <padding>
-                        <Insets top="10.0" />
-                     </padding>
-                  </HBox>
+                  <ScrollPane layoutX="3.0" layoutY="-3.0" prefHeight="511.0" prefViewportHeight="398.0" prefViewportWidth="174.0" prefWidth="264.0">
+                     <content>
+                        <ListView fx:id="classificationList" layoutX="3.0" layoutY="-3.0" prefHeight="500.0" prefWidth="261.0" />
+                     </content>
+                  </ScrollPane>
+               </children>
+            </AnchorPane>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+               <children>
+                  <ScrollPane prefHeight="497.0" prefViewportHeight="159.0" prefViewportWidth="624.0" prefWidth="624.0">
+                     <content>
+                        <FlowPane fx:id="longTermMemoryBox" prefHeight="489.0" prefWidth="606.0" />
+                     </content>
+                  </ScrollPane>
                </children>
             </AnchorPane>
          </items>
       </SplitPane>
-   </children>
-</VBox>
+      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="197.0" prefWidth="900.0">
+         <children>
+            <HBox alignment="CENTER" layoutX="7.0" prefHeight="197.0" prefWidth="900.0" spacing="50.0">
+               <children>
+                  <VBox layoutX="23.0" prefHeight="174.0" prefWidth="601.0">
+                     <children>
+                        <Label prefHeight="25.0" prefWidth="141.0" text="Short Term Memory:" />
+                        <ScrollPane prefHeight="145.0" prefViewportHeight="159.0" prefViewportWidth="624.0" prefWidth="624.0">
+                           <content>
+                              <FlowPane fx:id="shortTermMemoryBox" prefHeight="137.0" prefWidth="590.0" />
+                           </content>
+                        </ScrollPane>
+                     </children>
+                  </VBox>
+                  <Button alignment="CENTER" mnemonicParsing="false" prefHeight="109.0" prefWidth="153.0" text="Consolidate" />
+               </children>
+               <padding>
+                  <Insets top="10.0" />
+               </padding>
+            </HBox>
+         </children>
+      </AnchorPane>
+   </items>
+</SplitPane>

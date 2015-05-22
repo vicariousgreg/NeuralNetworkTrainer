@@ -54,7 +54,7 @@
                               <HBox spacing="300.0">
                                  <children>
                                     <Label prefHeight="25.0" prefWidth="141.0" text="Short Term Memory:" />
-                                    <Button fx:id="memoryButton" mnemonicParsing="false" onAction="#viewMemory" text="View Memory" />
+                                    <Button fx:id="memoryButton" mnemonicParsing="false" onAction="#viewMemory" prefHeight="25.0" prefWidth="178.0" text="View Memory" />
                                  </children>
                               </HBox>
                               <ScrollPane prefHeight="145.0" prefViewportHeight="159.0" prefViewportWidth="624.0" prefWidth="624.0">
