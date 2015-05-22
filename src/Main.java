@@ -23,7 +23,6 @@ public class Main extends Application {
        // Push main interaction screen.
        NetworkControllerStack.instance.push(
              Main.class.getResource("gui/view/interact.fxml"));
-
     }
 
     public static void main(String[] args) {

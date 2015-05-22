@@ -16,16 +16,14 @@ import java.util.Stack;
 public class NetworkControllerStack implements Initializable {
    public static NetworkControllerStack instance = new NetworkControllerStack();
 
-   @FXML Pane pane;
    @FXML Button backButton;
+   @FXML Pane pane;
 
    private Stage stage;
    private Stack<ControllerScene> stack;
 
    public NetworkControllerStack() {
-      this.stage = new Stage();
       this.stack = new Stack<ControllerScene>();
-      stage.setTitle("Neural Network Trainer");
    }
 
    @Override
@@ -46,11 +44,9 @@ public class NetworkControllerStack implements Initializable {
     * @throws IOException when resource is invalid
     */
    public void push(URL resource) throws IOException {
+      // Load resource, extract node and controller
       FXMLLoader loader = new FXMLLoader(resource);
       Node node = loader.load();
-
-      pane.getChildren().clear();
-      pane.getChildren().add(node);
       NetworkController controller = loader.getController();
 
       // Propagate network
@@ -58,10 +54,10 @@ public class NetworkControllerStack implements Initializable {
          controller.setNetwork(stack.peek().controller.getNetwork());
       }
 
+      // Add new node
       stack.push(new ControllerScene(controller, node));
-      display();
 
-      if (stack.size() > 1) backButton.setVisible(true);
+      display();
    }
 
    /**
@@ -69,15 +65,18 @@ public class NetworkControllerStack implements Initializable {
     */
    public void pop() {
       stack.pop();
-      if (stack.size() == 1) backButton.setVisible(false);
       display();
    }
 
    public void display() {
-      ControllerScene cs = stack.peek();
-      cs.controller.display();
+      // Display back button if necessary.
+      backButton.setVisible(stack.size() > 1);
+
+      // Display node
       pane.getChildren().clear();
-      pane.getChildren().add(cs.node);
+      pane.getChildren().add(stack.peek().node);
+
+      stack.peek().controller.display();
       stage.sizeToScene();
       stage.show();
    }
