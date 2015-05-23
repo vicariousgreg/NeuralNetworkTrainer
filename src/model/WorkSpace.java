@@ -20,6 +20,10 @@ public class WorkSpace extends Observable {
       this.networks = new ArrayList<NetworkData>();
    }
 
+   /**
+    * Loads networks from storage.
+    * @throws Exception
+    */
    public void loadNetworks() throws Exception {
       File dataFile = new File(kDataPath);
       File[] networkFiles = dataFile.listFiles();
@@ -34,6 +38,25 @@ public class WorkSpace extends Observable {
       }
       setChanged();
       notifyObservers();
+   }
+
+   /**
+    * Saves a network to storage.
+    * @param network network to save.
+    */
+   public void saveNetwork(Network network) {
+      for (NetworkData nd : networks) {
+         if (nd.network.equals(network)) {
+            try {
+               FileOutputStream fos = new FileOutputStream(new File(kDataPath + nd.fileName));
+               ObjectOutputStream out = new ObjectOutputStream(fos);
+               out.writeObject(network);
+               out.close();
+            } catch (Exception e) {
+               e.printStackTrace();
+            }
+         }
+      }
    }
 
    /**

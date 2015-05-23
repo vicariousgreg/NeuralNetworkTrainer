@@ -7,7 +7,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
@@ -265,6 +264,10 @@ public class InteractController extends NetworkController implements Initializab
     * Loads up the new network screen.
     */
    public void newNetwork() {
+   }
+
+   public void saveNetwork() {
+      WorkSpace.instance.saveNetwork(network);
    }
 
    @Override

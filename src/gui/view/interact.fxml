@@ -11,15 +11,16 @@
    <children>
       <VBox alignment="CENTER" spacing="5.0">
          <children>
-            <Button mnemonicParsing="false" onAction="#newNetwork" prefHeight="25.0" prefWidth="246.0" text="New Network..." />
-            <ScrollPane layoutX="3.0" layoutY="-3.0" prefHeight="644.0" prefViewportHeight="398.0" prefViewportWidth="174.0" prefWidth="264.0">
+            <Button mnemonicParsing="false" onAction="#newNetwork" prefHeight="25.0" prefWidth="246.0" text="New Network..." textAlignment="CENTER" />
+            <ScrollPane layoutX="3.0" layoutY="-3.0" prefHeight="568.0" prefViewportHeight="398.0" prefViewportWidth="174.0" prefWidth="264.0">
                <content>
-                  <ListView fx:id="networkList" layoutX="3.0" layoutY="-3.0" prefHeight="602.0" prefWidth="261.0" />
+                  <ListView fx:id="networkList" layoutX="3.0" layoutY="-3.0" prefHeight="562.0" prefWidth="261.0" />
                </content>
             </ScrollPane>
+            <Button mnemonicParsing="false" onAction="#saveNetwork" prefHeight="25.0" prefWidth="246.0" text="Save Network" textAlignment="CENTER" />
          </children>
          <HBox.margin>
-            <Insets top="5.0" />
+            <Insets bottom="5.0" top="5.0" />
          </HBox.margin>
       </VBox>
       <VBox alignment="CENTER" layoutX="-1.0" layoutY="2.0" prefHeight="644.0" prefWidth="630.0" spacing="5.0">
@@ -28,7 +29,7 @@
                <children>
                   <VBox spacing="5.0">
                      <children>
-                        <Button mnemonicParsing="false" onAction="#correct" prefHeight="25.0" prefWidth="242.0" text="Correct!" />
+                        <Button mnemonicParsing="false" onAction="#correct" prefHeight="25.0" prefWidth="242.0" text="Correct!" textAlignment="CENTER" />
                         <ScrollPane prefHeight="430.0" prefWidth="246.0">
                            <content>
                               <ListView fx:id="classificationList" prefHeight="426.0" prefWidth="237.0" />
@@ -49,7 +50,7 @@
                   <HBox spacing="300.0">
                      <children>
                         <Label prefHeight="25.0" prefWidth="141.0" text="Short Term Memory:" />
-                        <Button fx:id="memoryButton" mnemonicParsing="false" onAction="#viewMemory" prefHeight="25.0" prefWidth="178.0" text="View Memory" />
+                        <Button fx:id="memoryButton" mnemonicParsing="false" onAction="#viewMemory" prefHeight="25.0" prefWidth="178.0" text="View Memory" textAlignment="CENTER" />
                      </children>
                      <VBox.margin>
                         <Insets left="5.0" />
