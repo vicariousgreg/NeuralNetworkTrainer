@@ -16,13 +16,13 @@ public class FileManager {
    public static final FileManager instance = new FileManager();
 
    /** Path to network files. */
-   private static final String kNetworkPath = "src/gui/controller/data/networks/";
+   private static final String kNetworkPath = "src/application/data/networks/";
 
    /** Path to memory files. */
-   private static final String kMemoryPath = "src/gui/controller/data/memories/";
+   private static final String kMemoryPath = "src/application/data/memories/";
 
    /** Path to memory files. */
-   private static final String kSchemaPath = "src/gui/controller/data/schemas/";
+   private static final String kSchemaPath = "src/application/data/schemas/";
 
 
    /** Map of file names to networks. */

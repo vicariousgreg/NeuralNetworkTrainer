@@ -11,7 +11,7 @@ import java.util.Observable;
  * Created by gpdavis on 5/2/15.
  */
 public class WorkSpace extends Observable {
-   private static final String kDataPath = "src/gui/controller/data/networks";
+   private static final String kDataPath = "src/application/data/networks";
    public static final WorkSpace instance = new WorkSpace();
 
    private List<NetworkData> networks;
