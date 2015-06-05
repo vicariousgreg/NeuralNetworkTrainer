@@ -3,6 +3,7 @@ package model.network;
 import model.network.activation.*;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -140,6 +141,29 @@ public class Parameters implements Serializable {
       return null;
    }
 
+   @Override
+   public String toString() {
+      StringBuilder sb = new StringBuilder("Parameters:\n");
+      for (String key : parametersList) {
+         sb.append(String.format("  { %s: %s }\n",
+               key, parameters.get(key).getValueString()));
+      }
+
+      try {
+         Class activationClass = activationFunction.getClass();
+         Method m = activationClass.getMethod("getParameters");
+         sb.append(String.format("\n  { ActivationFunction: %s }\n",
+               activationClass.getSimpleName()));
+         for (String key : (List<String>) m.invoke(new Object[0])) {
+            sb.append(String.format("  { %s: %s }\n",
+                  key, activationFunction.getValue(key)));
+         }
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      return sb.toString();
+   }
+
    public class Parameter<T> implements Serializable {
       public final String name;
       private T value;
@@ -187,10 +211,10 @@ public class Parameters implements Serializable {
 
       public String toString() {
          StringBuilder sb = new StringBuilder(name + ":");
-         if (minimum != null) sb.append("Minimum: " + minimum.toString());
-         if (maximum != null) sb.append("Maximum: " + maximum.toString());
+         if (minimum != null) sb.append("\n  Minimum: " + minimum.toString());
+         if (maximum != null) sb.append("\n  Maximum: " + maximum.toString());
          if (enumerations != null) {
-            sb.append("Enumeration: ");
+            sb.append("\n  Enumeration: ");
             for (int i = 0; i < enumerations.length; ++i)
                sb.append(enumerations[i].toString() + " ");
          }
@@ -199,6 +223,13 @@ public class Parameters implements Serializable {
       }
 
       public String getValueString() {
+         if (value instanceof Object[]) {
+            StringBuilder sb = new StringBuilder();
+            for (Object o : (Object[]) value) {
+               sb.append(o.toString() + " ");
+            }
+            return sb.toString().trim();
+         }
          return value.toString();
       }
 

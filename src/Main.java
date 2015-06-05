@@ -7,7 +7,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import model.WorkSpace;
-import model.network.Network;
+import model.network.*;
 import model.network.schema.ColorSchema;
 
 public class Main extends Application {
@@ -15,7 +15,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
        //FileManager.instance.saveNetwork(new Network(new ColorSchema()), "test.network");
 
-       // Load networks;
+       // Load networks.
        WorkSpace.instance.loadNetworks();
 
        FXMLLoader loader = new FXMLLoader(

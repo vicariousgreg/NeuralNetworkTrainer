@@ -69,10 +69,13 @@ public class SigmoidEstimate extends Sigmoid {
 
    @Override
    public void setValue(String param, String value) throws Exception {
-      if (param.equals("Granularity"))
+      if (param.equals("Granularity")) {
+         int val = Integer.parseInt(value);
+         if (val < 1) throw new Exception(String.format("Invalid %s: %s!", param, value));
          granularity = Integer.parseInt(value);
-      else
+      } else {
          super.setValue(param, value);
+      }
 
       initializeEstimations();
    }

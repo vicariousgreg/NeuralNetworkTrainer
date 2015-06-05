@@ -40,10 +40,13 @@ public class Sigmoid extends ActivationFunction {
 
    @Override
    public void setValue(String param, String value) throws Exception {
-      if (param.equals("Slope Parameter"))
-         slopeParameter = Integer.parseInt(value);
-      else
+      if (param.equals("Slope Parameter")) {
+         int val = Integer.parseInt(value);
+         if (val < 1) throw new Exception(String.format("Invalid %s: %s!", param, value));
+         slopeParameter = val;
+      } else {
          throw new Exception("Unrecognized parameter!");
+      }
    }
 
    /**

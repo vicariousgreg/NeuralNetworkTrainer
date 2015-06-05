@@ -1,5 +1,6 @@
 package gui.controller;
 
+import application.DialogFactory;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -13,6 +14,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import model.WorkSpace;
 import model.network.Network;
+import model.network.Parameters;
 import model.network.memory.Memory;
 import model.network.memory.MemoryModule;
 
@@ -50,14 +52,9 @@ public class InteractController extends NetworkController implements Initializab
             Network net = WorkSpace.instance.getNetwork(selected);
 
             if (net != null) {
-               try {
-                  NetworkControllerStack.instance.push(
-                        getClass().getResource(
-                              "../view/parameters.fxml"));
-               } catch (IOException ex) {
-                  ex.printStackTrace();
-               }
-
+               Parameters newParams = DialogFactory.displayParametersDialog(net.getParameters());
+               if (newParams != null)
+                  net.setParameters(newParams);
             }
          }
       });

@@ -99,7 +99,7 @@ public class DialogFactory {
     * Displays and waits for a parameters dialog.
     * @return created parameters
     */
-   public static Parameters displayParametersDialog() {
+   public static Parameters displayParametersDialog(Parameters params) {
       final Response<Parameters> response = new Response<Parameters>(null);
 
       // Load resource, extract node and controller
@@ -108,6 +108,7 @@ public class DialogFactory {
                "../gui/view/dialog/parametersDialog.fxml"));
          Parent root = loader.load();
          ParametersDialogController controller = loader.getController();
+         controller.setParameters(params);
          controller.setResponse(response);
 
          display(root);
