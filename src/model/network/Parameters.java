@@ -3,77 +3,84 @@ package model.network;
 import model.network.activation.*;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Neural network parameters.
  */
 public class Parameters implements Serializable {
-   /** Learning constant. */
-   public double learningConstant;
+   public static final String kLearningConstant = "Learning Constant";
+   public static final String kHiddenLayerDepths = "Hidden Layer Depths";
+   public static final String kRegressionThreshold = "Regression Threshold";
+   public static final String kStaleThreshold = "Stale Threshold";
+   public static final String kAcceptableTestError = "Acceptable Test Error";
+   public static final String kAcceptablePercentCorrect = "Acceptable Test Percentage Correct";
 
-   /**
-    * The depths of the hidden layers.
-    * The length corresponds to the number of hidden layers.
-    */
-   public int[] hiddenLayerDepths;
+   public static final List<String> parametersList = new ArrayList<String>();
+   static {
+      parametersList.add(kLearningConstant);
+      parametersList.add(kHiddenLayerDepths);
+      parametersList.add(kRegressionThreshold);
+      parametersList.add(kStaleThreshold);
+      parametersList.add(kAcceptableTestError);
+      parametersList.add(kAcceptablePercentCorrect);
+   }
 
    /** Neuron activation function. */
-   public ActivationFunction activationFunction;
+   private ActivationFunction activationFunction;
 
-   /**
-    * The error threshold for network regression.
-    * If the network's error increases by this much, it is reset.
-    */
-   public double regressionThreshold;
-
-   /** The number of iterations the learning process can go through without
-    * making significant improvements before the network is reset. */
-   public int staleThreshold;
-
-   /** Acceptable test error for learning termination. */
-   public double acceptableTestError;
-
-   /** Acceptable percentage correct for learning termination. */
-   public double acceptablePercentCorrect;
-
-   /** Activation function names to class map. */
-   public static final List<Class> activationFunctions =
-      new ArrayList<Class>();
-   static {
-      activationFunctions.add(Sigmoid.class);
-      activationFunctions.add(SigmoidClip.class);
-      activationFunctions.add(SigmoidEstimate.class);
-   }
-
-   /**
-    * Constructor.
-    */
-   public Parameters(double learningConstant, int[] hidden,
-                     ActivationFunction activation, int staleThresh,
-                     double regressionThresh, double acceptableError,
-                     double acceptablePercentage) {
-      this.learningConstant = learningConstant;
-      this.hiddenLayerDepths = hidden;
-      this.activationFunction = activation;
-      this.regressionThreshold = regressionThresh;
-      this.staleThreshold = staleThresh;
-      this.acceptableTestError = acceptableError;
-      this.acceptablePercentCorrect = acceptablePercentage;
-   }
+   /** Parameters map. */
+   private Map<String, Parameter> parameters;
 
    /**
     * Default constructor.
     */
    public Parameters() {
-      this(0.1,
-         new int[] { 3 },
-         new SigmoidEstimate(2, 1000),
-         50,
-         1000,
-         100,
-         80);
+      parameters = new HashMap<String, Parameter>();
+      /** Learning constant. */
+      parameters.put(kLearningConstant,
+            new Parameter<Double>(kLearningConstant, 0.1, 0.0, 1.0));
+      /**
+       * The depths of the hidden layers.
+       * The length corresponds to the number of hidden layers.
+       */
+      parameters.put(kHiddenLayerDepths,
+            new Parameter<Integer[]>(kHiddenLayerDepths,
+                  new Integer[] { 3 }, new Integer[] { 0 }, null));
+      /**
+       * The error threshold for network regression.
+       * If the network's error increases by this much, it is reset.
+       */
+      parameters.put(kRegressionThreshold,
+            new Parameter<Double>(kRegressionThreshold, 50.0, 0.0, null));
+      /** The number of iterations the learning process can go through without
+       * making significant improvements before the network is reset. */
+      parameters.put(kStaleThreshold,
+            new Parameter<Integer>(kStaleThreshold, 1000, 0, null));
+      /** Acceptable test error for learning termination. */
+      parameters.put(kAcceptableTestError,
+            new Parameter<Double>(kAcceptableTestError, 100.0, 1.0, null));
+      /** Acceptable percentage correct for learning termination. */
+      parameters.put(kAcceptablePercentCorrect,
+            new Parameter<Double>(kAcceptablePercentCorrect, 80.0, 0.0, 99.9));
+
+      activationFunction = new SigmoidEstimate(1, 1000);
+   }
+
+   /**
+    * Clone constructor.
+    * @param map map to clone
+    */
+   private Parameters(Map<String, Parameter> map, ActivationFunction activ) {
+      this.parameters = new HashMap<String, Parameter>();
+      this.activationFunction = activ;
+
+      for (String key : map.keySet()) {
+         this.parameters.put(key, map.get(key).clone());
+      }
    }
 
    /**
@@ -81,13 +88,172 @@ public class Parameters implements Serializable {
     * @return clone of parameters
     */
    public Parameters clone() {
-      return new Parameters(
-         this.learningConstant,
-         this.hiddenLayerDepths,
-         this.activationFunction,
-         this.staleThreshold,
-         this.regressionThreshold,
-         this.acceptableTestError,
-         this.acceptablePercentCorrect);
+      return new Parameters(parameters, activationFunction);
+   }
+
+   /**
+    * Sets the activation function.
+    * @param activ activation function
+    */
+   public void setActivationFunction(ActivationFunction activ) {
+      this.activationFunction = activ;
+   }
+
+   public ActivationFunction getActivationFunction() {
+      return activationFunction;
+   }
+
+   /**
+    * Sets a parameter.
+    * @param key parameter key
+    * @param value new parameter value
+    * @return whether the set was successful
+    */
+   public boolean setParameter(String key, Object value) {
+      if (parametersList.contains(key)) {
+         return parameters.get(key).setValue(value);
+      }
+      return false;
+   }
+
+   /**
+    * Gets a parameter.
+    * @param key parameter key
+    * @return parameter object
+    */
+   public Parameter getParameter(String key) {
+      if (parametersList.contains(key)) {
+         return parameters.get(key);
+      }
+      return null;
+   }
+
+   /**
+    * Gets the value of a parameter.
+    * @param key parameter key
+    * @return parameter value
+    */
+   public Object getParameterValue(String key){
+      if (parametersList.contains(key)) {
+         return parameters.get(key).getValue();
+      }
+      return null;
+   }
+
+   public class Parameter<T> implements Serializable {
+      public final String name;
+      private T value;
+      public final T minimum;
+      public final T maximum;
+      public final T[] enumerations;
+
+      public Parameter(String name, T value) {
+         this.name = name;
+         this.value = value;
+         this.minimum = null;
+         this.maximum = null;
+         this.enumerations = null;
+      }
+
+      public Parameter(String name, T value, T[] enumerations) {
+         this.name = name;
+         this.value = value;
+         this.minimum = null;
+         this.maximum = null;
+         this.enumerations = enumerations;
+      }
+
+      public Parameter(String name, T value, T minimum, T maximum) {
+         this.name = name;
+         this.value = value;
+         this.minimum = minimum;
+         this.maximum = maximum;
+         this.enumerations = null;
+      }
+
+      public T getValue() {
+         return value;
+      }
+
+      public boolean setValue(Object newValue) {
+         if (newValue.getClass().equals(value.getClass())) {
+            if (checkBounds((T)newValue) && checkEnumerations((T)newValue)) {
+               this.value = (T)newValue;
+               return true;
+            }
+         }
+         return false;
+      }
+
+      public String toString() {
+         StringBuilder sb = new StringBuilder(name + ":");
+         if (minimum != null) sb.append("Minimum: " + minimum.toString());
+         if (maximum != null) sb.append("Maximum: " + maximum.toString());
+         if (enumerations != null) {
+            sb.append("Enumeration: ");
+            for (int i = 0; i < enumerations.length; ++i)
+               sb.append(enumerations[i].toString() + " ");
+         }
+
+         return sb.toString();
+      }
+
+      public String getValueString() {
+         return value.toString();
+      }
+
+      public Parameter<T> clone() {
+         Parameter<T> clone = null;
+         if (enumerations != null)
+            clone = new Parameter(name, value, enumerations);
+         else
+            clone = new Parameter(name, value, minimum, maximum);
+         return clone;
+      }
+
+      private boolean checkBounds(T newValue) {
+         if (newValue instanceof Object[]) {
+            Object[] arr = (Object[]) newValue;
+
+            for (int i = 0; i < arr.length; ++i) {
+               Comparable compNew = (Comparable) arr[i];
+
+               if (minimum != null) {
+                  Comparable compMin = ((Comparable[]) minimum)[0];
+                  if (compNew.compareTo(compMin) < 0) return false;
+               }
+               if (maximum != null) {
+                  Comparable compMax = ((Comparable[]) maximum)[0];
+                  if (compNew.compareTo(compMax) > 0) return false;
+               }
+            }
+         } else {
+            Comparable compNew = (Comparable) newValue;
+
+            if (minimum != null) {
+               Comparable compMin = (Comparable) minimum;
+               if (compNew.compareTo(compMin) < 0) return false;
+            }
+            if (maximum != null) {
+               Comparable compMax = (Comparable) maximum;
+               if (compNew.compareTo(compMax) > 0) return false;
+            }
+         }
+
+         return true;
+      }
+
+      private boolean checkEnumerations(T newValue) {
+         if (enumerations != null) {
+            boolean valid = false;
+
+            for (int i = 0; i < enumerations.length; ++i) {
+               if (enumerations[i].equals(newValue))
+                  valid = true;
+            }
+            if (!valid) return false;
+         }
+         return true;
+      }
    }
 }

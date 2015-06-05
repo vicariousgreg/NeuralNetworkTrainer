@@ -31,6 +31,14 @@ public class SigmoidEstimate extends Sigmoid {
    /**
     * Constructor.
     * @param slopeParameter slope parameter
+    */
+   public SigmoidEstimate(int slopeParameter) {
+      this(slopeParameter, 1000);
+   }
+
+   /**
+    * Constructor.
+    * @param slopeParameter slope parameter
     * @param granularity granularity of estimation
     */
    public SigmoidEstimate(int slopeParameter, int granularity) {

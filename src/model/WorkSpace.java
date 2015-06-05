@@ -11,7 +11,7 @@ import java.util.Observable;
  * Created by gpdavis on 5/2/15.
  */
 public class WorkSpace extends Observable {
-   private static final String kDataPath = "src/gui/controller/data/";
+   private static final String kDataPath = "src/gui/controller/data/networks";
    public static final WorkSpace instance = new WorkSpace();
 
    private List<NetworkData> networks;
@@ -29,12 +29,16 @@ public class WorkSpace extends Observable {
       File[] networkFiles = dataFile.listFiles();
 
       for (File file : networkFiles) {
-         FileInputStream fin = new FileInputStream(file);
-         ObjectInputStream ois = new ObjectInputStream(fin);
-         Network net = (Network) ois.readObject();
-         ois.close();
+         try {
+            FileInputStream fin = new FileInputStream(file);
+            ObjectInputStream ois = new ObjectInputStream(fin);
+            Network net = (Network) ois.readObject();
+            ois.close();
 
-         networks.add(new NetworkData(file.getName(), net));
+            networks.add(new NetworkData(file.getName(), net));
+         } catch (Exception e) {
+            System.err.println("Error loading network: " + file.getName());
+         }
       }
       setChanged();
       notifyObservers();

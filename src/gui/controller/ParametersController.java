@@ -1,11 +1,13 @@
 package gui.controller;
 
+import application.DialogFactory;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import model.Registry;
 import model.WorkSpace;
 import model.network.Network;
 import model.network.Parameters;
@@ -29,13 +31,11 @@ public class ParametersController extends NetworkController implements Initializ
    @FXML TextField acceptableErrorField;
    @FXML TextField acceptablePercentField;
 
-   @FXML ProgressIndicator progress;
-
    public void initialize(URL location, ResourceBundle resources) {
       parameterTextFields = new ArrayList<TextField>();
 
       // Set up activation functions dropdown.
-      for (Class function : Parameters.activationFunctions) {
+      for (Class function : Registry.activationFunctionClasses) {
          activationFunctionsField.getItems().add(function.getSimpleName());
       }
    }
@@ -51,6 +51,7 @@ public class ParametersController extends NetworkController implements Initializ
       staleThresholdField.clear();
       acceptableErrorField.clear();
       acceptablePercentField.clear();
+      acceptablePercentField.clear();
 
       for (TextField field : parameterTextFields)  {
          field.clear();
@@ -59,25 +60,25 @@ public class ParametersController extends NetworkController implements Initializ
 
    public void setFields(Parameters params) {
       // Set up standard parameters.
-      learningConstantField.setText(Double.toString(params.learningConstant));
-      regressionThresholdField.setText(Double.toString(params.regressionThreshold));
-      staleThresholdField.setText(Integer.toString(params.staleThreshold));
-      acceptableErrorField.setText(Double.toString(params.acceptableTestError));
-      acceptablePercentField.setText(Double.toString(params.acceptablePercentCorrect));
+      learningConstantField.setText(params.getParameter(Parameters.kLearningConstant).getValueString());
+      regressionThresholdField.setText(params.getParameter(Parameters.kRegressionThreshold).getValueString());
+      staleThresholdField.setText(params.getParameter(Parameters.kStaleThreshold).getValueString());
+      acceptableErrorField.setText(params.getParameter(Parameters.kAcceptableTestError).getValueString());
+      acceptablePercentField.setText(params.getParameter(Parameters.kAcceptablePercentCorrect).getValueString());
 
       // Set up hidden layers string.
       // String is formatted as a space delimited list of integers.
       StringBuilder sb = new StringBuilder();
-      int[] layers = params.hiddenLayerDepths;
+      Integer[] layers = (Integer[])params.getParameterValue(Parameters.kHiddenLayerDepths);
       for (int i = 0; i < layers.length; ++i)
          sb.append(layers[i] + " ");
       hiddenLayersField.setText(sb.toString());
 
-      currentActivationFunction = params.activationFunction;
+      currentActivationFunction = params.getActivationFunction();
 
       // Set up activation function dropdown.
       activationFunctionsField.setValue(
-            params.activationFunction.getClass().getSimpleName());
+            params.getActivationFunction().getClass().getSimpleName());
 
       // Set up activation function parameters.
       initializeActivationParameters();
@@ -91,7 +92,7 @@ public class ParametersController extends NetworkController implements Initializ
          // Get list of parameter names.
          List<String> activationFunctionParameters = null;
          String functionName = (String) activationFunctionsField.getValue();
-         for (Class clazz : Parameters.activationFunctions) {
+         for (Class clazz : Registry.activationFunctionClasses) {
             if (clazz.getSimpleName().equals(functionName)) {
                Method m = clazz.getMethod("getParameters");
                activationFunctionParameters = (List<String>) m.invoke(new Object[0]);
@@ -130,31 +131,21 @@ public class ParametersController extends NetworkController implements Initializ
       String invalidField = "";
       try {
          /* Extract standard fields. */
-         invalidField = "Learning Constant";
          final double learning = Double.parseDouble(learningConstantField.getText());
-         if (learning < 0.0 || learning > 1.0) throw new Exception();
 
-         invalidField = "Regression Error Threshold";
          final double regression = Double.parseDouble(regressionThresholdField.getText());
-         if (regression < 0.0) throw new Exception();
 
-         invalidField = "Stale Threshold";
          final int stale = Integer.parseInt(staleThresholdField.getText());
-         if (stale < 0) throw new Exception();
 
-         invalidField = "Acceptable Test Error";
          final double error = Double.parseDouble(acceptableErrorField.getText());
-         if (error < 1.0) throw new Exception();
 
-         invalidField = "Acceptable Percentage Correct";
          final double percent = Double.parseDouble(acceptablePercentField.getText());
-         if (percent < 0.0 || percent > 100.0) throw new Exception();
 
 
          /* Extract hidden layers. */
          invalidField = "Hidden Layers";
          String[] tokens = hiddenLayersField.getText().split("\\s+");
-         final int[] hidden = new int[tokens.length];
+         final Integer[] hidden = new Integer[tokens.length];
          for (int i = 0; i < hidden.length; ++i) {
             hidden[i] = Integer.parseInt(tokens[i]);
          }
@@ -165,7 +156,7 @@ public class ParametersController extends NetworkController implements Initializ
 
          // Identify class and extract parameter list.
          String functionName = (String) activationFunctionsField.getValue();
-         for (Class clazz : Parameters.activationFunctions) {
+         for (Class clazz : Registry.activationFunctionClasses) {
             if (clazz.getSimpleName().equals(functionName)) {
                functionClass = clazz;
             }
@@ -180,14 +171,22 @@ public class ParametersController extends NetworkController implements Initializ
             activ.setValue(text.getPromptText(), text.getText());
          }
 
-         network.setParameters(
-               new Parameters(learning,
-                     hidden,
-                     activ,
-                     stale,
-                     regression,
-                     error,
-                     percent));
+         Parameters newParams = new Parameters();
+         if (!newParams.setParameter(Parameters.kLearningConstant, learning))
+            DialogFactory.displayErrorDialog(newParams.getParameter(Parameters.kLearningConstant).toString());
+         if (!newParams.setParameter(Parameters.kHiddenLayerDepths, hidden))
+            DialogFactory.displayErrorDialog(newParams.getParameter(Parameters.kHiddenLayerDepths).toString());
+         if (!newParams.setParameter(Parameters.kStaleThreshold, stale))
+            DialogFactory.displayErrorDialog(newParams.getParameter(Parameters.kStaleThreshold).toString());
+         if (!newParams.setParameter(Parameters.kRegressionThreshold, regression))
+            DialogFactory.displayErrorDialog(newParams.getParameter(Parameters.kRegressionThreshold).toString());
+         if (!newParams.setParameter(Parameters.kAcceptableTestError, error))
+            DialogFactory.displayErrorDialog(newParams.getParameter(Parameters.kAcceptableTestError).toString());
+         if (!newParams.setParameter(Parameters.kAcceptablePercentCorrect, percent))
+            DialogFactory.displayErrorDialog(newParams.getParameter(Parameters.kAcceptablePercentCorrect).toString());
+         newParams.setActivationFunction(activ);
+
+         network.setParameters(newParams);
          NetworkControllerStack.instance.pop();
       } catch (Exception e) {
          Alert alert = new Alert(Alert.AlertType.ERROR);

@@ -66,10 +66,12 @@ public class Network implements Serializable {
 
       Neuron[] prevLayer = inputLayer;
 
+      Integer[] hiddenLayerDepths = (Integer[]) parameters.getParameterValue(Parameters.kHiddenLayerDepths);
+
       // Build hidden layers.
-      for (int layerIndex = 0; layerIndex < parameters.hiddenLayerDepths.length; ++layerIndex) {
+      for (int layerIndex = 0; layerIndex < hiddenLayerDepths.length; ++layerIndex) {
          // Build a layer.
-         Neuron[] currLayer = new Neuron[parameters.hiddenLayerDepths[layerIndex]];
+         Neuron[] currLayer = new Neuron[hiddenLayerDepths[layerIndex]];
 
          // Hook layer up to previous layer.
          for (int currIndex = 0; currIndex < currLayer.length; ++currIndex) {
@@ -344,10 +346,16 @@ public class Network implements Serializable {
       System.out.println("Training memory size: " + trainingMemory.size());
       System.out.println("Test memory size: " + testMemory.size());
 
+      // Extract relevant parameters
+      Double acceptableTestError = (Double) parameters.getParameterValue(Parameters.kAcceptableTestError);
+      Double acceptablePercentCorrect = (Double) parameters.getParameterValue(Parameters.kAcceptablePercentCorrect);
+      Double regressionThreshold = (Double) parameters.getParameterValue(Parameters.kRegressionThreshold);
+      Integer staleThreshold = (Integer) parameters.getParameterValue(Parameters.kStaleThreshold);
+
       // Teach the network until the error is acceptable.
       // Loop is broken when conditions are met.
-      while (testError > parameters.acceptableTestError ||
-          percentCorrect < parameters.acceptablePercentCorrect) {
+      while (testError > acceptableTestError ||
+          percentCorrect < acceptablePercentCorrect) {
          // Set up previous values.
          prevTestError = testError;
          prevPercentCorrect = percentCorrect;
@@ -369,9 +377,9 @@ public class Network implements Serializable {
          // Determine if the network needs to be reset.
          // If it is unacceptable, and is either stale or has regressed
          //   significantly in error, it should be reset.
-         if (staleCounter > parameters.staleThreshold ||
-             testError - prevTestError > parameters.regressionThreshold) {
-            if (print && staleCounter > parameters.staleThreshold) System.out.println("STALE");
+         if (staleCounter > staleThreshold ||
+             testError - prevTestError > regressionThreshold) {
+            if (print && staleCounter > staleThreshold) System.out.println("STALE");
             reset();
             staleCounter = 0;
             if (print) System.out.println("====================");

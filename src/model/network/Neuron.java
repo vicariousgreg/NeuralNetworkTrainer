@@ -47,8 +47,8 @@ public class Neuron implements Serializable {
     */
    public Neuron(Parameters params) {
       this.numInputs = 0;
-      this.learningConstant = params.learningConstant;
-      this.activationFunction = params.activationFunction;
+      this.learningConstant = (Double)params.getParameterValue(Parameters.kLearningConstant);
+      this.activationFunction = params.getActivationFunction();
       this.weights = new HashMap<Neuron, Double>();
       this.inputs = new HashMap<Neuron, Double>();
       this.outputNeurons = new ArrayList<Neuron>();

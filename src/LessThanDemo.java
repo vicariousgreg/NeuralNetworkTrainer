@@ -46,8 +46,8 @@ public class LessThanDemo {
       // Create the network.
       Network network = new Network(schema);
       Parameters params = network.getParameters();
-      params.hiddenLayerDepths = new int[] { 3 };
-      params.learningConstant = 0.05;
+      params.setParameter(Parameters.kHiddenLayerDepths, new int[] { 3 });
+      params.setParameter(Parameters.kLearningConstant, 0.05);
       network.setParameters(params);
 
       //////////////

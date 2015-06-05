@@ -1,3 +1,5 @@
+import application.DialogFactory;
+import application.FileManager;
 import gui.controller.NetworkControllerStack;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -5,10 +7,14 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import model.WorkSpace;
+import model.network.Network;
+import model.network.schema.ColorSchema;
 
 public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
+       //FileManager.instance.saveNetwork(new Network(new ColorSchema()), "test.network");
+
        // Load networks;
        WorkSpace.instance.loadNetworks();
 
