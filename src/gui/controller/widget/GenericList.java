@@ -19,14 +19,14 @@ import java.util.List;
 /**
  * Created by gpdavis on 6/5/15.
  */
-public class NetworkList {
+public class GenericList<T> {
    private ListView listView;
    private Network selectedNetwork;
    private ContextMenu contextMenu;
 
    private List<NetworkHandler> clickHandlers;
 
-   public NetworkList(ListView lv) {
+   public GenericList(ListView lv) {
       this.listView = lv;
       this.selectedNetwork = null;
       this.contextMenu = new ContextMenu();
@@ -72,10 +72,12 @@ public class NetworkList {
                Network selection = (Network)
                      listView.getSelectionModel().getSelectedItem();
 
-               selectedNetwork = selection;
-               if (selection != null)
-                  for (NetworkHandler handler : clickHandlers)
-                     handler.handle(selection);
+               if (selection != selectedNetwork) {
+                  selectedNetwork = selection;
+                  if (selection != null)
+                     for (NetworkHandler handler : clickHandlers)
+                        handler.handle(selection);
+               }
             }
          }
       });

@@ -19,31 +19,31 @@ import java.util.List;
 /**
  * Created by gpdavis on 6/5/15.
  */
-public class NetworkList {
+public class ClassificationList {
    private ListView listView;
-   private Network selectedNetwork;
+   private String selectedClassification;
    private ContextMenu contextMenu;
 
-   private List<NetworkHandler> clickHandlers;
+   private List<ClassificationHandler> clickHandlers;
 
-   public NetworkList(ListView lv) {
+   public ClassificationList(ListView lv) {
       this.listView = lv;
-      this.selectedNetwork = null;
+      this.selectedClassification = null;
       this.contextMenu = new ContextMenu();
-      this.clickHandlers = new ArrayList<NetworkHandler>();
+      this.clickHandlers = new ArrayList<ClassificationHandler>();
 
       listView.setItems(FXCollections.observableArrayList());
 
       // Set cell factory to query FileManager for name.
-      listView.setCellFactory(new Callback<ListView<Network>, ListCell<Network>>(){
+      listView.setCellFactory(new Callback<ListView<String>, ListCell<String>>(){
          @Override
-         public ListCell<Network> call(ListView<Network> p) {
-            ListCell<Network> cell = new ListCell<Network>(){
+         public ListCell<String> call(ListView<String> p) {
+            ListCell<String> cell = new ListCell<String>(){
                @Override
-               protected void updateItem(Network t, boolean bln) {
+               protected void updateItem(String t, boolean bln) {
                   super.updateItem(t, bln);
                   if (t != null) {
-                     setText(FileManager.instance.getName(t));
+                     setText(t);
                      setContextMenu(contextMenu);
                   }
                }
@@ -69,53 +69,60 @@ public class NetworkList {
          public void handle(MouseEvent click) {
             if (click.getButton() == MouseButton.PRIMARY) {
                // Load selection
-               Network selection = (Network)
+               String selection = (String)
                      listView.getSelectionModel().getSelectedItem();
 
-               selectedNetwork = selection;
+               selectedClassification = selection;
                if (selection != null)
-                  for (NetworkHandler handler : clickHandlers)
+                  for (ClassificationHandler handler : clickHandlers)
                      handler.handle(selection);
             }
          }
       });
    }
 
-   public Network getSelectedNetwork() {
-      return selectedNetwork;
+   public void setSelectedClassification(String newClass) {
+      if (listView.getItems().contains(newClass)) {
+         selectedClassification = newClass;
+         listView.getSelectionModel().select(newClass);
+      }
    }
 
-   public List<Network> getAll() {
+   public String getSelectedClassification() {
+      return selectedClassification;
+   }
+
+   public List<String> getAll() {
       return listView.getItems();
    }
 
-   public void add(Network network) {
-      if (!listView.getItems().contains(network))
-         listView.getItems().add(network);
+   public void add(String classification) {
+      if (!listView.getItems().contains(classification))
+         listView.getItems().add(classification);
    }
 
-   public void remove(Network network) {
-      if (listView.getItems().contains(network))
-         listView.getItems().remove(network);
+   public void remove(String classification) {
+      if (listView.getItems().contains(classification))
+         listView.getItems().remove(classification);
    }
 
    public void clear() {
       listView.getItems().clear();
    }
 
-   public void addClickListener(NetworkHandler handler) {
+   public void addClickListener(ClassificationHandler handler) {
       clickHandlers.add(handler);
    }
 
-   public void addContextMenuItem(String name, NetworkHandler handler) {
-      final NetworkHandler finalHandler = handler;
+   public void addContextMenuItem(String name, ClassificationHandler handler) {
+      final ClassificationHandler finalHandler = handler;
 
       MenuItem item = new MenuItem(name);
       item.setOnAction(new EventHandler<ActionEvent>() {
          @Override
          public void handle(ActionEvent e) {
             // Load selection
-            Network selection = (Network)
+            String selection = (String)
                   listView.getSelectionModel().getSelectedItem();
             if (selection != null)
                finalHandler.handle(selection);

@@ -18,7 +18,7 @@
                         <Button mnemonicParsing="false" onAction="#correct" prefHeight="25.0" prefWidth="242.0" text="Correct!" textAlignment="CENTER" />
                         <ScrollPane prefHeight="430.0" prefWidth="246.0">
                            <content>
-                              <ListView fx:id="classificationList" prefHeight="426.0" prefWidth="237.0" />
+                              <ListView fx:id="listView" prefHeight="426.0" prefWidth="237.0" />
                            </content>
                         </ScrollPane>
                      </children>
