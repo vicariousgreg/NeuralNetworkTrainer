@@ -25,7 +25,7 @@ public class GenericList<T> {
    private List<GenericHandler<T>> clickHandlers;
    private GenericHandler<T> allHandler;
 
-   private static final String kAll = "=== ALL ===";
+   public static final String kAll = "=== ALL ===";
 
    public GenericList(ListView lv) {
       this.listView = lv;

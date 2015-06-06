@@ -7,7 +7,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.controller.MemoryController">
+<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.controller.component.MemoryController">
    <children>
       <HBox>
          <children>
@@ -15,7 +15,7 @@
                <children>
                   <ScrollPane layoutX="3.0" layoutY="-3.0" prefHeight="455.0" prefViewportHeight="398.0" prefViewportWidth="174.0" prefWidth="264.0">
                      <content>
-                        <ListView fx:id="classificationList" layoutX="3.0" layoutY="-3.0" prefHeight="452.0" prefWidth="261.0" />
+                        <ListView fx:id="listView" layoutX="3.0" layoutY="-3.0" prefHeight="452.0" prefWidth="261.0" />
                      </content>
                   </ScrollPane>
                   <Button mnemonicParsing="false" onAction="#exportMemory" prefHeight="25.0" prefWidth="261.0" text="Export..." />

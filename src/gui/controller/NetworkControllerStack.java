@@ -1,5 +1,6 @@
 package gui.controller;
 
+import gui.controller.component.NetworkController;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;

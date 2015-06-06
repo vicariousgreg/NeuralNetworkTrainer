@@ -1,4 +1,4 @@
-package gui.controller;
+package gui.controller.component;
 
 import application.DialogFactory;
 import application.FileManager;

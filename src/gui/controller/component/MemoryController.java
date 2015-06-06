@@ -1,18 +1,16 @@
-package gui.controller;
+package gui.controller.component;
 
+import gui.controller.NetworkControllerStack;
+import gui.controller.widget.GenericHandler;
+import gui.controller.widget.GenericList;
 import gui.controller.widget.MemoryBox;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ListView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.FileChooser;
-import model.network.memory.Memory;
 import model.network.memory.MemoryModule;
 
 import java.io.*;
@@ -20,15 +18,13 @@ import java.net.URL;
 import java.util.*;
 
 public class MemoryController extends NetworkController implements Initializable {
-   @FXML ListView classificationList;
+   @FXML ListView listView;
    @FXML FlowPane shortTermPane;
    @FXML FlowPane longTermPane;
 
-   /** All Classification item. */
-   private static final String kAll = "=== ALL ===";
-
    private MemoryBox shortTermMemoryBox;
    private MemoryBox longTermMemoryBox;
+   private GenericList<Object> classificationList;
 
    /**
     * Initialization.
@@ -37,15 +33,20 @@ public class MemoryController extends NetworkController implements Initializable
    public void initialize(URL location, ResourceBundle resources) {
       shortTermMemoryBox = new MemoryBox(shortTermPane);
       longTermMemoryBox = new MemoryBox(longTermPane);
+      classificationList = new GenericList<Object>(listView);
 
       // Set up event handler for classification list.
-      classificationList.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      classificationList.addClickListener(new GenericHandler<Object>() {
          @Override
-         public void handle(MouseEvent click) {
-            // Load selection
-            String selection = (String)
-                  classificationList.getSelectionModel().getSelectedItem();
-            selectClassification(selection);
+         public void handle(Object item) {
+            selectClassification(item);
+         }
+      });
+
+      classificationList.addAllItem(new GenericHandler<Object>() {
+         @Override
+         public void handle(Object item) {
+            selectClassification(GenericList.kAll);
          }
       });
    }
@@ -56,8 +57,8 @@ public class MemoryController extends NetworkController implements Initializable
    public void display() {
       try {
          loadClassifications();
-         selectClassification(kAll);
-         classificationList.getSelectionModel().select(kAll);
+         selectClassification(GenericList.kAll);
+         classificationList.setSelectedItem(GenericList.kAll);
       } catch (Exception e) {
          e.printStackTrace();
       }
@@ -69,13 +70,11 @@ public class MemoryController extends NetworkController implements Initializable
     */
    private void loadClassifications() throws Exception {
       // Populate classification list.
-      ObservableList data = FXCollections.observableArrayList();
+      classificationList.clear();
       Object[] classifications = network.schema.getOutputClassifications();
-      data.add(kAll);
       for (int i = 0; i < classifications.length; ++i) {
-         data.add(classifications[i]);
+         classificationList.add(classifications[i]);
       }
-      classificationList.setItems(data);
    }
 
    /**
@@ -83,40 +82,29 @@ public class MemoryController extends NetworkController implements Initializable
     * @param classification classification of memories to load
     * @throws Exception
     */
-   private void loadMemory(String classification) throws Exception {
+   private void loadMemory(Object classification) throws Exception {
+      MemoryModule mem = network.getMemoryModule();
+
       // Populate short term memory box.
       shortTermMemoryBox.clear();
-      MemoryModule mem = network.getMemoryModule();
-      Map<Object, List<Memory>> shortTermMemory = mem.getShortTermMemory();
-
-      for (Object key : shortTermMemory.keySet()) {
-         if (classification.equals(kAll) || key.equals(classification)) {
-            for (Memory memory : shortTermMemory.get(key)) {
-               shortTermMemoryBox.add(memory, network.schema);
-            }
-         }
-      }
+      if (classification == GenericList.kAll)
+         shortTermMemoryBox.addAll(network.schema, mem.getShortTermMemory());
+      else
+         shortTermMemoryBox.add(network.schema, mem.getShortTermMemory(), classification);
 
       // Populate long term memory box.
       longTermMemoryBox.clear();
-      Map<Object, List<Memory>> longTermMemory = mem.getLongTermMemory();
-
-      for (Object key : longTermMemory.keySet()) {
-         if (classification.equals(kAll) || key.equals(classification)) {
-            for (Memory memory : longTermMemory.get(key)) {
-               longTermMemoryBox.add(memory, network.schema);
-            }
-         }
-      }
+      if (classification == GenericList.kAll)
+         longTermMemoryBox.addAll(network.schema, mem.getLongTermMemory());
+      else
+         longTermMemoryBox.add(network.schema, mem.getLongTermMemory(), classification);
    }
 
    /**
     * Selects a classification, teaching the network.
     * @param classification selected classification
     */
-   private void selectClassification(String classification) {
-      System.out.println("Selected " + classification);
-
+   private void selectClassification(Object classification) {
       try {
          loadMemory(classification);
       } catch (Exception e) {

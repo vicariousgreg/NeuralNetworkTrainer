@@ -7,7 +7,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<HBox prefHeight="644.0" prefWidth="630.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.controller.InteractController">
+<HBox prefHeight="644.0" prefWidth="630.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.controller.component.InteractController">
    <children>
       <VBox alignment="CENTER" layoutX="-1.0" layoutY="2.0" prefHeight="644.0" prefWidth="630.0" spacing="5.0">
          <children>

@@ -1,5 +1,6 @@
-package gui.controller;
+package gui.controller.component;
 
+import gui.controller.NetworkControllerStack;
 import gui.controller.widget.GenericHandler;
 import gui.controller.widget.GenericList;
 import gui.controller.widget.MemoryBox;
@@ -29,7 +30,7 @@ public class InteractController extends NetworkController implements Initializab
    /** Random generator for color generation. */
    private Random rand;
 
-   private GenericList<String> classificationList;
+   private GenericList<Object> classificationList;
    private MemoryBox shortTermMemoryBox;
 
    /**
@@ -40,10 +41,10 @@ public class InteractController extends NetworkController implements Initializab
       rand = new Random();
       shortTermMemoryBox = new MemoryBox(shortTermMemoryPane);
 
-      classificationList = new GenericList<String>(listView);
-      classificationList.addClickListener(new GenericHandler<String>() {
+      classificationList = new GenericList<Object>(listView);
+      classificationList.addClickListener(new GenericHandler<Object>() {
          @Override
-         public void handle(String classification) {
+         public void handle(Object classification) {
             selectClassification(classification);
          }
       });
@@ -136,7 +137,7 @@ public class InteractController extends NetworkController implements Initializab
     * Selects a classification, teaching the network.
     * @param classification selected classification
     */
-   private void selectClassification(String classification) {
+   private void selectClassification(Object classification) {
       try {
          network.addMemory(colorBox.getFill(), classification);
          shortTermMemoryBox.add(

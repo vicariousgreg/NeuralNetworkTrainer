@@ -1,16 +1,11 @@
-import application.DialogFactory;
-import application.FileManager;
 import gui.controller.NetworkControllerStack;
-import gui.controller.NetworkSelectorController;
+import gui.controller.component.NetworkSelectorController;
 import javafx.application.Application;
-import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import model.WorkSpace;
-import model.network.*;
-import model.network.schema.ColorSchema;
 
 public class Main extends Application {
     @Override
