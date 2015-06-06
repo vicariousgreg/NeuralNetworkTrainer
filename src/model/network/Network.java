@@ -32,6 +32,8 @@ public class Network implements Serializable {
    /** Neuron output layer. */
    private Neuron[] outputLayer;
 
+   public String name;
+
 
    /**
     * Constructor.
@@ -461,10 +463,18 @@ public class Network implements Serializable {
    }
 
    /**
-    * Returns a string representation of this network.
-    * @return string representation
+    * Returns this network's name.
+    * @return network name
     */
    public String toString() {
+      return name;
+   }
+
+   /**
+    * Returns a string representation of this network's neuron map.
+    * @return string representation
+    */
+   public String getNeuronMap() {
       StringBuilder sb = new StringBuilder("Network\n");
 
       for (Neuron[] layer : layers) {

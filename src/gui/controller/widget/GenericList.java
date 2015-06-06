@@ -1,6 +1,5 @@
 package gui.controller.widget;
 
-import application.FileManager;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -11,7 +10,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Callback;
-import model.network.Network;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,29 +19,29 @@ import java.util.List;
  */
 public class GenericList<T> {
    private ListView listView;
-   private Network selectedNetwork;
+   private T selectedItem;
    private ContextMenu contextMenu;
 
-   private List<NetworkHandler> clickHandlers;
+   private List<GenericHandler<T>> clickHandlers;
 
    public GenericList(ListView lv) {
       this.listView = lv;
-      this.selectedNetwork = null;
+      this.selectedItem = null;
       this.contextMenu = new ContextMenu();
-      this.clickHandlers = new ArrayList<NetworkHandler>();
+      this.clickHandlers = new ArrayList<GenericHandler<T>>();
 
       listView.setItems(FXCollections.observableArrayList());
 
       // Set cell factory to query FileManager for name.
-      listView.setCellFactory(new Callback<ListView<Network>, ListCell<Network>>(){
+      listView.setCellFactory(new Callback<ListView<T>, ListCell<T>>(){
          @Override
-         public ListCell<Network> call(ListView<Network> p) {
-            ListCell<Network> cell = new ListCell<Network>(){
+         public ListCell<T> call(ListView<T> p) {
+            ListCell<T> cell = new ListCell<T>(){
                @Override
-               protected void updateItem(Network t, boolean bln) {
+               protected void updateItem(T t, boolean bln) {
                   super.updateItem(t, bln);
                   if (t != null) {
-                     setText(FileManager.instance.getName(t));
+                     setText(t.toString());
                      setContextMenu(contextMenu);
                   }
                }
@@ -69,55 +67,60 @@ public class GenericList<T> {
          public void handle(MouseEvent click) {
             if (click.getButton() == MouseButton.PRIMARY) {
                // Load selection
-               Network selection = (Network)
+               T selection = (T)
                      listView.getSelectionModel().getSelectedItem();
 
-               if (selection != selectedNetwork) {
-                  selectedNetwork = selection;
-                  if (selection != null)
-                     for (NetworkHandler handler : clickHandlers)
-                        handler.handle(selection);
-               }
+               selectedItem = selection;
+               if (selection != null)
+                  for (GenericHandler<T> handler : clickHandlers)
+                     handler.handle(selection);
             }
          }
       });
    }
 
-   public Network getSelectedNetwork() {
-      return selectedNetwork;
+   public void setSelectedItem(T newSelection) {
+      if (listView.getItems().contains(newSelection)) {
+         selectedItem = newSelection;
+         listView.getSelectionModel().select(newSelection);
+      }
    }
 
-   public List<Network> getAll() {
+   public T getSelectedItem() {
+      return selectedItem;
+   }
+
+   public List<T> getAll() {
       return listView.getItems();
    }
 
-   public void add(Network network) {
-      if (!listView.getItems().contains(network))
-         listView.getItems().add(network);
+   public void add(T item) {
+      if (!listView.getItems().contains(item))
+         listView.getItems().add(item);
    }
 
-   public void remove(Network network) {
-      if (listView.getItems().contains(network))
-         listView.getItems().remove(network);
+   public void remove(T item) {
+      if (listView.getItems().contains(item))
+         listView.getItems().remove(item);
    }
 
    public void clear() {
       listView.getItems().clear();
    }
 
-   public void addClickListener(NetworkHandler handler) {
+   public void addClickListener(GenericHandler<T> handler) {
       clickHandlers.add(handler);
    }
 
-   public void addContextMenuItem(String name, NetworkHandler handler) {
-      final NetworkHandler finalHandler = handler;
+   public void addContextMenuItem(String name, GenericHandler<T> handler) {
+      final GenericHandler<T> finalHandler = handler;
 
       MenuItem item = new MenuItem(name);
       item.setOnAction(new EventHandler<ActionEvent>() {
          @Override
          public void handle(ActionEvent e) {
             // Load selection
-            Network selection = (Network)
+            T selection = (T)
                   listView.getSelectionModel().getSelectedItem();
             if (selection != null)
                finalHandler.handle(selection);

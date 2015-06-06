@@ -1,10 +1,8 @@
 package gui.controller;
 
 import application.FileManager;
-import gui.controller.widget.ClassificationHandler;
-import gui.controller.widget.ClassificationList;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import gui.controller.widget.GenericHandler;
+import gui.controller.widget.GenericList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -31,7 +29,7 @@ public class InteractController extends NetworkController implements Initializab
    /** Random generator for color generation. */
    private Random rand;
 
-   private ClassificationList classificationList;
+   private GenericList<String> classificationList;
 
    /**
     * Initialization.
@@ -40,8 +38,8 @@ public class InteractController extends NetworkController implements Initializab
    public void initialize(URL location, ResourceBundle resources) {
       this.rand = new Random();
 
-      classificationList = new ClassificationList(listView);
-      classificationList.addClickListener(new ClassificationHandler() {
+      classificationList = new GenericList<String>(listView);
+      classificationList.addClickListener(new GenericHandler<String>() {
          @Override
          public void handle(String classification) {
             selectClassification(classification);
@@ -68,23 +66,23 @@ public class InteractController extends NetworkController implements Initializab
    }
 
    public void setNetwork(Network network) {
-      if (network != super.getNetwork()) {
-         super.setNetwork(network);
+      boolean newNetwork = (network != super.getNetwork());
+      super.setNetwork(network);
 
-         // Null check
-         if (network != null) {
+      if (network != null) {
+         if (newNetwork) {
             super.setNetwork(network);
+            loadClassifications();
             System.out.println("Loaded network: " + FileManager.instance.getName(network));
-
-            try {
-               loadClassifications();
-               loadMemory();
-            } catch (Exception e) {
-               e.printStackTrace();
-            }
 
             // Run randomizer
             randomize();
+         }
+
+         try {
+            loadMemory();
+         } catch (Exception e) {
+            e.printStackTrace();
          }
       }
    }
@@ -108,7 +106,9 @@ public class InteractController extends NetworkController implements Initializab
 
       try {
          network.addMemory(colorBox.getFill(), classification);
-         loadMemory();
+         shortTermMemoryBox.getChildren().add(
+               network.schema.toFXNode(
+                     new Memory(network.schema, colorBox.getFill(), classification), 25, 25));
       } catch (Exception e) {
          e.printStackTrace();
       }
@@ -120,7 +120,7 @@ public class InteractController extends NetworkController implements Initializab
     * Commits the guessed classification to memory.
     */
    public void correct() {
-      selectClassification(classificationList.getSelectedClassification());
+      selectClassification(classificationList.getSelectedItem());
    }
 
    /**
@@ -151,7 +151,7 @@ public class InteractController extends NetworkController implements Initializab
    private void guess() {
       try {
          String answer = (String) network.query(colorBox.getFill());
-         classificationList.setSelectedClassification(answer);
+         classificationList.setSelectedItem(answer);
          listView.requestFocus();
       } catch (Exception e) {
          e.printStackTrace();

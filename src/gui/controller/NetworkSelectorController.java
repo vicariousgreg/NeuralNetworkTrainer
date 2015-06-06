@@ -2,8 +2,8 @@ package gui.controller;
 
 import application.DialogFactory;
 import application.FileManager;
-import gui.controller.widget.NetworkHandler;
-import gui.controller.widget.NetworkList;
+import gui.controller.widget.GenericHandler;
+import gui.controller.widget.GenericList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -23,7 +23,7 @@ public class NetworkSelectorController extends MultiNetworkController implements
    @FXML ListView listView;
 
    private NetworkController subController;
-   private NetworkList networkList;
+   private GenericList<Network> networkList;
 
       /**
        * Initialization.
@@ -33,10 +33,10 @@ public class NetworkSelectorController extends MultiNetworkController implements
       // Add as a listener to whatever the source of the network list is.
       //WorkSpace.instance.addObserver(this);
 
-      networkList = new NetworkList(listView);
+      networkList = new GenericList<Network>(listView);
 
       // Add click listener
-      networkList.addClickListener(new NetworkHandler() {
+      networkList.addClickListener(new GenericHandler<Network>() {
          @Override
          public void handle(Network network) {
             setNetwork(network);
@@ -44,7 +44,7 @@ public class NetworkSelectorController extends MultiNetworkController implements
       });
 
       // Add edit parameters context menu item.
-      networkList.addContextMenuItem("Edit Parameters", new NetworkHandler() {
+      networkList.addContextMenuItem("Edit Parameters", new GenericHandler<Network>() {
          public void handle(Network network) {
             Parameters newParams = DialogFactory.displayParametersDialog(network.getParameters());
             if (newParams != null)
@@ -62,23 +62,22 @@ public class NetworkSelectorController extends MultiNetworkController implements
       Node node = loader.load();
       subControllerPane.getChildren().clear();
       subControllerPane.getChildren().add(node);
-      NetworkController controller = loader.getController();
 
-      controller.setNetwork(getNetwork());
+      subController = loader.getController();
+      subController.setNetwork(getNetwork());
+   }
 
-      this.subController = controller;
-
-      networkList.addClickListener(new NetworkHandler() {
-         @Override
-         public void handle(Network network) {
-            subController.setNetwork(network);
-         }
-      });
+   @Override
+   public void setNetwork(Network network) {
+      super.setNetwork(network);
+      if (subController != null) {
+         subController.setNetwork(network);
+      }
    }
 
    public void saveNetwork() {
       try {
-         FileManager.instance.saveNetwork(networkList.getSelectedNetwork());
+         FileManager.instance.saveNetwork(networkList.getSelectedItem());
       } catch (Exception e) { }
    }
 
@@ -87,7 +86,9 @@ public class NetworkSelectorController extends MultiNetworkController implements
 
       if (name != null) {
          try {
-            FileManager.instance.saveNetwork(new Network(new ColorSchema()), name);
+            Network newNetwork = new Network(new ColorSchema());
+            newNetwork.name = name;
+            FileManager.instance.saveNetwork(newNetwork, name);
             loadNetworks();
          } catch (Exception e) {
             DialogFactory.displayErrorDialog("Network with name already exists!");
@@ -98,6 +99,7 @@ public class NetworkSelectorController extends MultiNetworkController implements
    @Override
    public void display() {
       loadNetworks();
+      setNetwork(getNetwork());
    }
 
    private void loadNetworks() {
