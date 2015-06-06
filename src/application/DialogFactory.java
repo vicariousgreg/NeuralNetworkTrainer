@@ -1,12 +1,14 @@
 package application;
 
 import gui.controller.dialog.*;
+import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import model.network.*;
 import model.network.schema.*;
 
@@ -83,6 +85,37 @@ public class DialogFactory {
       } catch (Exception e) {
          e.printStackTrace();
       }
+   }
+
+   /**
+    * Displays and waits for a task progress dialog.
+    * @param task task to run
+    * @param text text to display
+    * @return whether the task was successfully run
+    */
+   public static boolean displayTaskProgressDialog(Task task, String text) {
+      final Response<Boolean> response = new Response<Boolean>(false);
+
+      // Load resource, extract node and controller
+      try {
+         FXMLLoader loader = new FXMLLoader(DialogFactory.class.getResource(
+               "../gui/view/dialog/taskProgressDialog.fxml"));
+         Parent root = loader.load();
+         TaskProgressDialogController controller = loader.getController();
+         controller.setText(text);
+         controller.setResponse(response);
+
+         Stage dialogStage = new Stage();
+         dialogStage.setScene(new Scene(root));
+         dialogStage.requestFocus();
+         dialogStage.initStyle(StageStyle.UNDECORATED);
+         dialogStage.initModality(Modality.APPLICATION_MODAL);
+
+         controller.runOnStage(task, dialogStage);
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      return response.getValue();
    }
 
    /**

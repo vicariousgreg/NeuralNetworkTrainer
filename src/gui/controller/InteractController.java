@@ -1,10 +1,9 @@
 package gui.controller;
 
-import application.DialogFactory;
+import application.FileManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -12,9 +11,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import model.WorkSpace;
 import model.network.Network;
-import model.network.Parameters;
 import model.network.memory.Memory;
 import model.network.memory.MemoryModule;
 
@@ -22,8 +19,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
-public class InteractController extends NetworkController implements Initializable, Observer {
-   @FXML ListView networkList;
+public class InteractController extends NetworkController implements Initializable {
    @FXML ListView classificationList;
    @FXML Rectangle colorBox;
    @FXML ColorPicker colorPicker;
@@ -39,38 +35,6 @@ public class InteractController extends NetworkController implements Initializab
     */
    public void initialize(URL location, ResourceBundle resources) {
       this.rand = new Random();
-      WorkSpace.instance.addObserver(this);
-
-      // Set up network list context menu.
-      ContextMenu context = new ContextMenu();
-
-      MenuItem parametersItem = new MenuItem("Edit Parameters");
-      parametersItem.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent e) {
-            String selected = (String) networkList.getSelectionModel().getSelectedItem();
-            System.out.println(selected);
-            Network net = WorkSpace.instance.getNetwork(selected);
-
-            if (net != null) {
-               Parameters newParams = DialogFactory.displayParametersDialog(net.getParameters());
-               if (newParams != null)
-                  net.setParameters(newParams);
-            }
-         }
-      });
-      context.getItems().add(parametersItem);
-      networkList.setContextMenu(context);
-
-      // Set up event handler for network list.
-      networkList.setOnMouseClicked(new EventHandler<MouseEvent>() {
-         @Override
-         public void handle(MouseEvent click) {
-            // Load selection
-            String selection = (String)
-                  networkList.getSelectionModel().getSelectedItem();
-            selectNetwork(selection);
-         }
-      });
 
       // Set up event handler for classification list.
       classificationList.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -95,7 +59,6 @@ public class InteractController extends NetworkController implements Initializab
 
    @Override
    public void display() {
-      loadNetworks();
       try {
          loadClassifications();
          loadMemory();
@@ -104,36 +67,13 @@ public class InteractController extends NetworkController implements Initializab
       }
    }
 
-   /**
-    * Loads networks from the WorkSpace.
-    */
-   private void loadNetworks() {
-      try {
-         ObservableList data = FXCollections.observableArrayList();
+   public void setNetwork(Network network) {
+      super.setNetwork(network);
 
-         List<String> names = WorkSpace.instance.getNetworkNames();
-         for (String name : names) {
-            data.add(name);
-         }
-         networkList.setItems(data);
-      } catch (Exception e) {
-         e.printStackTrace();
-      }
-   }
-
-   /**
-    * Selects a network by name.
-    * Queries the WorkSpace for the Network.
-    * @param networkName name of selected network
-    */
-   private void selectNetwork(String networkName) {
-      // Query workspace for network
-      //   Set to selected
-      network = WorkSpace.instance.getNetwork(networkName);
-
-      // Null check
-      if (network != null) {
-         System.out.println("Loaded network: " + networkName);
+       // Null check
+       if (network != null) {
+         super.setNetwork(network);
+         System.out.println("Loaded network: " + FileManager.instance.getName(network));
 
          try {
             loadClassifications();
@@ -255,20 +195,5 @@ public class InteractController extends NetworkController implements Initializab
             e.printStackTrace();
          }
       }
-   }
-
-   /**
-    * Loads up the new network screen.
-    */
-   public void newNetwork() {
-   }
-
-   public void saveNetwork() {
-      WorkSpace.instance.saveNetwork(network);
-   }
-
-   @Override
-   public void update(Observable o, Object arg) {
-      loadNetworks();
    }
 }

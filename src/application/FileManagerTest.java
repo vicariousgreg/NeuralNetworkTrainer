@@ -18,8 +18,17 @@ public class FileManagerTest {
 
    @Test
    public void testSaveAndDelete() throws Exception {
+      // Test save unrecognized without explicit name.
+      try {
+         FileManager.instance.saveNetwork(testNetwork);
+         assert (false);
+      } catch (Exception e) { }
+
       // Save network
       FileManager.instance.saveNetwork(testNetwork, networkName);
+
+      // Save without explicit name.
+      FileManager.instance.saveNetwork(testNetwork);
 
       // Ensure network exists and has the correct name
       assert (FileManager.instance.exists(networkName));
@@ -28,6 +37,8 @@ public class FileManagerTest {
       // Delete network
       FileManager.instance.delete(networkName);
       assert (!FileManager.instance.exists(networkName));
+
+
    }
 
    @Test

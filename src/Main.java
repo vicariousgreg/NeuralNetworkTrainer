@@ -1,7 +1,9 @@
 import application.DialogFactory;
 import application.FileManager;
 import gui.controller.NetworkControllerStack;
+import gui.controller.NetworkSelectorController;
 import javafx.application.Application;
+import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -27,7 +29,14 @@ public class Main extends Application {
 
        // Push main interaction screen.
        NetworkControllerStack.instance.push(
-             Main.class.getResource("gui/view/interact.fxml"));
+             Main.class.getResource("gui/view/networkSelector.fxml"));
+
+       NetworkSelectorController nsc = (NetworkSelectorController) NetworkControllerStack.instance.peekController();
+       try {
+          nsc.setChild(Main.class.getResource("gui/view/interact.fxml"));
+       } catch (Exception e) {
+          e.printStackTrace();
+       }
     }
 
     public static void main(String[] args) {

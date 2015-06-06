@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox prefHeight="644.0" prefWidth="897.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.controller.NetworkSelectorController">
+   <children>
+      <VBox alignment="CENTER" spacing="5.0">
+         <children>
+            <Button mnemonicParsing="false" onAction="#newNetwork" prefHeight="25.0" prefWidth="246.0" text="New Network..." textAlignment="CENTER" />
+            <ScrollPane layoutX="3.0" layoutY="-3.0" prefHeight="568.0" prefViewportHeight="398.0" prefViewportWidth="174.0" prefWidth="264.0">
+               <content>
+                  <ListView fx:id="listView" layoutX="3.0" layoutY="-3.0" prefHeight="562.0" prefWidth="261.0" />
+               </content>
+            </ScrollPane>
+            <Button mnemonicParsing="false" onAction="#saveNetwork" prefHeight="25.0" prefWidth="246.0" text="Save Network" textAlignment="CENTER" />
+         </children>
+         <HBox.margin>
+            <Insets bottom="5.0" top="5.0" />
+         </HBox.margin>
+      </VBox>
+      <Pane fx:id="subControllerPane" />
+   </children>
+</HBox>

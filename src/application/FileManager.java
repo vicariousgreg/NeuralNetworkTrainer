@@ -89,6 +89,27 @@ public class FileManager {
    }
 
    /**
+    * Saves a network to storage.
+    * @param network network to save.
+    * @throws Exception if network is not recognized or could not be saved
+    */
+   public void saveNetwork(Network network) throws Exception {
+      if (networks.containsValue(network)) {
+         String name = "";
+         for (String key : networks.keySet())
+            if (networks.get(key) == network) name = key;
+
+         FileOutputStream fos = new FileOutputStream(new File(kNetworkPath + name));
+         ObjectOutputStream out = new ObjectOutputStream(fos);
+         out.writeObject(network);
+         out.close();
+         networks.put(name, network);
+      } else {
+         throw new Exception ("Could not save network!");
+      }
+   }
+
+   /**
     * Imports a network.
     * @param networkFile network file
     * @throws Exception if network could not be imported

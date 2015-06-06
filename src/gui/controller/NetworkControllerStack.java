@@ -94,6 +94,14 @@ public class NetworkControllerStack implements Initializable {
    }
 
    /**
+    * Gets the controller from the top of the stack.
+    * @return controller on top of stack
+    */
+   public NetworkController peekController() {
+      return stack.peek().controller;
+   }
+
+   /**
     * Displays the view on the top of the stack.
     */
    public void display() {
