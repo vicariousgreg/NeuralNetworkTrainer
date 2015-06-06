@@ -106,6 +106,12 @@ public class GenericList<T> {
       allHandler = handler;
    }
 
+   public void addAll(T[] items) {
+      for (int i = 0; i < items.length; ++i) {
+         add(items[i]);
+      }
+   }
+
    public void add(T item) {
       if (!listView.getItems().contains(item))
          listView.getItems().add(item);

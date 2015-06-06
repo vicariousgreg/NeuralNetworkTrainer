@@ -72,6 +72,7 @@ public class NetworkSelectorController extends MultiNetworkController implements
       super.setNetwork(network);
       if (subController != null) {
          subController.setNetwork(network);
+         subController.display();
       }
    }
 

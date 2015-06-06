@@ -25,7 +25,7 @@
                   </VBox>
                   <VBox alignment="TOP_CENTER" prefHeight="458.0" prefWidth="381.0" spacing="5.0">
                      <children>
-                        <ColorPicker fx:id="colorPicker" onAction="#setColor" prefHeight="25.0" prefWidth="390.0" />
+                        <ColorPicker fx:id="colorPicker" prefHeight="25.0" prefWidth="390.0" />
                         <Rectangle fx:id="colorBox" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="428.0" stroke="BLACK" strokeType="INSIDE" width="379.0" />
                      </children>
                   </VBox>

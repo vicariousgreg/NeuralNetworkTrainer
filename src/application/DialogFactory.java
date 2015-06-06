@@ -12,7 +12,7 @@ import javafx.stage.StageStyle;
 import model.network.*;
 import model.network.schema.*;
 
-import java.io.File;
+import java.io.*;
 
 /**
  * Created by gpdavis on 6/4/15.
@@ -89,11 +89,11 @@ public class DialogFactory {
 
    /**
     * Displays and waits for a task progress dialog.
-    * @param task task to run
     * @param text text to display
+    * @param task task to run
     * @return whether the task was successfully run
     */
-   public static boolean displayTaskProgressDialog(Task task, String text) {
+   public static boolean displayTaskProgressDialog(String text, Task task) {
       final Response<Boolean> response = new Response<Boolean>(false);
 
       // Load resource, extract node and controller
@@ -126,6 +126,49 @@ public class DialogFactory {
    public static File displayFileChooser(Stage stage) {
       FileChooser fileChooser = new FileChooser();
       return fileChooser.showOpenDialog(stage);
+   }
+
+   /**
+    * Displays and waits for a load dialog.
+    * @param stage stage to display on
+    * @return loaded object, or null if unable to load
+    */
+   public static Object displayLoadDialog(Stage stage) {
+      File file = displayFileChooser(stage);
+      if (file != null) {
+         try {
+            FileInputStream fin = new FileInputStream(file);
+            ObjectInputStream ois = new ObjectInputStream(fin);
+            Object toReturn = ois.readObject();
+            ois.close();
+            return toReturn;
+         } catch (Exception e) {
+            e.printStackTrace();
+         }
+      }
+      return null;
+   }
+
+   /**
+    * Displays and waits for a save dialog.
+    * @param toSave object to save
+    * @param stage stage to display on
+    * @return whether save was successful
+    */
+   public static boolean displaySaveDialog(Object toSave, Stage stage) {
+      File file = displayFileChooser(stage);
+      if (file != null) {
+         try {
+            FileOutputStream fos = new FileOutputStream(file);
+            ObjectOutputStream out = new ObjectOutputStream(fos);
+            out.writeObject(toSave);
+            out.close();
+         } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+         }
+      }
+      return true;
    }
 
    /**
