@@ -1,8 +1,8 @@
 package gui.controller;
 
-import application.FileManager;
 import gui.controller.widget.GenericHandler;
 import gui.controller.widget.GenericList;
+import gui.controller.widget.MemoryBox;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -23,20 +23,22 @@ public class InteractController extends NetworkController implements Initializab
    @FXML ListView listView;
    @FXML Rectangle colorBox;
    @FXML ColorPicker colorPicker;
-   @FXML FlowPane shortTermMemoryBox;
+   @FXML FlowPane shortTermMemoryPane;
    @FXML Button memoryButton;
 
    /** Random generator for color generation. */
    private Random rand;
 
    private GenericList<String> classificationList;
+   private MemoryBox shortTermMemoryBox;
 
    /**
     * Initialization.
     * Sets up listeners for GUI.
     */
    public void initialize(URL location, ResourceBundle resources) {
-      this.rand = new Random();
+      rand = new Random();
+      shortTermMemoryBox = new MemoryBox(shortTermMemoryPane);
 
       classificationList = new GenericList<String>(listView);
       classificationList.addClickListener(new GenericHandler<String>() {
@@ -73,7 +75,6 @@ public class InteractController extends NetworkController implements Initializab
          if (newNetwork) {
             super.setNetwork(network);
             loadClassifications();
-            System.out.println("Loaded network: " + FileManager.instance.getName(network));
 
             // Run randomizer
             randomize();
@@ -82,6 +83,40 @@ public class InteractController extends NetworkController implements Initializab
          try {
             loadMemory();
          } catch (Exception e) {
+            e.printStackTrace();
+         }
+      } else {
+         classificationList.clear();
+         shortTermMemoryBox.clear();
+      }
+   }
+
+   /**
+    * Commits the guessed classification to memory.
+    */
+   public void correct() {
+      selectClassification(classificationList.getSelectedItem());
+   }
+
+   /**
+    * Sets the color of the box according to the color picker.
+    */
+   public void setColor() {
+      Color color = colorPicker.getValue();
+      colorBox.setFill(color);
+      guess();
+   }
+
+   /**
+    * Loads up the memory screen.
+    */
+   public void viewMemory() {
+      if (network != null) {
+         try {
+            NetworkControllerStack.instance.push(
+                  getClass().getResource(
+                        "../view/memory.fxml"));
+         } catch (IOException e) {
             e.printStackTrace();
          }
       }
@@ -102,34 +137,16 @@ public class InteractController extends NetworkController implements Initializab
     * @param classification selected classification
     */
    private void selectClassification(String classification) {
-      System.out.println("Selected " + classification);
-
       try {
          network.addMemory(colorBox.getFill(), classification);
-         shortTermMemoryBox.getChildren().add(
-               network.schema.toFXNode(
-                     new Memory(network.schema, colorBox.getFill(), classification), 25, 25));
+         shortTermMemoryBox.add(
+               new Memory(network.schema, colorBox.getFill(), classification),
+               network.schema);
       } catch (Exception e) {
          e.printStackTrace();
       }
 
       randomize();
-   }
-
-   /**
-    * Commits the guessed classification to memory.
-    */
-   public void correct() {
-      selectClassification(classificationList.getSelectedItem());
-   }
-
-   /**
-    * Sets the color of the box according to the color picker.
-    */
-   public void setColor() {
-      Color color = colorPicker.getValue();
-      colorBox.setFill(color);
-      guess();
    }
 
    /**
@@ -165,30 +182,14 @@ public class InteractController extends NetworkController implements Initializab
    private void loadMemory() throws Exception {
       if (network != null) {
          // Populate memory box.
-         shortTermMemoryBox.getChildren().clear();
+         shortTermMemoryBox.clear();
          MemoryModule mem = network.getMemoryModule();
          Map<Object, List<Memory>> shortTermMemory = mem.getShortTermMemory();
 
          for (Object key : shortTermMemory.keySet()) {
             for (Memory memory : shortTermMemory.get(key)) {
-               shortTermMemoryBox.getChildren().add(
-                     network.schema.toFXNode(memory, 25, 25));
+               shortTermMemoryBox.add(memory, network.schema);
             }
-         }
-      }
-   }
-
-   /**
-    * Loads up the memory screen.
-    */
-   public void viewMemory() {
-      if (network != null) {
-         try {
-            NetworkControllerStack.instance.push(
-                  getClass().getResource(
-                        "../view/memory.fxml"));
-         } catch (IOException e) {
-            e.printStackTrace();
          }
       }
    }

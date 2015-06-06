@@ -23,6 +23,9 @@ public class GenericList<T> {
    private ContextMenu contextMenu;
 
    private List<GenericHandler<T>> clickHandlers;
+   private GenericHandler<T> allHandler;
+
+   private static final String kAll = "=== ALL ===";
 
    public GenericList(ListView lv) {
       this.listView = lv;
@@ -67,13 +70,17 @@ public class GenericList<T> {
          public void handle(MouseEvent click) {
             if (click.getButton() == MouseButton.PRIMARY) {
                // Load selection
-               T selection = (T)
-                     listView.getSelectionModel().getSelectedItem();
-
-               selectedItem = selection;
-               if (selection != null)
-                  for (GenericHandler<T> handler : clickHandlers)
-                     handler.handle(selection);
+               Object selection = listView.getSelectionModel().getSelectedItem();
+               if (selection.equals(kAll)) {
+                  if (allHandler != null)
+                     allHandler.handle(null);
+               } else {
+                  selectedItem = (T) selection;
+                  if (selectedItem != null) {
+                     for (GenericHandler<T> handler : clickHandlers)
+                        handler.handle(selectedItem);
+                  }
+               }
             }
          }
       });
@@ -92,6 +99,11 @@ public class GenericList<T> {
 
    public List<T> getAll() {
       return listView.getItems();
+   }
+
+   public void addAllItem(GenericHandler<T> handler) {
+      listView.getItems().add(0, kAll);
+      allHandler = handler;
    }
 
    public void add(T item) {

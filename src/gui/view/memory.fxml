@@ -24,7 +24,7 @@
             </VBox>
             <ScrollPane prefHeight="495.0" prefViewportHeight="159.0" prefViewportWidth="624.0" prefWidth="631.0">
                <content>
-                  <FlowPane fx:id="longTermMemoryBox" prefHeight="489.0" prefWidth="626.0" />
+                  <FlowPane fx:id="longTermPane" prefHeight="489.0" prefWidth="626.0" />
                </content>
             </ScrollPane>
          </children>
@@ -36,7 +36,7 @@
                   <Label prefHeight="25.0" prefWidth="141.0" text="Short Term Memory:" />
                   <ScrollPane prefHeight="145.0" prefViewportHeight="159.0" prefViewportWidth="624.0" prefWidth="624.0">
                      <content>
-                        <FlowPane fx:id="shortTermMemoryBox" prefHeight="137.0" prefWidth="590.0" />
+                        <FlowPane fx:id="shortTermPane" prefHeight="137.0" prefWidth="590.0" />
                      </content>
                   </ScrollPane>
                </children>

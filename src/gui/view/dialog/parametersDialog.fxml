@@ -30,7 +30,7 @@
                         </HBox>
                         <HBox alignment="CENTER" prefHeight="36.0" prefWidth="100.0">
                             <children>
-                                <Button fx:id="clearButton" mnemonicParsing="false" onAction="#clearFields" text="Clear" />
+                                <Button fx:id="clearButton" mnemonicParsing="false" onAction="#clear" text="Clear" />
                             </children>
                         </HBox>
                         <HBox alignment="CENTER" prefHeight="36.0" prefWidth="200.0">

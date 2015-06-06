@@ -44,7 +44,7 @@
                   </HBox>
                   <ScrollPane prefHeight="124.0" prefViewportHeight="159.0" prefViewportWidth="624.0" prefWidth="630.0">
                      <content>
-                        <FlowPane fx:id="shortTermMemoryBox" prefHeight="117.0" prefWidth="605.0" />
+                        <FlowPane fx:id="shortTermMemoryPane" prefHeight="117.0" prefWidth="605.0" />
                      </content>
                   </ScrollPane>
                </children>

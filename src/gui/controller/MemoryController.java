@@ -1,5 +1,6 @@
 package gui.controller;
 
+import gui.controller.widget.MemoryBox;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -20,17 +21,23 @@ import java.util.*;
 
 public class MemoryController extends NetworkController implements Initializable {
    @FXML ListView classificationList;
-   @FXML FlowPane shortTermMemoryBox;
-   @FXML FlowPane longTermMemoryBox;
+   @FXML FlowPane shortTermPane;
+   @FXML FlowPane longTermPane;
 
    /** All Classification item. */
    private static final String kAll = "=== ALL ===";
+
+   private MemoryBox shortTermMemoryBox;
+   private MemoryBox longTermMemoryBox;
 
    /**
     * Initialization.
     * Sets up listeners for GUI.
     */
    public void initialize(URL location, ResourceBundle resources) {
+      shortTermMemoryBox = new MemoryBox(shortTermPane);
+      longTermMemoryBox = new MemoryBox(longTermPane);
+
       // Set up event handler for classification list.
       classificationList.setOnMouseClicked(new EventHandler<MouseEvent>() {
          @Override
@@ -78,28 +85,26 @@ public class MemoryController extends NetworkController implements Initializable
     */
    private void loadMemory(String classification) throws Exception {
       // Populate short term memory box.
-      shortTermMemoryBox.getChildren().clear();
+      shortTermMemoryBox.clear();
       MemoryModule mem = network.getMemoryModule();
       Map<Object, List<Memory>> shortTermMemory = mem.getShortTermMemory();
 
       for (Object key : shortTermMemory.keySet()) {
          if (classification.equals(kAll) || key.equals(classification)) {
             for (Memory memory : shortTermMemory.get(key)) {
-               shortTermMemoryBox.getChildren().add(
-                     network.schema.toFXNode(memory, 25, 25));
+               shortTermMemoryBox.add(memory, network.schema);
             }
          }
       }
 
       // Populate long term memory box.
-      longTermMemoryBox.getChildren().clear();
+      longTermMemoryBox.clear();
       Map<Object, List<Memory>> longTermMemory = mem.getLongTermMemory();
 
       for (Object key : longTermMemory.keySet()) {
          if (classification.equals(kAll) || key.equals(classification)) {
             for (Memory memory : longTermMemory.get(key)) {
-               longTermMemoryBox.getChildren().add(
-                     network.schema.toFXNode(memory, 25, 25));
+               longTermMemoryBox.add(memory, network.schema);
             }
          }
       }

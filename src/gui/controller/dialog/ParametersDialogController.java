@@ -39,12 +39,11 @@ public class ParametersDialogController extends DialogController implements Init
    }
 
    public void setParameters(Parameters params) {
-      if (params != null)
-         this.params = params;
-      setFields();
+      this.params = params;
+      reset();
    }
 
-   public void clearFields() {
+   public void clear() {
       for (String key : fields.keySet())
          fields.get(key).clear();
       for (TextField field : parameterTextFields)  {
@@ -52,7 +51,91 @@ public class ParametersDialogController extends DialogController implements Init
       }
    }
 
-   public void setFields() {
+   public void reset() {
+      if (params != null)
+         setFields();
+   }
+
+   @Override
+   public void confirm() {
+      Parameters newParams = new Parameters();
+
+      try {
+         // Instantiate activation function.
+         ActivationFunction activ;
+         try {
+            activ = buildActivationFunction();
+         } catch (Exception e) {
+            DialogFactory.displayErrorDialog(e.getMessage());
+            return;
+         }
+
+         /* Extract regular parameters. */
+         for (String key : fields.keySet()) {
+            Object value = extractField(key);
+            if (value == null || !newParams.setParameter(key, value))
+               DialogFactory.displayErrorDialog(params.getParameter(key).toString());
+         }
+
+         newParams.setActivationFunction(activ);
+
+         setResponseValue(newParams);
+         close();
+      } catch (Exception e) {
+         DialogFactory.displayErrorDialog("Invalid Parameters!");
+      }
+   }
+
+   private ActivationFunction buildActivationFunction() throws Exception {
+      /* Identify activation function. */
+      Class functionClass = null;
+
+      // Identify class and extract parameter list.
+      String functionName = (String) activationFunctionsField.getValue();
+      for (Class clazz : Registry.activationFunctionClasses) {
+         if (clazz.getSimpleName().equals(functionName)) {
+            functionClass = clazz;
+         }
+      }
+
+      ActivationFunction activ = (ActivationFunction) functionClass.newInstance();
+
+      // Set activation function parameters.
+      for (TextField text : parameterTextFields) {
+         activ.setValue(text.getPromptText(), text.getText());
+      }
+      return activ;
+   }
+
+   private Object extractField(String key) {
+      String valueString = fields.get(key).getText();
+      Object value = null;
+      Class clazz = params.getParameter(key).getValue().getClass();
+      try {
+         if (clazz.equals(Integer.class)) {
+            value = Integer.parseInt(valueString);
+         } else if (clazz.equals(Integer[].class)) {
+            String[] tokens = fields.get(key).getText().split("\\s+");
+            Integer[] arr = new Integer[tokens.length];
+            for (int i = 0; i < arr.length; ++i) {
+               arr[i] = Integer.parseInt(tokens[i]);
+            }
+            value = arr;
+         } else if (clazz.equals(Double.class)) {
+            value = Double.parseDouble(valueString);
+         } else if (clazz.equals(Double[].class)) {
+            String[] tokens = fields.get(key).getText().split("\\s+");
+            Double[] arr = new Double[tokens.length];
+            for (int i = 0; i < arr.length; ++i) {
+               arr[i] = Double.parseDouble(tokens[i]);
+            }
+            value = arr;
+         }
+      } catch (Exception e) { }
+      return value;
+   }
+
+   private void setFields() {
       labels.clear();
       fields.clear();
 
@@ -82,7 +165,7 @@ public class ParametersDialogController extends DialogController implements Init
       }
    }
 
-   public void initializeActivationParameters() throws Exception{
+   private void initializeActivationParameters() throws Exception{
       parameterTextFields = new ArrayList<TextField>();
       activationParametersGrid.getChildren().clear();
 
@@ -113,80 +196,6 @@ public class ParametersDialogController extends DialogController implements Init
          activationParametersGrid.addRow(i, label, input);
          parameterTextFields.add(input);
          ++i;
-      }
-   }
-
-   public void reset() {
-      setFields();
-   }
-
-   @Override
-   public void confirm() {
-      Parameters newParams = new Parameters();
-      try {
-         /* Identify activation function. */
-         Class functionClass = null;
-
-         // Identify class and extract parameter list.
-         String functionName = (String) activationFunctionsField.getValue();
-         for (Class clazz : Registry.activationFunctionClasses) {
-            if (clazz.getSimpleName().equals(functionName)) {
-               functionClass = clazz;
-            }
-         }
-
-         // Instantiate activation function.
-         final ActivationFunction activ = (ActivationFunction) functionClass.newInstance();
-
-         // Set activation function parameters.
-         try {
-            for (TextField text : parameterTextFields) {
-               activ.setValue(text.getPromptText(), text.getText());
-            }
-         } catch (Exception e) {
-            DialogFactory.displayErrorDialog(e.getMessage());
-            return;
-         }
-
-         /* Extract regular parameters. */
-         for (String key : fields.keySet()) {
-            String valueString = fields.get(key).getText();
-            Object value = null;
-            Class clazz = newParams.getParameter(key).getValue().getClass();
-            try {
-               if (clazz.equals(Integer.class)) {
-                  value = Integer.parseInt(valueString);
-               } else if (clazz.equals(Integer[].class)) {
-                  String[] tokens = fields.get(key).getText().split("\\s+");
-                  Integer[] arr = new Integer[tokens.length];
-                  for (int i = 0; i < arr.length; ++i) {
-                     arr[i] = Integer.parseInt(tokens[i]);
-                  }
-                  value = arr;
-               } else if (clazz.equals(Double.class)) {
-                  value = Double.parseDouble(valueString);
-               } else if (clazz.equals(Double[].class)) {
-                  String[] tokens = fields.get(key).getText().split("\\s+");
-                  Double[] arr = new Double[tokens.length];
-                  for (int i = 0; i < arr.length; ++i) {
-                     arr[i] = Double.parseDouble(tokens[i]);
-                  }
-                  value = arr;
-               }
-               if (!newParams.setParameter(key, value))
-                  throw new Exception();
-            } catch (Exception e) {
-               DialogFactory.displayErrorDialog(newParams.getParameter(key).toString());
-               return;
-            }
-         }
-
-         newParams.setActivationFunction(activ);
-
-         setResponseValue(newParams);
-         close();
-      } catch (Exception e) {
-         DialogFactory.displayErrorDialog("Invalid Parameters!");
       }
    }
 }
