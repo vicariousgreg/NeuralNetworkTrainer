@@ -8,10 +8,9 @@ import model.network.activation.*;
  * Created by gpdavis on 6/4/15.
  */
 public class Registry {
-   public static final Class<? extends Schema>[] schemaClasses =
+   public static final Class<? extends Schema>[] inputAdapterClasses =
          new Class[] {
-               ColorSchema.class,
-               AdvancedColorSchema.class
+               ColorInputAdapter.class,
          };
 
    public static final Class<? extends ActivationFunction>[] activationFunctionClasses =

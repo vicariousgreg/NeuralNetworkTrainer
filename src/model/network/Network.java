@@ -11,8 +11,8 @@ import java.util.List;
  * Represents a neural network.
  */
 public class Network implements Serializable {
-   /** Network neuron map. */
-   private NeuronMap neuronMap;
+   /** Network neuron graph. */
+   private NeuronGraph neuronGraph;
 
    /** Network schema. */
    public final Schema schema;
@@ -33,24 +33,23 @@ public class Network implements Serializable {
    /**
     * Constructor.
     * Uses default parameters.
-    *
     * @param schema network schema
     */
-   public Network(Schema schema) {
-      this(schema, new Parameters());
+   public Network(String name, Schema schema) {
+      this(name, schema, new Parameters());
    }
 
    /**
     * Constructor.
-    *
     * @param schema network schema
     * @param params network parameters
     */
-   public Network(Schema schema, Parameters params) {
+   public Network(String name, Schema schema, Parameters params) {
+      this.name = name;
       this.schema = schema;
       this.parameters = params;
-      this.neuronMap = new NeuronMap(schema, params);
-      this.networkTrainer = new NetworkTrainer(neuronMap, schema, params);
+      this.neuronGraph = new NeuronGraph(schema, params);
+      this.networkTrainer = new NetworkTrainer(neuronGraph, schema, params);
 
       buildMemoryModule((Class)
             params.getParameterValue(Parameters.kMemoryModule));
@@ -71,7 +70,7 @@ public class Network implements Serializable {
    public void setParameters(Parameters params) {
       this.parameters = params;
       this.networkTrainer.setParameters(params);
-      this.neuronMap.build(schema, params);
+      this.neuronGraph.build(schema, params);
       buildMemoryModule((Class)
             params.getParameterValue(Parameters.kMemoryModule));
    }
@@ -153,7 +152,7 @@ public class Network implements Serializable {
     * @throws Exception if the input does not fit the network schema
     */
    public Object query(Object in) throws Exception {
-      return schema.translateOutput(neuronMap.fire(schema.encodeInput(in)));
+      return schema.translateOutput(neuronGraph.fire(schema.encodeInput(in)));
    }
 
    /**

@@ -1,7 +1,9 @@
 package application;
 
+import javafx.scene.effect.ColorInput;
 import model.network.Network;
-import model.network.schema.ColorSchema;
+import model.network.schema.ColorInputAdapter;
+import model.network.schema.Schema;
 import org.junit.Test;
 
 import java.io.File;
@@ -14,7 +16,9 @@ import static org.junit.Assert.*;
 
 public class FileManagerTest {
    private static String networkName = "junitTestNetwork12345";
-   private static Network testNetwork = new Network(new ColorSchema());
+   private static Network testNetwork = new Network(networkName,
+         new Schema(new ColorInputAdapter(),
+               new String[] {"Red", "Orange", "Yellow"}));
 
    @Test
    public void testSaveAndDelete() throws Exception {
@@ -81,9 +85,9 @@ public class FileManagerTest {
    @Test
    public void testGetNetworks() throws Exception {
       // Create test networks
-      Network testNetwork1 = new Network(new ColorSchema());
-      Network testNetwork2 = new Network(new ColorSchema());
-      Network testNetwork3 = new Network(new ColorSchema());
+      Network testNetwork1 = testNetwork.clone();
+      Network testNetwork2 = testNetwork.clone();
+      Network testNetwork3 = testNetwork.clone();
 
       // Save networks
       FileManager.instance.saveNetwork(testNetwork1, networkName + "1");
@@ -113,7 +117,7 @@ public class FileManagerTest {
       FileManager.instance.saveNetwork(testNetwork, networkName);
       try {
          // Create unrecognized network
-         Network badNetwork = new Network(new ColorSchema());
+         Network badNetwork = testNetwork.clone();
 
          FileManager.instance.saveNetwork(badNetwork, networkName);
          assert (false);

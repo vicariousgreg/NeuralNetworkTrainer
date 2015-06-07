@@ -12,7 +12,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.layout.Pane;
 import model.network.Network;
 import model.network.Parameters;
-import model.network.schema.ColorSchema;
 
 import java.io.IOException;
 import java.net.URL;
@@ -83,17 +82,14 @@ public class NetworkSelectorController extends MultiNetworkController implements
    }
 
    public void newNetwork() {
-      String name = DialogFactory.displayTextDialog("Enter network name:");
-
-      if (name != null) {
-         try {
-            Network newNetwork = new Network(new ColorSchema());
-            newNetwork.name = name;
-            FileManager.instance.saveNetwork(newNetwork, name);
+      try {
+         Network newNetwork = DialogFactory.displayNetworkDialog();
+         if (newNetwork != null) {
+            FileManager.instance.saveNetwork(newNetwork, newNetwork.name);
             loadNetworks();
-         } catch (Exception e) {
-            DialogFactory.displayErrorDialog("Network with name already exists!");
          }
+      } catch (Exception e) {
+         DialogFactory.displayErrorDialog("Invalid network name!");
       }
    }
 

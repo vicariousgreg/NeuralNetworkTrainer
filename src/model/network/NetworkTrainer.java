@@ -7,15 +7,15 @@ import java.io.*;
 import java.util.List;
 
 /**
- * Represents a neural network.
+ * Neural network trainer.
  */
 public class NetworkTrainer implements Serializable {
-   private NeuronMap neuronMap;
+   private NeuronGraph neuronGraph;
    private Schema schema;
    private Parameters parameters;
 
-   public NetworkTrainer(NeuronMap neuronMap, Schema schema, Parameters params) {
-      this.neuronMap = neuronMap;
+   public NetworkTrainer(NeuronGraph neuronGraph, Schema schema, Parameters params) {
+      this.neuronGraph = neuronGraph;
       this.schema = schema;
       this.parameters = params;
    }
@@ -50,10 +50,10 @@ public class NetworkTrainer implements Serializable {
       double percentCorrect = calcPercentCorrect(testMemory);
       double bestPercent = percentCorrect;
 
-      System.out.println("Total test error before learning: " + testError);
-      System.out.println("Passing percentage: %" + percentCorrect);
-      System.out.println("Training memory size: " + trainingMemory.size());
-      System.out.println("Test memory size: " + testMemory.size());
+      if (debug) System.out.println("Total test error before learning: " + testError);
+      if (debug) System.out.println("Passing percentage: %" + percentCorrect);
+      if (debug) System.out.println("Training memory size: " + trainingMemory.size());
+      if (debug) System.out.println("Test memory size: " + testMemory.size());
 
       // Extract relevant parameters
       Double acceptableTestError = (Double)
@@ -75,7 +75,7 @@ public class NetworkTrainer implements Serializable {
 
          // Teach the network using the tests.
          for (int i = 0; i < trainingMemory.size(); ++i) {
-            neuronMap.backpropagate(trainingMemory.get(i));
+            neuronGraph.backpropagate(trainingMemory.get(i));
          }
 
          // Calculate error and percentage correct.
@@ -83,7 +83,7 @@ public class NetworkTrainer implements Serializable {
          percentCorrect = calcPercentCorrect(testMemory);
          if (percentCorrect > bestPercent) {
             bestPercent = percentCorrect;
-            System.out.println("Best: " + bestPercent);
+            if (debug) System.out.println("Best: " + bestPercent);
          }
 
 
@@ -93,7 +93,7 @@ public class NetworkTrainer implements Serializable {
          if (staleCounter > staleThreshold ||
                testError - prevTestError > regressionThreshold) {
             if (debug && staleCounter > staleThreshold) System.out.println("STALE");
-            neuronMap.reset();
+            neuronGraph.reset();
             staleCounter = 0;
             if (debug) System.out.println("====================");
             if (debug) System.out.println("Resetting network...");
@@ -112,18 +112,18 @@ public class NetworkTrainer implements Serializable {
          }
 
          if(++masterCounter > 100000) {
-            System.out.println("Passed 100,000 iterations.  Reshuffling memories...");
+            if (debug) System.out.println("Passed 100,000 iterations.  Reshuffling memories...");
             return false;
          } else if (masterCounter % 10000 == 0) {
-            System.out.print(".");
+            if (debug) System.out.print(".");
          }
       }
 
-      System.out.println("Total test error after learning: " +
+      if (debug) System.out.println("Total test error after learning: " +
             calcTotalTestError(testMemory));
-      System.out.println("Passing percentage: %" +
+      if (debug) System.out.println("Passing percentage: %" +
             calcPercentCorrect(testMemory));
-      System.out.println();
+      if (debug) System.out.println();
 
       return true;
    }
@@ -152,7 +152,7 @@ public class NetworkTrainer implements Serializable {
       double totalError = 0.0;
       try {
          // Get quadratic deviations for each output neuron
-         double[] errors = calcError(neuronMap.fire(test.inputVector),
+         double[] errors = calcError(neuronGraph.fire(test.inputVector),
                test.outputVector);
 
          // Total deviations.
@@ -197,7 +197,7 @@ public class NetworkTrainer implements Serializable {
       for (int i = 0; i < tests.size(); ++i) {
          try {
             Memory test = tests.get(i);
-            double[] outVector = neuronMap.fire(test.inputVector);
+            double[] outVector = neuronGraph.fire(test.inputVector);
 
             Object out = schema.translateOutput(outVector);
             Object testOut = schema.translateOutput(test.outputVector);

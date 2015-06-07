@@ -7,9 +7,9 @@ import java.io.*;
 import java.util.ArrayList;
 
 /**
- * Represents a neural network.
+ * Graph of neural network neurons.
  */
-public class NeuronMap implements Serializable {
+public class NeuronGraph implements Serializable {
    /** Network neuron layers. */
    private ArrayList<Neuron[]> layers;
 
@@ -24,12 +24,12 @@ public class NeuronMap implements Serializable {
     * @param schema input/output schema
     * @param parameters network parameters
     */
-   public NeuronMap(Schema schema, Parameters parameters) {
+   public NeuronGraph(Schema schema, Parameters parameters) {
       build(schema, parameters);
    }
 
    /**
-    * Builds the neuron map.
+    * Builds the neuron graph.
     * @param schema input/output schema
     * @param parameters network parameters
     */

@@ -199,15 +199,16 @@ public class DialogFactory {
     * Displays and waits for a schema dialog.
     * @return created schema
     */
-   public static Schema displaySchemaDialog() {
+   public static Schema displaySchemaDialog(Schema schema) {
       final Response<Schema> response = new Response<Schema>(null);
 
       // Load resource, extract node and controller
       try {
          FXMLLoader loader = new FXMLLoader(DialogFactory.class.getResource(
-               "../gui/view/dialog/networkDialog.fxml"));
+               "../gui/view/dialog/schemaDialog.fxml"));
          Parent root = loader.load();
-         NetworkDialogController controller = loader.getController();
+         SchemaDialogController controller = loader.getController();
+         controller.setSchema(schema);
          controller.setResponse(response);
 
          display(root);

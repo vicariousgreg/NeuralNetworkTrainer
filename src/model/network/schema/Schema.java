@@ -1,19 +1,18 @@
 package model.network.schema;
 
 import javafx.scene.Node;
+import javafx.scene.text.Text;
 import model.network.memory.Memory;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by gpdavis on 4/29/15.
  */
-public abstract class Schema implements Serializable {
-   /** Classes supported by this schema. */
-   public final List<Class> inputClasses;
+public class Schema implements Serializable {
+   /** Input adapter. */
+   public final InputAdapter inputAdapter;
 
    /** Size of input vector. */
    public final int inputSize;
@@ -25,26 +24,24 @@ public abstract class Schema implements Serializable {
    public final Object[] classifications;
 
    /**
-    * Constructor.
-    * @param inputClasses objects recognized as input
-    * @param inputSize the number of doubles that inputs are converted into
-    * @param classifications output classifications
+    * Default constructor.
+    * Assumes double[] inputs.
+    * @param classifications
     */
-   public Schema(Class[] inputClasses, int inputSize, Object[] classifications) {
-      this.inputClasses = new ArrayList<Class>();
-      this.inputClasses.addAll(Arrays.asList(inputClasses));
-      this.inputClasses.add(double[].class);
-      this.inputSize = inputSize;
-      this.outputSize = classifications.length;
-      this.classifications = classifications;
+   public Schema(Object[] classifications) {
+      this(null, classifications);
    }
 
    /**
-    * Returns a list of classes supported by this schema.
-    * @return supported class list
+    * Constructor.
+    * @param inputAdapter input adapter
+    * @param classifications output classifications
     */
-   public final Class[] getSupportedClasses() {
-      return inputClasses.toArray(new Class[inputClasses.size()]);
+   public Schema(InputAdapter inputAdapter, Object[] classifications) {
+      this.inputAdapter = inputAdapter;
+      this.inputSize = inputAdapter.inputSize;
+      this.outputSize = classifications.length;
+      this.classifications = classifications;
    }
 
    /**
@@ -63,7 +60,10 @@ public abstract class Schema implements Serializable {
     * @return whether the object class is supported
     */
    public final boolean validInput(Object obj) {
-      return inputClasses.contains(obj.getClass());
+      if (inputAdapter == null)
+         return obj instanceof double[] && ((double[])obj).length == inputSize;
+      else
+         return inputAdapter.validInput(obj);
    }
 
    /**
@@ -73,7 +73,7 @@ public abstract class Schema implements Serializable {
     * @return input vector
     */
    public final double[] encodeInput(Object in) throws Exception {
-      if (in instanceof double[]) return (double[]) in;
+      if (in instanceof double[] && ((double[])in).length == inputSize) return (double[]) in;
       else return encode(in);
    }
 
@@ -81,8 +81,17 @@ public abstract class Schema implements Serializable {
     * Recreates an input object given an input vector.
     * @param inputVector input vector
     * @return recreated input object
+    * @throws Exception if input vector is improper length
     */
-   public abstract Object recreateInput(double[] inputVector);
+   public Object recreateInput(double[] inputVector) throws Exception {
+      if (inputVector.length != inputSize)
+         throw new Exception ("Invalid input vector length!");
+
+      if (inputAdapter == null)
+         return inputVector;
+      else
+         return inputAdapter.recreateInput(inputVector);
+   }
 
    /**
     * Converts an input object to an input vector.
@@ -90,7 +99,9 @@ public abstract class Schema implements Serializable {
     * @return input vector
     */
 
-   public abstract double[] encode(Object in) throws Exception;
+   public double[] encode(Object in) throws Exception {
+      return inputAdapter.encode(in);
+   }
 
    /**
     * Converts an output string to an output vector.
@@ -159,10 +170,22 @@ public abstract class Schema implements Serializable {
 
    /**
     * Converts a memory to a JavaFX Node for rendering.
-    * @param memory memory
+    * @param in input object
     * @param width width of node
     * @param height height of node
     * @return javaFX node
     */
-   public abstract Node toFXNode(Memory memory, double width, double height) throws Exception;
+   public Node toFXNode(Object in, double width, double height) throws Exception {
+      if (inputAdapter == null) {
+         if (!(in instanceof double[]) || ((double[])in).length != inputSize)
+            throw new Exception ("Invalid input vector length!");
+
+         StringBuilder sb = new StringBuilder();
+         for (double inValue : (double[])in)
+            sb.append(inValue + "\n");
+         return new Text(sb.toString());
+      } else {
+         return inputAdapter.toFXNode(in, width, height);
+      }
+   }
 }
