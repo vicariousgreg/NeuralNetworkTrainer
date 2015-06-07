@@ -22,6 +22,8 @@ public class GenericList<T> {
    private T selectedItem;
    private ContextMenu contextMenu;
 
+   private boolean containsAllItem;
+
    private List<GenericHandler<T>> clickHandlers;
    private GenericHandler<T> allHandler;
 
@@ -31,17 +33,18 @@ public class GenericList<T> {
       this.listView = lv;
       this.selectedItem = null;
       this.contextMenu = new ContextMenu();
+      this.containsAllItem = false;
       this.clickHandlers = new ArrayList<GenericHandler<T>>();
 
       listView.setItems(FXCollections.observableArrayList());
 
       // Set cell factory to query FileManager for name.
-      listView.setCellFactory(new Callback<ListView<T>, ListCell<T>>(){
+      listView.setCellFactory(new Callback<ListView, ListCell>(){
          @Override
-         public ListCell<T> call(ListView<T> p) {
-            ListCell<T> cell = new ListCell<T>(){
+         public ListCell call(ListView p) {
+            ListCell cell = new ListCell(){
                @Override
-               protected void updateItem(T t, boolean bln) {
+               protected void updateItem(Object t, boolean bln) {
                   super.updateItem(t, bln);
                   if (t != null) {
                      setText(t.toString());
@@ -71,8 +74,12 @@ public class GenericList<T> {
             if (click.getButton() == MouseButton.PRIMARY) {
                // Load selection
                Object selection = listView.getSelectionModel().getSelectedItem();
-               if (selection.equals(kAll)) {
+
+               if (selection == null) {
+                  return;
+               } else if (selection.equals(kAll)) {
                   if (allHandler != null)
+                     selectedItem = null;
                      allHandler.handle(null);
                } else {
                   selectedItem = (T) selection;
@@ -102,6 +109,7 @@ public class GenericList<T> {
    }
 
    public void addAllItem(GenericHandler<T> handler) {
+      containsAllItem = true;
       listView.getItems().add(0, kAll);
       allHandler = handler;
    }
@@ -124,6 +132,8 @@ public class GenericList<T> {
 
    public void clear() {
       listView.getItems().clear();
+      if (containsAllItem)
+         listView.getItems().add(kAll);
    }
 
    public void addClickListener(GenericHandler<T> handler) {

@@ -11,7 +11,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import model.network.Network;
 import model.network.memory.Memory;
 
 import java.io.IOException;
@@ -88,10 +87,9 @@ public class InteractController extends NetworkController implements Initializab
       Color color = randomizer.getValue();
 
       try {
-         network.addMemory(color, classification);
-         shortTermMemoryBox.add(
-               new Memory(network.schema, color, classification),
-               network.schema);
+         Memory newMemory = new Memory(network.schema, color, classification);
+         network.addMemory(newMemory);
+         shortTermMemoryBox.add(network.schema, newMemory);
       } catch (Exception e) {
          e.printStackTrace();
       }
@@ -121,8 +119,8 @@ public class InteractController extends NetworkController implements Initializab
       if (network != null) {
          try {
             // Populate memory box.
-            shortTermMemoryBox.addAll(network.schema,
-                  network.getMemoryModule().getShortTermMemory());
+            shortTermMemoryBox.add(network.schema,
+                  network.getAllMemories());
          } catch (Exception e) {
             e.printStackTrace();
          }

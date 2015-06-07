@@ -1,5 +1,6 @@
 package model;
 
+import model.network.memory.*;
 import model.network.schema.*;
 import model.network.activation.*;
 
@@ -18,6 +19,13 @@ public class Registry {
                Sigmoid.class,
                SigmoidEstimate.class,
                SigmoidClip.class
+         };
+
+   public static final Class<? extends ActivationFunction>[] memoryModuleClasses =
+         new Class[] {
+               BasicMemoryModule.class,
+               ShortTermMemoryModule.class,
+               ClassifierMemoryModule.class
          };
 
    public static final Class[] inputClasses =

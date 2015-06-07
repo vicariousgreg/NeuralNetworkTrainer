@@ -12,26 +12,23 @@ public class ClassifierMemoryModule extends MemoryModule {
    public ClassifierMemoryModule(Schema schema) {
       super(schema);
    }
-   public List<List<Memory>> splitMemories() {
-      final double kCutoffPoint = 2 / 3;
 
+   @Override
+   public void onTrain() { }
+
+   /**
+    * Splits memories, ensuring that both the training and test sets include
+    * memories from each classification.
+    */
+   @Override
+   public List<List<Memory>> splitMemories() {
       List<List<Memory>> split = new ArrayList<List<Memory>>();
       List<Memory> trainingMemory = new ArrayList<Memory>();
       List<Memory> testMemory = new ArrayList<Memory>();
 
-      // Split long term memories.
-      for (Object key : longTermMemory.keySet()) {
-         ArrayList<Memory> shuffled = new ArrayList<Memory>(longTermMemory.get(key));
-         Collections.shuffle(shuffled);
-         int cutoff = (int) (shuffled.size() * kCutoffPoint);
-
-         trainingMemory.addAll(shuffled.subList(0, cutoff));
-         testMemory.addAll(shuffled.subList(cutoff, shuffled.size()));
-      }
-
-      // Split short term memories.
-      for (Object key : shortTermMemory.keySet()) {
-         ArrayList<Memory> shuffled = new ArrayList<Memory>(shortTermMemory.get(key));
+      // Split memories by classification.
+      for (Object key : memoryMap.keySet()) {
+         ArrayList<Memory> shuffled = new ArrayList<Memory>(memoryMap.get(key));
          Collections.shuffle(shuffled);
          int cutoff = (int) (shuffled.size() * kCutoffPoint);
 

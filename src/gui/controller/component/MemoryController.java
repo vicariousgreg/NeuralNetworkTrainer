@@ -11,6 +11,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
+import model.network.memory.Memory;
 import model.network.memory.MemoryModule;
 
 import java.net.URL;
@@ -71,22 +72,20 @@ public class MemoryController extends NetworkController implements Initializable
     * @throws Exception
     */
    private void loadMemory(Object classification) {
-      MemoryModule mem = network.getMemoryModule();
-
       try {
          // Populate short term memory box.
          shortTermMemoryBox.clear();
          if (classification == GenericList.kAll)
-            shortTermMemoryBox.addAll(network.schema, mem.getShortTermMemory());
+            shortTermMemoryBox.add(network.schema, network.getAllMemories());
          else
-            shortTermMemoryBox.add(network.schema, mem.getShortTermMemory(), classification);
+            shortTermMemoryBox.add(network.schema, network.getMemories(classification));
 
          // Populate long term memory box.
          longTermMemoryBox.clear();
          if (classification == GenericList.kAll)
-            longTermMemoryBox.addAll(network.schema, mem.getLongTermMemory());
+            longTermMemoryBox.add(network.schema, network.getAllMemories());
          else
-            longTermMemoryBox.add(network.schema, mem.getLongTermMemory(), classification);
+            longTermMemoryBox.add(network.schema, network.getMemories(classification));
       } catch (Exception e) {
          e.printStackTrace();
       }
@@ -118,7 +117,7 @@ public class MemoryController extends NetworkController implements Initializable
     */
    public void exportMemory() {
       if (!DialogFactory.displaySaveDialog(
-            network.getMemoryModule(),
+            network.getAllMemories(),
             (Stage) listView.getScene().getWindow())) {
          DialogFactory.displayErrorDialog("Could not save memories!");
       }
@@ -128,12 +127,12 @@ public class MemoryController extends NetworkController implements Initializable
     * Imports the network's memory from a file of the user's choice.
     */
    public void importMemory() {
-      MemoryModule mem = (MemoryModule) DialogFactory.displayLoadDialog(
+      List<Memory> mem = (List<Memory>) DialogFactory.displayLoadDialog(
             (Stage) listView.getScene().getWindow());
-      if (mem != null) {
-         network.setMemoryModule(mem);
+      try {
+         network.addMemories(mem);
          display();
-      } else {
+      } catch  (Exception e) {
          DialogFactory.displayErrorDialog("Could not load memories!");
       }
    }

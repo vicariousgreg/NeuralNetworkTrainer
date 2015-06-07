@@ -1,19 +1,19 @@
 package model.network;
 
-import model.network.memory.BasicMemoryModule;
-import model.network.memory.Memory;
-import model.network.memory.MemoryModule;
-import model.network.schema.Schema;
+import model.network.memory.*;
+import model.network.schema.*;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.lang.reflect.Constructor;
 import java.util.List;
 
 /**
  * Represents a neural network.
  */
 public class Network implements Serializable {
+   /** Network neuron map. */
+   private NeuronMap neuronMap;
+
    /** Network schema. */
    public final Schema schema;
 
@@ -23,21 +23,17 @@ public class Network implements Serializable {
    /** Memory of inputs and output test cases. */
    private MemoryModule memoryModule;
 
-   /** Network neuron layers. */
-   private ArrayList<Neuron[]> layers;
+   /** Network trainer. */
+   private NetworkTrainer networkTrainer;
 
-   /** Neuron input layer. */
-   private Neuron[] inputLayer;
-
-   /** Neuron output layer. */
-   private Neuron[] outputLayer;
-
+   /** Network name; */
    public String name;
 
 
    /**
     * Constructor.
     * Uses default parameters.
+    *
     * @param schema network schema
     */
    public Network(Schema schema) {
@@ -46,87 +42,22 @@ public class Network implements Serializable {
 
    /**
     * Constructor.
+    *
     * @param schema network schema
     * @param params network parameters
     */
    public Network(Schema schema, Parameters params) {
       this.schema = schema;
       this.parameters = params;
-      this.memoryModule = new BasicMemoryModule(schema);
-      buildNetwork();
-   }
+      this.neuronMap = new NeuronMap(schema, params);
+      this.networkTrainer = new NetworkTrainer(neuronMap, schema, params);
 
-   private void buildNetwork() {
-      layers = new ArrayList<Neuron[]>();
-
-      // Build input layer.
-      inputLayer = new Neuron[schema.inputSize];
-      for (int index = 0; index < inputLayer.length; ++index) {
-         inputLayer[index] = new Neuron(parameters);
-      }
-      layers.add(inputLayer);
-
-      Neuron[] prevLayer = inputLayer;
-
-      Integer[] hiddenLayerDepths = (Integer[]) parameters.getParameterValue(Parameters.kHiddenLayerDepths);
-
-      // Build hidden layers.
-      for (int layerIndex = 0; layerIndex < hiddenLayerDepths.length; ++layerIndex) {
-         // Build a layer.
-         Neuron[] currLayer = new Neuron[hiddenLayerDepths[layerIndex]];
-
-         // Hook layer up to previous layer.
-         for (int currIndex = 0; currIndex < currLayer.length; ++currIndex) {
-            currLayer[currIndex] = new Neuron(parameters);
-            for (int prevIndex = 0; prevIndex < prevLayer.length; ++prevIndex) {
-               // Hook up input from previous layer.
-               // Tell current neuron to expect input from previous.
-               currLayer[currIndex].addInputNeuron(prevLayer[prevIndex]);
-               // Tell previous neuron to notify current neuron.
-               prevLayer[prevIndex].addOutputNeuron(currLayer[currIndex]);
-            }
-            // Randomize neuron.
-            currLayer[currIndex].randomize();
-         }
-         layers.add(currLayer);
-
-         prevLayer = currLayer;
-      }
-
-      // Build output layer.
-      outputLayer = new Neuron[schema.outputSize];
-
-      // Hook layer up to previous layer.
-      for (int outIndex = 0; outIndex < outputLayer.length; ++outIndex) {
-         outputLayer[outIndex] = new Neuron(parameters);
-         for (int prevIndex = 0; prevIndex < prevLayer.length; ++prevIndex) {
-            // Hook up input from previous layer.
-            // Tell current neuron to expect input from previous.
-            outputLayer[outIndex].addInputNeuron(prevLayer[prevIndex]);
-            // Tell previous neuron to notify current neuron.
-            prevLayer[prevIndex].addOutputNeuron(outputLayer[outIndex]);
-         }
-         // Randomize neuron.
-         outputLayer[outIndex].randomize();
-      }
-      layers.add(outputLayer);
+      buildMemoryModule((Class)
+            params.getParameterValue(Parameters.kMemoryModule));
    }
 
    /**
-    * Resets the network by randomizing each neuron's weights.
-    * Retains memories and parameters.
-    */
-   public void reset() {
-      for (Neuron[] layer : layers) {
-         for (int index = 0; index < layer.length; ++index) {
-            layer[index].randomize();
-         }
-      }
-   }
-
-   /**
-    * Returns the network parameters.
-    * Returns a copy.
+    * Returns a copy of this network's parameters.
     * @return network parameters
     */
    public Parameters getParameters() {
@@ -139,37 +70,64 @@ public class Network implements Serializable {
     */
    public void setParameters(Parameters params) {
       this.parameters = params;
-      buildNetwork();
+      this.networkTrainer.setParameters(params);
+      this.neuronMap.build(schema, params);
+      buildMemoryModule((Class)
+            params.getParameterValue(Parameters.kMemoryModule));
    }
 
    /**
-    * Returns this network's memory module.
-    * @return memory module
+    * Builds a new memory module of the given class and moves memories.
+    * @param moduleClass new memory module class
     */
-   public MemoryModule getMemoryModule() {
-      return memoryModule;
+   public void buildMemoryModule(Class moduleClass) {
+      try {
+         MemoryModule oldMemory = this.memoryModule;
+
+         Constructor constructor = moduleClass.getConstructor(Schema.class);
+         this.memoryModule = (MemoryModule) constructor.newInstance(schema);
+
+         if (oldMemory != null) {
+            List<Memory> memories = oldMemory.getAllMemories();
+            memoryModule.add(memories);
+         }
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+
    }
 
-   public void setMemoryModule(MemoryModule mem) {
-      this.memoryModule = mem;
+   /**
+    * Gets memories of the given classification.
+    * @param classification memory classification
+    * @return memories
+    */
+   public List<Memory> getMemories(Object classification) {
+      return memoryModule.getMemories(classification);
    }
 
+   /**
+    * Gets all of this network's memories.
+    * @return memories
+    */
+   public List<Memory> getAllMemories() {
+      return memoryModule.getAllMemories();
+   }
 
    /**
     * Wipes the network's memory.
     */
    public void wipeMemory() {
-      memoryModule.wipeShortTermMemory();
-      memoryModule.wipeLongTermMemory();
+      memoryModule.wipeMemory();
    }
 
    /**
     * Adds a memory to the network's memory module using the network's schema.
-    * @param in input object
+    * @param in     input object
     * @param result resulting classification
     */
    public void addMemory(Object in, Object result) throws Exception {
-      memoryModule.add(in, result);
+      memoryModule.add(schema.createMemory(in, result));
    }
 
    /**
@@ -195,251 +153,24 @@ public class Network implements Serializable {
     * @throws Exception if the input does not fit the network schema
     */
    public Object query(Object in) throws Exception {
-      return schema.translateOutput(fire(schema.encodeInput(in)));
+      return schema.translateOutput(neuronMap.fire(schema.encodeInput(in)));
    }
 
    /**
-    * Fires the neural network and returns output.
-    * @param input input signals
-    * @return output signals
-    */
-   public double[] fire(double[] input) {
-      // Validate input size.
-      if (input.length != schema.inputSize)
-         throw new RuntimeException("Network fired with improper input!");
-
-      double[] output = new double[outputLayer.length];
-
-      for (int inputIndex = 0; inputIndex < inputLayer.length; ++inputIndex) {
-         inputLayer[inputIndex].fire(input[inputIndex]);
-      }
-
-      for (int outputIndex = 0; outputIndex < outputLayer.length; ++outputIndex) {
-         output[outputIndex] = outputLayer[outputIndex].getOutput();
-      }
-
-      return output;
-   }
-
-   /**
-    * Calculates the total test error by summing up individual test
-    * case errors.
-    * @param tests test suite
-    * @return total test error
-    */
-   private double calcTotalTestError(List<Memory> tests) {
-      double totalTestError = 0.0;
-      for (int i = 0; i < tests.size(); ++i) {
-         totalTestError += calcTestError(tests.get(i));
-      }
-      return totalTestError;
-   }
-
-   /**
-    * Runs a test and calculates the total error.
-    * Uses sum of quadratic deviations.
-    * @param test test to calculate error for
-    * @return total error
-    */
-   private double calcTestError(Memory test) {
-      double totalError = 0.0;
-      try {
-         // Get quadratic deviations for each output neuron
-         double[] errors = calcError(fire(test.inputVector),
-               test.outputVector);
-
-         // Total deviations.
-         for (int i = 0; i < errors.length; ++i) {
-            totalError += errors[i];
-         }
-      } catch (Exception e) {
-         System.out.println("Memory does not match network schema!");
-         e.printStackTrace();
-      }
-      return totalError;
-   }
-
-   /**
-    * Calculates the error of the network given actual and expected output.
-    * Uses quadratic deviation.
-    * @param actual network output
-    * @param expected expected output
-    * @return errors
-    */
-   private double[] calcError(double[] actual, double[] expected) {
-      double[] errors = new double[actual.length];
-
-      // Calculate test error for each output neuron.
-      for (int i = 0; i < actual.length; ++i) {
-         errors[i] = 0.5 *
-                     (expected[i] - actual[i]) *
-                     (expected[i] - actual[i]);
-      }
-      return errors;
-   }
-
-   /**
-    * Calculates backpropagation error, which is the derivative of the error.
-    * @param actual network output
-    * @param expected expected output
-    * @return backpropagation error
-    */
-   private double[] calcBPError(double[] actual, double[] expected) {
-      double[] errors = new double[actual.length];
-
-      // Calculate backpropagated error for each output neuron.
-      // Uses expected - actual so that error represents direction of gradient descent.
-      // Ommitting the extra output multiplication because the neuron does it for us.
-      for (int i = 0; i < actual.length; ++i) {
-         errors[i] = (expected[i] - actual[i]);
-      }
-      return errors;
-   }
-
-   /**
-    * Teaches the network using a memory.
-    * Uses backpropagation.
-    * @param memory memory to learn from
-    */
-   private void learn(Memory memory) {
-      // Fire network and gather output.
-      double[] output = fire(memory.inputVector);
-      double[] errors = calcBPError(output, memory.outputVector);
-
-      // Backpropagate to output layer using calcBPError.
-      for (int index = 0; index < outputLayer.length; ++index) {
-         outputLayer[index].backPropagate(errors[index]);
-      }
-   }
-
-   /**
-    * Trains the network with its memories.
+    * Trains this network using its memory module.
     */
    public void train() {
-      final boolean print = false;
+      List<Memory> trainingMemory;
+      List<Memory> testMemory;
 
-      // Split memory.
-      List<List<Memory>> split = memoryModule.splitMemories();
-      List<Memory> trainingMemory = split.get(0);
-      List<Memory> testMemory = split.get(1);
+      do {
+         // Split memory.
+         List<List<Memory>> split = memoryModule.splitMemories();
+         trainingMemory = split.get(0);
+         testMemory = split.get(1);
+      } while (!networkTrainer.train(trainingMemory, testMemory));
 
-      if (testMemory.size() == 0) {
-         System.out.println("Insufficient memory for training!");
-         return;
-      }
-
-      // Counter for master reset.
-      int masterCounter = 0;
-
-      // Counter for stale networks.
-      int staleCounter = 0;
-
-      // Test Errors.
-      double prevTestError = 1000;
-      double testError = calcTotalTestError(testMemory);
-
-      // Percentage of tests passed.
-      double prevPercentCorrect = 0;
-      double percentCorrect = calcPercentCorrect(testMemory);
-      double bestPercent = percentCorrect;
-
-      System.out.println("Total test error before learning: " + testError);
-      System.out.println("Passing percentage: %" + percentCorrect);
-      System.out.println("Training memory size: " + trainingMemory.size());
-      System.out.println("Test memory size: " + testMemory.size());
-
-      // Extract relevant parameters
-      Double acceptableTestError = (Double) parameters.getParameterValue(Parameters.kAcceptableTestError);
-      Double acceptablePercentCorrect = (Double) parameters.getParameterValue(Parameters.kAcceptablePercentCorrect);
-      Double regressionThreshold = (Double) parameters.getParameterValue(Parameters.kRegressionThreshold);
-      Integer staleThreshold = (Integer) parameters.getParameterValue(Parameters.kStaleThreshold);
-
-      // Teach the network until the error is acceptable.
-      // Loop is broken when conditions are met.
-      while (testError > acceptableTestError ||
-          percentCorrect < acceptablePercentCorrect) {
-         // Set up previous values.
-         prevTestError = testError;
-         prevPercentCorrect = percentCorrect;
-
-         // Teach the network using the tests.
-         for (int i = 0; i < trainingMemory.size(); ++i) {
-            learn(trainingMemory.get(i));
-         }
-
-         // Calculate error and percentage correct.
-         testError = calcTotalTestError(testMemory);
-         percentCorrect = calcPercentCorrect(testMemory);
-         if (percentCorrect > bestPercent) {
-            bestPercent = percentCorrect;
-            System.out.println("Best: " + bestPercent);
-         }
-
-
-         // Determine if the network needs to be reset.
-         // If it is unacceptable, and is either stale or has regressed
-         //   significantly in error, it should be reset.
-         if (staleCounter > staleThreshold ||
-             testError - prevTestError > regressionThreshold) {
-            if (print && staleCounter > staleThreshold) System.out.println("STALE");
-            reset();
-            staleCounter = 0;
-            if (print) System.out.println("====================");
-            if (print) System.out.println("Resetting network...");
-            if (print) System.out.println("====================");
-         // If the error and percentage correct have not changed significantly,
-         //   increase the stale counter.
-         } else if ((Double.compare(testError, 100) != 0 && 
-                     Double.compare(testError, prevTestError) == 0) ||
-                    Double.compare(percentCorrect, prevPercentCorrect) == 0) {
-            if (print) System.out.print(".");
-            ++staleCounter;
-         } else {
-            if (print) System.out.printf("Percent Correct: %.6f%%  |  ", percentCorrect);
-            if (print) System.out.printf("Test error: %.6f\n", testError);
-            staleCounter = 0;
-         }
-
-         if(++masterCounter > 200000) {
-            System.out.println("\nPassed 200,000 iterations.  Resetting memory split.");
-            masterCounter = 0;
-
-            split = memoryModule.splitMemories();
-            trainingMemory = split.get(0);
-            testMemory = split.get(1);
-         } else if (masterCounter % 10000 == 0) {
-            System.out.print(".");
-         }
-      }
-
-      System.out.println("Total test error after learning: " +
-         calcTotalTestError(testMemory));
-      System.out.println("Passing percentage: %" +
-         calcPercentCorrect(testMemory));
-      System.out.println();
-
-      if (print) System.out.println(toString());
-
-      // Commit short term memory.
-      memoryModule.commitShortTermMemories();
-   }
-
-   /**
-    * Calculates the percentage of test cases passed.
-    * @return percentage of tests passed
-    */
-   private double calcPercentCorrect(List<Memory> tests) {
-      int correct = 0;
-
-      // Run each test.
-      for (int i = 0; i < tests.size(); ++i) {
-         try {
-            Memory test = tests.get(i);
-            Object out = query(schema.encodeInput(test.inputVector));
-            if (out.equals(schema.translateOutput(test.outputVector))) ++correct;
-         } catch (Exception e) { e.printStackTrace(); }
-      }
-      return 100.0 * (double) correct / tests.size();
+      memoryModule.onTrain();
    }
 
    /**
@@ -468,21 +199,5 @@ public class Network implements Serializable {
     */
    public String toString() {
       return name;
-   }
-
-   /**
-    * Returns a string representation of this network's neuron map.
-    * @return string representation
-    */
-   public String getNeuronMap() {
-      StringBuilder sb = new StringBuilder("Network\n");
-
-      for (Neuron[] layer : layers) {
-         sb.append("  LAYER\n");
-         for (int i = 0; i < layer.length; ++i) {
-            sb.append(layer[i] + "\n");
-         }
-      }
-      return sb.toString();
    }
 }

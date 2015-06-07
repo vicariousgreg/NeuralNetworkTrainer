@@ -1,6 +1,8 @@
 package model.network;
 
+import model.Registry;
 import model.network.activation.*;
+import model.network.memory.BasicMemoryModule;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -19,6 +21,7 @@ public class Parameters implements Serializable {
    public static final String kStaleThreshold = "Stale Threshold";
    public static final String kAcceptableTestError = "Acceptable Test Error";
    public static final String kAcceptablePercentCorrect = "Acceptable Test Percentage Correct";
+   public static final String kMemoryModule = "Memory Module";
 
    public static final List<String> parametersList = new ArrayList<String>();
    static {
@@ -28,6 +31,7 @@ public class Parameters implements Serializable {
       parametersList.add(kStaleThreshold);
       parametersList.add(kAcceptableTestError);
       parametersList.add(kAcceptablePercentCorrect);
+      parametersList.add(kMemoryModule);
    }
 
    /** Neuron activation function. */
@@ -67,6 +71,11 @@ public class Parameters implements Serializable {
       /** Acceptable percentage correct for learning termination. */
       parameters.put(kAcceptablePercentCorrect,
             new Parameter<Double>(kAcceptablePercentCorrect, 80.0, 0.0, 99.9));
+
+      /** Memory module type. */
+      parameters.put(kMemoryModule,
+            new Parameter<Class>(kAcceptablePercentCorrect,
+                  BasicMemoryModule.class, Registry.memoryModuleClasses));
 
       activationFunction = new SigmoidEstimate(1, 1000);
    }
@@ -209,6 +218,10 @@ public class Parameters implements Serializable {
          return false;
       }
 
+      public T[] getEnumerations() {
+         return enumerations;
+      }
+
       public String toString() {
          StringBuilder sb = new StringBuilder(name + ":");
          if (minimum != null) sb.append("\n  Minimum: " + minimum.toString());
@@ -258,7 +271,7 @@ public class Parameters implements Serializable {
                   if (compNew.compareTo(compMax) > 0) return false;
                }
             }
-         } else {
+         } else if (minimum != null || maximum != null) {
             Comparable compNew = (Comparable) newValue;
 
             if (minimum != null) {
