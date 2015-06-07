@@ -18,15 +18,13 @@ import java.util.ResourceBundle;
 public class NetworkDialogController extends DialogController implements Initializable {
    @FXML TextField nameTextField;
    @FXML Label schemaLabel;
-   @FXML Label parametersLabel;
 
-   private Network network;
    private Schema schema;
    private Parameters params;
 
    @Override
    public void initialize(URL location, ResourceBundle resources) {
-      this.schema = new Schema(new ColorInputAdapter(),
+      this.schema = new Schema("Default Color Schema", new ColorInputAdapter(),
             new String[] {
                   "Red",
                   "Orange",
@@ -41,7 +39,7 @@ public class NetworkDialogController extends DialogController implements Initial
    }
 
    public void render() {
-      this.schemaLabel.setText(schema.inputAdapter.toString());
+      this.schemaLabel.setText(schema.name);
    }
 
    public void editSchema() {

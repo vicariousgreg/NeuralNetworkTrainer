@@ -1,146 +1,108 @@
 package application;
 
 import model.network.Network;
+import model.network.schema.Schema;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by gpdavis on 6/4/15.
  */
 public class FileManager {
-   /** Singleton instance. */
-   public static final FileManager instance = new FileManager();
-
    /** Path to network files. */
-   private static final String kNetworkPath = "src/application/data/networks/";
+   public static final String kNetworkPath = "src/application/data/networks/";
 
    /** Path to memory files. */
-   private static final String kMemoryPath = "src/application/data/memories/";
+   public static final String kMemoryPath = "src/application/data/memories/";
 
    /** Path to memory files. */
-   private static final String kSchemaPath = "src/application/data/schemas/";
+   public static final String kSchemaPath = "src/application/data/schemas/";
 
+   /**
+    * Loads the network with the given name.
+    * @throws Exception if networks could not be loaded
+    */
+   public static List<Network> loadNetworks() throws Exception {
+      final File dataFile = new File(kNetworkPath);
+      final File[] networkFiles = dataFile.listFiles();
+      List<Network> networks = new ArrayList<Network>();
 
-   /** Map of file names to networks. */
-   private Map<String, Network> networks;
-
-   /** Constructor. */
-   private FileManager() {
-      networks = new HashMap<String, Network>();
-      try {
-         loadNetworks();
-      } catch (Exception e) {
-         System.err.println("Could not load networks!");
+      for (File file : networkFiles) {
+         try {
+            networks.add((Network)loadObject(file));
+         } catch (Exception e) {
+            System.err.println("Could not load " + file.getName());
+         }
       }
+      return networks;
    }
 
    /**
     * Loads the network with the given name.
     * @throws Exception if networks could not be loaded
     */
-   private void loadNetworks() throws Exception {
-      File dataFile = new File(kNetworkPath);
-      File[] networkFiles = dataFile.listFiles();
+   public static List<Schema> loadSchemas() throws Exception {
+      final File dataFile = new File(kSchemaPath);
+      final File[] schemaFiles = dataFile.listFiles();
+      List<Schema> schemas = new ArrayList<Schema>();
 
-      for (File file : networkFiles) {
+      for (File file : schemaFiles) {
          try {
-            networks.put(file.getName(), loadNetwork(file));
+            schemas.add((Schema)loadObject(file));
          } catch (Exception e) {
             System.err.println("Could not load " + file.getName());
          }
       }
+      return schemas;
    }
 
    /**
-    * Loads a network.
-    * @param file network file
-    * @return network
-    * @throws Exception if network could not be loaded
+    * Loads a file.
+    * @param file file to load
+    * @return loaded object
+    * @throws Exception if object could not be loaded
     */
-   private Network loadNetwork(File file) throws Exception {
+   public static Object loadObject(File file) throws Exception {
       FileInputStream fin = new FileInputStream(file);
       ObjectInputStream ois = new ObjectInputStream(fin);
-      Network net = (Network) ois.readObject();
+      Object obj = ois.readObject();
       ois.close();
-      return net;
+      return obj;
    }
 
    /**
-    * Saves a network to storage.
-    * @param network network to save.
-    * @param name network file name
-    * @throws Exception if network could not be saved
+    * Saves an object.
+    * @param obj object to save
+    * @return whether save was successful
+    * @throws Exception if object could not be saved
     */
-   public void saveNetwork(Network network, String name) throws Exception {
-      if (!exists(name) ||
-            (exists(name) && getName(network) != null && getName(network).equals(name))) {
-         FileOutputStream fos = new FileOutputStream(new File(kNetworkPath + name));
+   public static boolean saveObject(Object obj) throws Exception {
+      String path = null;
+      if (obj instanceof Network)
+         path = kNetworkPath + ((Network) obj).name;
+      else if (obj instanceof Schema)
+         path = kSchemaPath + ((Schema) obj).name;
+
+      if (path != null) {
+         FileOutputStream fos = new FileOutputStream(new File(path));
          ObjectOutputStream out = new ObjectOutputStream(fos);
-         out.writeObject(network);
+         out.writeObject(obj);
          out.close();
-         networks.put(name, network);
-      } else {
-         throw new Exception ("Could not save network!");
+         return true;
       }
+      return false;
    }
 
    /**
-    * Saves a network to storage.
-    * @param network network to save.
-    * @throws Exception if network is not recognized or could not be saved
+    * Checks whether a file with the given name exists in storage.
+    * @param path path to directory to search
+    * @param name file name
+    * @return whether file exists in storage
     */
-   public void saveNetwork(Network network) throws Exception {
-      if (networks.containsValue(network)) {
-         String name = "";
-         for (String key : networks.keySet())
-            if (networks.get(key) == network) name = key;
-
-         FileOutputStream fos = new FileOutputStream(new File(kNetworkPath + name));
-         ObjectOutputStream out = new ObjectOutputStream(fos);
-         out.writeObject(network);
-         out.close();
-         networks.put(name, network);
-      } else {
-         throw new Exception ("Could not save network!");
-      }
-   }
-
-   /**
-    * Imports a network.
-    * @param networkFile network file
-    * @throws Exception if network could not be imported
-    */
-   public void importNetwork(File networkFile) throws Exception {
-      if (exists(networkFile.getName()))
-         throw new Exception("Network with same name already exists!");
-
-      saveNetwork(loadNetwork(networkFile), networkFile.getName());
-   }
-
-   /**
-    * Exports a network.
-    * @param network network to export
-    * @param destination destination file
-    * @throws Exception if network could not be exported
-    */
-   public void exportNetwork(Network network, File destination) throws Exception {
-      FileOutputStream fos = new FileOutputStream(destination);
-      ObjectOutputStream out = new ObjectOutputStream(fos);
-      out.writeObject(network);
-      out.close();
-   }
-
-   /**
-    * Checks whether a network with the given name exists.
-    * @param name network file name
-    * @return whether network exists
-    */
-   public boolean exists(String name) {
-      return networks.get(name) != null;
+   public static boolean exists(String path, String name) {
+      return new File(path + name).exists();
    }
 
    /**
@@ -148,42 +110,9 @@ public class FileManager {
     * @param name network file name
     * @throws Exception if network could not be deleted
     */
-   public void delete(String name) throws Exception {
-      if (exists(name)) {
-         File networkFile = new File(kNetworkPath + name);
-         networkFile.delete();
-         networks.remove(name);
-      } else {
-         throw new Exception ("Network does not exist!");
-      }
-   }
-
-   /**
-    * Gets a list of network names in storage.
-    * @return list of network names
-    */
-   public List<String> getNetworkNames() {
-      return new ArrayList<String>(networks.keySet());
-   }
-
-   /**
-    * Gets a map of names to networks loaded from storage.
-    * @return
-    */
-   public Map<String, Network> getNetworks() {
-      return networks;
-   }
-
-   /**
-    * Gets a network's name.
-    * @param network network to identify
-    * @return network name or null if does not exist
-    */
-   public String getName(Network network) {
-      for (String name : networks.keySet()) {
-         if (networks.get(name).equals(network))
-            return name;
-      }
-      return null;
+   public static void delete(String path, String name) throws Exception {
+      if (!exists(path, name))
+         throw new Exception ("File does not exist!");
+      new File(kNetworkPath + name).delete();
    }
 }

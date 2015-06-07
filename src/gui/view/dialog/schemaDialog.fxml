@@ -12,6 +12,12 @@
    <children>
       <VBox layoutX="37.0" layoutY="32.0" prefHeight="400.0" prefWidth="350.0" spacing="5.0">
          <children>
+            <Label text="Name:" />
+            <TextField fx:id="nameTextField">
+               <VBox.margin>
+                  <Insets bottom="10.0" />
+               </VBox.margin>
+            </TextField>
             <Label text="Input Type:" />
             <VBox alignment="TOP_CENTER" prefHeight="349.0" prefWidth="350.0" spacing="30.0">
                <children>
@@ -19,7 +25,7 @@
                   <Label text="Classifications:" />
                   <ScrollPane fx:id="scrollPane" prefHeight="219.0" prefViewportHeight="36.0" prefViewportWidth="350.0" prefWidth="350.0">
                      <content>
-                        <VBox alignment="TOP_CENTER" prefHeight="213.0" prefWidth="332.0" spacing="10.0">
+                        <VBox alignment="TOP_CENTER" prefHeight="182.0" prefWidth="332.0" spacing="10.0">
                            <children>
                               <VBox fx:id="classificationBox" alignment="TOP_CENTER" spacing="10.0" />
                               <Button mnemonicParsing="false" onAction="#addClassification" text="+" />

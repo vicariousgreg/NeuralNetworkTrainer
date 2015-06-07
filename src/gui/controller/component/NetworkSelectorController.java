@@ -2,6 +2,7 @@ package gui.controller.component;
 
 import application.DialogFactory;
 import application.FileManager;
+import application.NetworkManager;
 import gui.controller.widget.GenericHandler;
 import gui.controller.widget.GenericList;
 import javafx.fxml.FXML;
@@ -77,7 +78,7 @@ public class NetworkSelectorController extends MultiNetworkController implements
 
    public void saveNetwork() {
       try {
-         FileManager.instance.saveNetwork(networkList.getSelectedItem());
+         FileManager.saveObject(networkList.getSelectedItem());
       } catch (Exception e) { }
    }
 
@@ -85,7 +86,8 @@ public class NetworkSelectorController extends MultiNetworkController implements
       try {
          Network newNetwork = DialogFactory.displayNetworkDialog();
          if (newNetwork != null) {
-            FileManager.instance.saveNetwork(newNetwork, newNetwork.name);
+            FileManager.saveObject(newNetwork);
+            NetworkManager.instance.loadNetworks();
             loadNetworks();
          }
       } catch (Exception e) {
@@ -101,10 +103,10 @@ public class NetworkSelectorController extends MultiNetworkController implements
 
    private void loadNetworks() {
       networkList.clear();
-      for (Network net : FileManager.instance.getNetworks().values())
+      for (Network net : NetworkManager.instance.getNetworks())
          networkList.add(net);
 
       super.clearNetworks();
-      super.addNetworks(FileManager.instance.getNetworks().values());
+      super.addNetworks(NetworkManager.instance.getNetworks());
    }
 }

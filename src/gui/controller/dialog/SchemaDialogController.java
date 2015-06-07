@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class SchemaDialogController extends DialogController implements Initializable {
+   @FXML TextField nameTextField;
    @FXML ComboBox adapterComboBox;
    @FXML VBox classificationBox;
    @FXML ScrollPane scrollPane;
@@ -39,6 +40,7 @@ public class SchemaDialogController extends DialogController implements Initiali
    }
 
    public void setSchema(Schema schema) {
+      nameTextField.setText(schema.name);
       adapterComboBox.getSelectionModel().select(
             schema.inputAdapter.getClass().getSimpleName());
       for (Object classification : schema.getOutputClassifications()) {
@@ -98,7 +100,9 @@ public class SchemaDialogController extends DialogController implements Initiali
       for (TextField field : classificationFields)
          classifications.add(field.getText());
 
-      setResponseValue(new Schema(adapter, classifications.toArray()));
+      setResponseValue(new Schema(nameTextField.getText(),
+            adapter,
+            classifications.toArray()));
       close();
    }
 }

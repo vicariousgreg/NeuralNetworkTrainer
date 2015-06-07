@@ -11,6 +11,9 @@ import java.util.Arrays;
  * Created by gpdavis on 4/29/15.
  */
 public class Schema implements Serializable {
+   /** Schema name. */
+   public final String name;
+
    /** Input adapter. */
    public final InputAdapter inputAdapter;
 
@@ -28,8 +31,8 @@ public class Schema implements Serializable {
     * Assumes double[] inputs.
     * @param classifications
     */
-   public Schema(Object[] classifications) {
-      this(null, classifications);
+   public Schema(String name, Object[] classifications) {
+      this(name, null, classifications);
    }
 
    /**
@@ -37,7 +40,8 @@ public class Schema implements Serializable {
     * @param inputAdapter input adapter
     * @param classifications output classifications
     */
-   public Schema(InputAdapter inputAdapter, Object[] classifications) {
+   public Schema(String name, InputAdapter inputAdapter, Object[] classifications) {
+      this.name = name;
       this.inputAdapter = inputAdapter;
       this.inputSize = inputAdapter.inputSize;
       this.outputSize = classifications.length;
