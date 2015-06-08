@@ -31,8 +31,13 @@ public class Schema implements Serializable {
     * Assumes double[] inputs.
     * @param classifications
     */
-   public Schema(String name, Object[] classifications) {
-      this(name, null, classifications);
+   public Schema(String name, int size, Object[] classifications) {
+      this.name = name;
+      this.inputAdapter = null;
+      this.inputSize = size;
+      this.outputSize = classifications.length;
+      this.classifications = classifications;
+
    }
 
    /**
@@ -153,7 +158,7 @@ public class Schema implements Serializable {
     */
    public final boolean fits(Memory mem) {
       return (mem.inputVector.length == inputSize &&
-         mem.outputVector.length == outputSize);
+            Arrays.asList(classifications).contains(mem.output));
    }
 
    /**
@@ -172,8 +177,24 @@ public class Schema implements Serializable {
       return new Memory(this, in, out);
    }
 
+
    /**
     * Converts a memory to a JavaFX Node for rendering.
+    * @param mem memory
+    * @param width width of node
+    * @param height height of node
+    * @return javaFX node
+    */
+   public Node toFXNode(Memory mem, double width, double height) throws Exception {
+      if (fits(mem)) {
+         return toFXNode(mem.inputVector, width, height);
+      } else {
+         throw new Exception("Unrecognized memory!");
+      }
+   }
+
+   /**
+    * Converts an input object to a JavaFX Node for rendering.
     * @param in input object
     * @param width width of node
     * @param height height of node

@@ -1,6 +1,7 @@
 package gui.controller.component;
 
 import application.DialogFactory;
+import application.FileManager;
 import gui.controller.widget.GenericHandler;
 import gui.controller.widget.GenericList;
 import gui.controller.widget.MemoryBox;
@@ -116,9 +117,11 @@ public class MemoryController extends NetworkController implements Initializable
     * Exports the network's memory to a file of the user's choice.
     */
    public void exportMemory() {
-      if (!DialogFactory.displaySaveDialog(
-            network.getAllMemories(),
-            (Stage) listView.getScene().getWindow())) {
+      try {
+         FileManager.saveMemories(
+               DialogFactory.displayTextDialog("Enter memory set name:"),
+               network.getAllMemories());
+      } catch (Exception e) {
          DialogFactory.displayErrorDialog("Could not save memories!");
       }
    }
@@ -127,12 +130,10 @@ public class MemoryController extends NetworkController implements Initializable
     * Imports the network's memory from a file of the user's choice.
     */
    public void importMemory() {
-      List<Memory> mem = (List<Memory>) DialogFactory.displayLoadDialog(
-            (Stage) listView.getScene().getWindow());
       try {
-         network.addMemories(mem);
-         display();
-      } catch  (Exception e) {
+         FileManager.loadMemories(
+               DialogFactory.displayTextDialog("Enter memory set name:"));
+      } catch (Exception e) {
          DialogFactory.displayErrorDialog("Could not load memories!");
       }
    }

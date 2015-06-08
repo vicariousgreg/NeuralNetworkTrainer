@@ -44,8 +44,7 @@ public class ShortTermMemoryModule extends MemoryModule {
    public void add(Memory memory) throws Exception  {
       super.add(memory);
 
-      Object classification = schema.translateOutput(memory.outputVector);
-      shortTermMemoryMap.get(classification).add(memory);
+      shortTermMemoryMap.get(memory.output).add(memory);
    }
 
    @Override

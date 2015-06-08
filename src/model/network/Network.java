@@ -159,17 +159,55 @@ public class Network implements Serializable {
     * Trains this network using its memory module.
     */
    public void train() {
-      List<Memory> trainingMemory;
-      List<Memory> testMemory;
+      try {
+         List<Memory> trainingMemory;
+         List<Memory> testMemory;
 
-      do {
-         // Split memory.
-         List<List<Memory>> split = memoryModule.splitMemories();
-         trainingMemory = split.get(0);
-         testMemory = split.get(1);
-      } while (!networkTrainer.train(trainingMemory, testMemory));
+         do {
+            // Split memory.
+            List<List<Memory>> split = memoryModule.splitMemories();
+            trainingMemory = split.get(0);
+            testMemory = split.get(1);
+         } while (!networkTrainer.train(trainingMemory, testMemory));
 
-      memoryModule.onTrain();
+         memoryModule.onTrain();
+      } catch (Exception e) {
+         System.err.println("Network has corrupt memories!");
+      }
+   }
+
+   /**
+    * Trains this network once with a given training and test set.
+    * @param trainingSet training set
+    * @param testSet test set
+    */
+   public void train(List<Memory> trainingSet, List<Memory> testSet) throws Exception {
+      networkTrainer.train(trainingSet, testSet);
+   }
+
+   /**
+    * Crosses over two networks to produce a child network.
+    * @param left left parent
+    * @param right right parent
+    * @return child network
+    */
+   public static Network crossover(Network left, Network right) {
+      // Schemas should be equal
+      // Cross over parameters by randomly selecting differing ones
+      // Memory crossover?  Probably not.
+      Parameters crossoverParameters = left.parameters;
+
+      Network child = new Network("Child", left.schema, left.parameters);
+      child.neuronGraph =
+         NeuronGraph.crossover(left.neuronGraph, right.neuronGraph, crossoverParameters);
+      return child;
+   }
+
+   /**
+    * Mutates the network.
+    */
+   public void mutate() {
+      neuronGraph.mutate();
    }
 
    /**
@@ -190,6 +228,14 @@ public class Network implements Serializable {
       } catch (ClassNotFoundException e) {
          return null;
       }
+   }
+
+   /**
+    * Gets the string representation of this network's neuron graph.
+    * @return neuron graph string
+    */
+   public String getNeuronGraphString() {
+      return neuronGraph.toString();
    }
 
    /**

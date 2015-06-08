@@ -13,10 +13,18 @@ import java.util.Random;
  * Created by gpdavis on 6/5/15.
  */
 public class ColorRandomizer extends Randomizer<Color> {
-   private Random rand;
+   /** GUI color rectangle. */
    private Rectangle colorBox;
+   /** GUI color picker. */
    private ColorPicker colorPicker;
+   /** Random number generator. */
+   private Random rand;
 
+   /**
+    * Constructor.
+    * @param cb color rectangle
+    * @param cp color picker
+    */
    public ColorRandomizer(Rectangle cb, ColorPicker cp) {
       rand = new Random();
       this.colorBox = cb;
@@ -39,6 +47,7 @@ public class ColorRandomizer extends Randomizer<Color> {
       randomize();
    }
 
+   @Override
    public void randomize() {
       double r = rand.nextDouble();
       double g = rand.nextDouble();
@@ -48,6 +57,7 @@ public class ColorRandomizer extends Randomizer<Color> {
       super.randomize();
    }
 
+   @Override
    public void render() {
       colorPicker.setValue(value);
       colorBox.setFill(value);

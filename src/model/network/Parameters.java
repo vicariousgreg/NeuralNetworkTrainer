@@ -21,6 +21,7 @@ public class Parameters implements Serializable {
    public static final String kStaleThreshold = "Stale Threshold";
    public static final String kAcceptableTestError = "Acceptable Test Error";
    public static final String kAcceptablePercentCorrect = "Acceptable Test Percentage Correct";
+   public static final String kIterationCap = "Training iteration cap";
    public static final String kMemoryModule = "Memory Module";
 
    public static final List<String> parametersList = new ArrayList<String>();
@@ -31,6 +32,7 @@ public class Parameters implements Serializable {
       parametersList.add(kStaleThreshold);
       parametersList.add(kAcceptableTestError);
       parametersList.add(kAcceptablePercentCorrect);
+      parametersList.add(kIterationCap);
       parametersList.add(kMemoryModule);
    }
 
@@ -70,7 +72,10 @@ public class Parameters implements Serializable {
             new Parameter<Double>(kAcceptableTestError, 100.0, 1.0, null));
       /** Acceptable percentage correct for learning termination. */
       parameters.put(kAcceptablePercentCorrect,
-            new Parameter<Double>(kAcceptablePercentCorrect, 80.0, 0.0, 99.9));
+            new Parameter<Double>(kAcceptablePercentCorrect, 80.0, 0.0, 100.0));
+      /** Acceptable percentage correct for learning termination. */
+      parameters.put(kIterationCap,
+            new Parameter<Integer>(kIterationCap, 20000, 1, 1000000));
 
       /** Memory module type. */
       parameters.put(kMemoryModule,
@@ -242,12 +247,14 @@ public class Parameters implements Serializable {
                sb.append(o.toString() + " ");
             }
             return sb.toString().trim();
+         } else if (value instanceof Class) {
+            return ((Class) value).getSimpleName();
          }
          return value.toString();
       }
 
       public Parameter<T> clone() {
-         Parameter<T> clone = null;
+         Parameter<T> clone;
          if (enumerations != null)
             clone = new Parameter(name, value, enumerations);
          else

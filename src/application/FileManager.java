@@ -1,6 +1,7 @@
 package application;
 
 import model.network.Network;
+import model.network.memory.Memory;
 import model.network.schema.Schema;
 
 import java.io.*;
@@ -59,6 +60,28 @@ public class FileManager {
    }
 
    /**
+    * Loads a list of memories to storage.
+    * @param name name of memory set
+    */
+   public static List<Memory> loadMemories(String name) throws Exception {
+      if (!exists(kMemoryPath, name))
+         throw new Exception ("Unable to load memory set!");
+
+      List<Memory> memories = new ArrayList<Memory>();
+
+      String path = kMemoryPath + name + "/";
+
+      final File[] classificationsDirectories = new File(path).listFiles();
+
+      for (File classFile : classificationsDirectories) {
+         for (File memFile : classFile.listFiles()) {
+            memories.add((Memory) loadObject(memFile));
+         }
+      }
+      return memories;
+   }
+
+   /**
     * Loads a file.
     * @param file file to load
     * @return loaded object
@@ -93,6 +116,31 @@ public class FileManager {
          return true;
       }
       return false;
+   }
+
+   /**
+    * Saves a list of memories to storage.
+    * @param name name of memory set
+    * @param memories memories to save
+    */
+   public static void saveMemories(String name, List<Memory> memories) throws Exception {
+      if (!exists(kMemoryPath, name))
+         new File(kMemoryPath + name).mkdir();
+
+      String path = kMemoryPath + name + "/";
+
+      for (Memory mem : memories) {
+         // Create classification subdirectory if necessary.
+         if (!exists(path, mem.output.toString()))
+            new File(path + mem.output.toString()).mkdir();
+
+         String memPath = path + mem.output.toString() + "/" + mem.hashCode();
+
+         FileOutputStream fos = new FileOutputStream(new File(memPath));
+         ObjectOutputStream out = new ObjectOutputStream(fos);
+         out.writeObject(mem);
+         out.close();
+      }
    }
 
    /**

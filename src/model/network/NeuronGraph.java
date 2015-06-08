@@ -5,6 +5,8 @@ import model.network.schema.Schema;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * Graph of neural network neurons.
@@ -19,12 +21,16 @@ public class NeuronGraph implements Serializable {
    /** Neuron output layer. */
    private Neuron[] outputLayer;
 
+   /** Network schema. */
+   private Schema schema;
+
    /**
     * Constructor.
     * @param schema input/output schema
     * @param parameters network parameters
     */
    public NeuronGraph(Schema schema, Parameters parameters) {
+      this.schema = schema;
       build(schema, parameters);
    }
 
@@ -34,6 +40,7 @@ public class NeuronGraph implements Serializable {
     * @param parameters network parameters
     */
    public void build(Schema schema, Parameters parameters) {
+      this.schema = schema;
       layers = new ArrayList<Neuron[]>();
 
       // Build input layer.
@@ -127,10 +134,10 @@ public class NeuronGraph implements Serializable {
     * Teaches the network a memory using backpropagation.
     * @param memory memory to learn from
     */
-   public void backpropagate(Memory memory) {
+   public void backpropagate(Memory memory) throws Exception {
       // Fire network and gather output.
       double[] output = fire(memory.inputVector);
-      double[] errors = calcBPError(output, memory.outputVector);
+      double[] errors = calcBPError(output, schema.encodeOutput(memory.output));
 
       // Backpropagate to output layer using calcBPError.
       for (int index = 0; index < outputLayer.length; ++index) {
@@ -149,11 +156,91 @@ public class NeuronGraph implements Serializable {
 
       // Calculate backpropagated error for each output neuron.
       // Uses expected - actual so that error represents direction of gradient descent.
-      // Ommitting the extra output multiplication because the neuron does it for us.
+      // Omitting the extra output multiplication because the neuron does it for us.
       for (int i = 0; i < actual.length; ++i) {
          errors[i] = (expected[i] - actual[i]);
       }
       return errors;
+   }
+
+   /**
+    * Crosses over two neuron graphs.
+    * @param left left parent
+    * @param right right parent
+    * @return child graph
+    */
+   public static NeuronGraph crossover(NeuronGraph left, NeuronGraph right, Parameters params) {
+      NeuronGraph child = new NeuronGraph(left.schema, params);
+
+      Neuron[] leftPrevLayer = left.inputLayer;
+      Neuron[] rightPrevLayer = right.inputLayer;
+      Neuron[] childPrevLayer = child.inputLayer;
+
+
+      // Mutate all layers except input layer.
+      for (int layerIndex = 1; layerIndex < child.layers.size(); ++layerIndex) {
+         Neuron[] leftCurrLayer = left.layers.get(layerIndex);
+         Neuron[] rightCurrLayer = right.layers.get(layerIndex);
+         Neuron[] childCurrLayer = child.layers.get(layerIndex);
+
+         // For each current layer neuron...
+         for (int neuronIndex = 0; neuronIndex < childCurrLayer.length; ++neuronIndex) {
+            Neuron leftNeuron = leftCurrLayer[neuronIndex];
+            Neuron rightNeuron = rightCurrLayer[neuronIndex];
+            Neuron childNeuron = childCurrLayer[neuronIndex];
+
+            Map<Neuron, Double> leftWeights = leftNeuron.getWeights();
+            Map<Neuron, Double> rightWeights = rightNeuron.getWeights();
+            Map<Neuron, Double> childWeights = childNeuron.getWeights();
+
+            // Average weights for each previous layer neuron...
+            for (int prevIndex = 0; prevIndex < childPrevLayer.length; ++prevIndex) {
+               double leftWeight = leftWeights.get(leftPrevLayer[prevIndex]);
+               double rightWeight = rightWeights.get(rightPrevLayer[prevIndex]);
+               double average = (leftWeight + rightWeight) / 2;
+
+               double newWeight;
+
+               // Take either left parent weight, right parent weight, or average weight.
+               double rand = new Random().nextDouble();
+               if (rand < 0.33) {
+                  newWeight = leftWeight;
+               } else if (rand < 0.67) {
+                  newWeight = leftWeight;
+               } else {
+                  newWeight = average;
+               }
+
+               childWeights.put(childPrevLayer[prevIndex], newWeight);
+            }
+         }
+
+         leftPrevLayer = leftCurrLayer;
+         rightPrevLayer = rightCurrLayer;
+         childPrevLayer = childCurrLayer;
+      }
+
+      return child;
+   }
+
+   /**
+    * Mutates the neuron graph.
+    */
+   public void mutate() {
+      // Likelihood of mutating neuron.
+      final double kNeuronMutationRate = 0.5;
+
+      Random rand = new Random();
+
+      // Mutate all layers except input layer.
+      for (int layerIndex = 1; layerIndex < layers.size(); ++layerIndex) {
+         for (Neuron neuron : layers.get(layerIndex)) {
+            // Mutate neuron according to mutation rate.
+            if (Double.compare(rand.nextDouble(), kNeuronMutationRate) < 0) {
+               neuron.mutate();
+            }
+         }
+      }
    }
 
    @Override

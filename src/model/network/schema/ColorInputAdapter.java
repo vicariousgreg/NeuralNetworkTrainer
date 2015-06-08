@@ -18,7 +18,9 @@ public class ColorInputAdapter extends InputAdapter {
 
    @Override
    public boolean validInput(Object in) {
-      return in instanceof Color;
+      return in instanceof Color ||
+            (in instanceof double[] &&
+                  ((double[])in).length == inputSize);
    }
 
    @Override
@@ -33,12 +35,16 @@ public class ColorInputAdapter extends InputAdapter {
    @Override
    public double[] encode(Object in) throws Exception {
       if (validInput(in)) {
-         Color color = (Color) in;
-         return new double[] {
-            color.getRed(),
-            color.getGreen(),
-            color.getBlue()
-         };
+         if (in instanceof double[]) {
+            return (double[]) in;
+         } else {
+            Color color = (Color) in;
+            return new double[] {
+                  color.getRed(),
+                  color.getGreen(),
+                  color.getBlue()
+            };
+         }
       } else {
          throw new Exception("Unrecognized input!");
       }
@@ -47,7 +53,13 @@ public class ColorInputAdapter extends InputAdapter {
    @Override
    public Node toFXNode(Object in, double width, double height) throws Exception {
       if (validInput(in)) {
-         Color color = (Color) in;
+         Color color;
+         if (in instanceof double[]) {
+            color = (Color) recreateInput((double[])in);
+         } else {
+            color = (Color) in;
+         }
+
          Rectangle rect = new Rectangle(width, height);
          rect.setFill(color);
          return rect;

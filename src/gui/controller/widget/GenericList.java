@@ -18,17 +18,29 @@ import java.util.List;
  * Created by gpdavis on 6/5/15.
  */
 public class GenericList<T> {
+   /** GUI list view. */
    private ListView listView;
+   /** Selected item in the list. */
    private T selectedItem;
+   /** Context menu. */
    private ContextMenu contextMenu;
 
-   private boolean containsAllItem;
-
-   private List<GenericHandler<T>> clickHandlers;
-   private GenericHandler<T> allHandler;
-
+   /** All string. */
    public static final String kAll = "=== ALL ===";
 
+   /** Whether an 'all' item exists in this list. */
+   private boolean containsAllItem;
+
+   /** Click handler for 'All' item, if one exists. */
+   private GenericHandler<T> allHandler;
+
+   /** Registered click handlers. */
+   private List<GenericHandler<T>> clickHandlers;
+
+   /**
+    * Constructor.
+    * @param lv list view to hook into
+    */
    public GenericList(ListView lv) {
       this.listView = lv;
       this.selectedItem = null;
@@ -93,6 +105,10 @@ public class GenericList<T> {
       });
    }
 
+   /**
+    * Sets the selected item in the list.
+    * @param newSelection item to select
+    */
    public void setSelectedItem(T newSelection) {
       if (listView.getItems().contains(newSelection)) {
          selectedItem = newSelection;
@@ -100,46 +116,84 @@ public class GenericList<T> {
       }
    }
 
+   /**
+    * Gets the selected item in the list.
+    * @return selected item
+    */
    public T getSelectedItem() {
       return selectedItem;
    }
 
+   /**
+    * Gets a list of all items in this list.
+    * @return list of items
+    */
    public List<T> getAll() {
       return listView.getItems();
    }
 
+   /**
+    * Adds an 'all' item to the list
+    * @param handler all item click handler
+    */
    public void addAllItem(GenericHandler<T> handler) {
-      containsAllItem = true;
-      listView.getItems().add(0, kAll);
+      if (!containsAllItem) {
+         containsAllItem = true;
+         listView.getItems().add(0, kAll);
+      }
       allHandler = handler;
    }
 
+   /**
+    * Adds multiple items to the list.
+    * @param items items to add
+    */
    public void addAll(T[] items) {
       for (int i = 0; i < items.length; ++i) {
          add(items[i]);
       }
    }
 
+   /**
+    * Adds a single item to the list.
+    * @param item item to add
+    */
    public void add(T item) {
       if (!listView.getItems().contains(item))
          listView.getItems().add(item);
    }
 
+   /**
+    * Removes an item from the list, if it exists.
+    * @param item item to remove
+    */
    public void remove(T item) {
       if (listView.getItems().contains(item))
          listView.getItems().remove(item);
    }
 
+   /**
+    * Clears the list.
+    */
    public void clear() {
       listView.getItems().clear();
       if (containsAllItem)
          listView.getItems().add(kAll);
    }
 
+   /**
+    * Adds a click listener.
+    * @param handler on click handler
+    */
    public void addClickListener(GenericHandler<T> handler) {
       clickHandlers.add(handler);
    }
 
+   /**
+    * Adds a context menu item.
+    * @param name menu item name
+    * @param handler click handler for context menu item
+    */
    public void addContextMenuItem(String name, GenericHandler<T> handler) {
       final GenericHandler<T> finalHandler = handler;
 

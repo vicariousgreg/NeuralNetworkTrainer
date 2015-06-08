@@ -49,8 +49,8 @@ public class Neuron implements Serializable {
       this.numInputs = 0;
       this.learningConstant = (Double)params.getParameterValue(Parameters.kLearningConstant);
       this.activationFunction = params.getActivationFunction();
-      this.weights = new HashMap<Neuron, Double>();
-      this.inputs = new HashMap<Neuron, Double>();
+      this.weights = new LinkedHashMap<Neuron, Double>();
+      this.inputs = new LinkedHashMap<Neuron, Double>();
       this.outputNeurons = new ArrayList<Neuron>();
    }
 
@@ -102,7 +102,7 @@ public class Neuron implements Serializable {
 
          // Backpropagate error to input neurons.
          for (Neuron key : inputs.keySet()) {
-            ((Neuron) key).backPropagate(error * weights.get(key));
+            key.backPropagate(error * weights.get(key));
          }
 
          // Update weights.
@@ -140,6 +140,36 @@ public class Neuron implements Serializable {
       return output;
    }
 
+   /**
+    * Mutates this neuron.
+    * Used for genetic algorithm.
+    */
+   public void mutate() {
+      // Likelihood of mutating weight.
+      final double kWeightMutationRate = 0.5;
+      // Bounds of weight mutation.
+      final double kMutationBounds = 0.1;
+
+      Random rand = new Random();
+
+      // Mutate neuron.
+      for (Neuron key : weights.keySet()) {
+         // Mutate weight.
+         if (Double.compare(rand.nextDouble(), kWeightMutationRate) < 0) {
+            // Generate a sigma between -kMutationBounds and +kMutationBounds.
+            double weightSigma =
+                  rand.nextDouble() * (2 * kMutationBounds) - kMutationBounds;
+            weights.put(key, weights.get(key) + weightSigma);
+         }
+      }
+
+      // Mutate bias.
+      // Generate a sigma between -kMutationBounds and +kMutationBounds.
+      double weightSigma =
+            rand.nextDouble() * (2 * kMutationBounds) - kMutationBounds;
+      bias += weightSigma;
+   }
+
    public void update(Neuron o, Object arg) {
       ++inputCounter;
       inputs.put(o, (Double) arg);
@@ -158,5 +188,15 @@ public class Neuron implements Serializable {
          // Calculate and fire signal output.
          fire(activationFunction.calculate(x));
       }
+   }
+
+   @Override
+   public String toString() {
+      StringBuilder sb = new StringBuilder();
+
+      for (Neuron key : weights.keySet()) {
+         sb.append(weights.get(key) + "\n");
+      }
+      return sb.toString();
    }
 }

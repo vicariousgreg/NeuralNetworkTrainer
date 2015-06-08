@@ -27,7 +27,7 @@ public class NetworkTrainer implements Serializable {
    /**
     * Trains the network with its memories.
     */
-   public boolean train(List<Memory> trainingMemory, List<Memory> testMemory) {
+   public boolean train(List<Memory> trainingMemory, List<Memory> testMemory) throws Exception {
       final boolean debug = false;
 
       if (trainingMemory.size() == 0 || testMemory.size() == 0) {
@@ -64,6 +64,8 @@ public class NetworkTrainer implements Serializable {
             parameters.getParameterValue(Parameters.kRegressionThreshold);
       Integer staleThreshold = (Integer)
             parameters.getParameterValue(Parameters.kStaleThreshold);
+      Integer iterationCap = (Integer)
+            parameters.getParameterValue(Parameters.kIterationCap);
 
       // Teach the network until the error is acceptable.
       // Loop is broken when conditions are met.
@@ -92,12 +94,16 @@ public class NetworkTrainer implements Serializable {
          //   significantly in error, it should be reset.
          if (staleCounter > staleThreshold ||
                testError - prevTestError > regressionThreshold) {
+            return false;
+
+            /*
             if (debug && staleCounter > staleThreshold) System.out.println("STALE");
             neuronGraph.reset();
             staleCounter = 0;
             if (debug) System.out.println("====================");
             if (debug) System.out.println("Resetting network...");
             if (debug) System.out.println("====================");
+            */
             // If the error and percentage correct have not changed significantly,
             //   increase the stale counter.
          } else if ((Double.compare(testError, 100) != 0 &&
@@ -111,8 +117,8 @@ public class NetworkTrainer implements Serializable {
             staleCounter = 0;
          }
 
-         if(++masterCounter > 100000) {
-            if (debug) System.out.println("Passed 100,000 iterations.  Reshuffling memories...");
+         if(++masterCounter > iterationCap) {
+            if (debug) System.out.printf("Passed %d iterations.  Reshuffling memories...\n", iterationCap);
             return false;
          } else if (masterCounter % 10000 == 0) {
             if (debug) System.out.print(".");
@@ -153,7 +159,7 @@ public class NetworkTrainer implements Serializable {
       try {
          // Get quadratic deviations for each output neuron
          double[] errors = calcError(neuronGraph.fire(test.inputVector),
-               test.outputVector);
+               test.output);
 
          // Total deviations.
          for (int i = 0; i < errors.length; ++i) {
@@ -173,14 +179,15 @@ public class NetworkTrainer implements Serializable {
     * @param expected expected output
     * @return errors
     */
-   private double[] calcError(double[] actual, double[] expected) {
+   private double[] calcError(double[] actual, Object expected) throws Exception {
       double[] errors = new double[actual.length];
+      double[] expectedVector = schema.encodeOutput(expected);
 
       // Calculate test error for each output neuron.
       for (int i = 0; i < actual.length; ++i) {
          errors[i] = 0.5 *
-               (expected[i] - actual[i]) *
-               (expected[i] - actual[i]);
+               (expectedVector[i] - actual[i]) *
+               (expectedVector[i] - actual[i]);
       }
       return errors;
    }
@@ -200,8 +207,7 @@ public class NetworkTrainer implements Serializable {
             double[] outVector = neuronGraph.fire(test.inputVector);
 
             Object out = schema.translateOutput(outVector);
-            Object testOut = schema.translateOutput(test.outputVector);
-            if (out.equals(testOut)) ++correct;
+            if (out.equals(test.output)) ++correct;
          } catch (Exception e) { e.printStackTrace(); }
       }
       return 100.0 * (double) correct / tests.size();

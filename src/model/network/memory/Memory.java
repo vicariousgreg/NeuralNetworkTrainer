@@ -12,8 +12,8 @@ import java.util.Arrays;
 public class Memory implements Serializable {
    /** Input vector. */
    public final double[] inputVector;
-   /** Output vector. */
-   public final double[] outputVector;
+   /** Output object. */
+   public final Object output;
 
    /**
     * Constructor.
@@ -23,7 +23,7 @@ public class Memory implements Serializable {
     */
    public Memory(Schema schema, Object in, Object out) throws Exception {
       this.inputVector = schema.encodeInput(in);
-      this.outputVector = schema.encodeOutput(out);
+      this.output = out;
    }
 
    /**
@@ -32,6 +32,6 @@ public class Memory implements Serializable {
     */
    public String toString() {
       return "Input: " + Arrays.toString(inputVector) + "\n" +
-         "Expected output: " + Arrays.toString(outputVector);
+         "Expected output: " + output.toString();
    }
 }

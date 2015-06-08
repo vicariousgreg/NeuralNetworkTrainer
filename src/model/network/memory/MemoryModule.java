@@ -68,8 +68,7 @@ public abstract class MemoryModule implements Serializable {
       if (!schema.fits(memory))
          throw new Exception("Memory does not fit network schema!");
 
-      Object classification = schema.translateOutput(memory.outputVector);
-      memoryMap.get(classification).add(memory);
+      memoryMap.get(memory.output).add(memory);
    }
 
    /**
