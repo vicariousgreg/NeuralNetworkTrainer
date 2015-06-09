@@ -4,6 +4,7 @@ import javafx.scene.layout.FlowPane;
 import model.network.memory.Memory;
 import model.network.schema.Schema;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -27,7 +28,7 @@ public class MemoryBox {
     * @param memories memories to add
     * @throws Exception if adding the memories failed
     */
-   public void add(Schema schema, List<Memory> memories) throws Exception {
+   public void add(Schema schema, Collection<Memory> memories) throws Exception {
       for (Memory memory : memories)
          add(schema, memory);
    }

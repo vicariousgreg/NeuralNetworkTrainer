@@ -11,9 +11,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.FlowPane;
-import javafx.stage.Stage;
 import model.network.memory.Memory;
-import model.network.memory.MemoryModule;
 
 import java.net.URL;
 import java.util.*;
@@ -77,7 +75,7 @@ public class MemoryController extends NetworkController implements Initializable
          // Populate short term memory box.
          shortTermMemoryBox.clear();
          if (classification == GenericList.kAll)
-            shortTermMemoryBox.add(network.schema, network.getAllMemories());
+            shortTermMemoryBox.add(network.schema, network.getPrototypes());
          else
             shortTermMemoryBox.add(network.schema, network.getMemories(classification));
 

@@ -41,6 +41,7 @@ public class InteractController extends NetworkController implements Initializab
       classificationList.addClickListener(new GenericHandler<Object>() {
          @Override
          public void handle(Object classification) {
+            System.out.println(classification);
             correct();
          }
       });

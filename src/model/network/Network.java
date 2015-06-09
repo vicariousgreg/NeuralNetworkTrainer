@@ -1,11 +1,13 @@
 package model.network;
 
+import model.geneticAlgorithm.GeneticAlgorithm;
+import model.geneticAlgorithm.PrototypeGeneticAdapter;
 import model.network.memory.*;
 import model.network.schema.*;
 
 import java.io.*;
 import java.lang.reflect.Constructor;
-import java.util.List;
+import java.util.*;
 
 /**
  * Represents a neural network.
@@ -22,6 +24,9 @@ public class Network implements Serializable {
 
    /** Memory of inputs and output test cases. */
    MemoryModule memoryModule;
+
+   /** Prototype map. */
+   private Map<Object, Memory> prototypes;
 
    /** Network name; */
    public String name;
@@ -46,6 +51,8 @@ public class Network implements Serializable {
       this.schema = schema;
       this.parameters = params;
       this.neuronGraph = new NeuronGraph(schema, params);
+      this.prototypes = new LinkedHashMap<Object, Memory>();
+      generatePrototypes();
 
       buildMemoryModule((Class)
             params.getParameterValue(Parameters.kMemoryModule));
@@ -174,9 +181,37 @@ public class Network implements Serializable {
       try {
          new NetworkTrainer(this).train(trainingSet, testSet);
          memoryModule.onTrain();
+         generatePrototypes();
       } catch (Exception e) {
          System.err.println("Network has corrupt memories!");
       }
+   }
+
+   /**
+    * Uses a genetic algorithm to generate prototypes for
+    * each output classification.
+    */
+   public void generatePrototypes() {
+      for (Object classification : schema.getOutputClassifications()) {
+         try {
+            GeneticAlgorithm<double[]> alg = new GeneticAlgorithm<double[]>(
+                  new PrototypeGeneticAdapter(this, classification));
+            alg.setPopulationSize(1000);
+            alg.setGenerationCap(25);
+            alg.setAcceptableFitness(0.0);
+            prototypes.put(classification, schema.createMemory(alg.run(), classification));
+         } catch (Exception e) {
+            e.printStackTrace();
+         }
+      }
+   }
+
+   /**
+    * Gets a collection of classification prototypes.
+    * @return prototypes
+    */
+   public Collection<Memory> getPrototypes() {
+      return prototypes.values();
    }
 
    /**

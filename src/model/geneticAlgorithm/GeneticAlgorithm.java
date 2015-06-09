@@ -21,7 +21,7 @@ public class GeneticAlgorithm<T> {
     * 0 runs the algorithm until an ideal solution is found. */
    private int generationCap = 0;
    /** Acceptable fitness for algorithm termination. */
-   private double acceptableFitness = 0;
+   private double acceptableFitness = 1.0;
 
    public GeneticAlgorithm(GeneticAdapter<T> adapter) {
       this.adapter = adapter;

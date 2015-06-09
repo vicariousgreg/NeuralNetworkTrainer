@@ -19,7 +19,7 @@ public class NetworkTrainer implements Serializable {
     * Trains the network with its memories.
     */
    public void train(List<Memory> trainingMemory, List<Memory> testMemory) throws Exception {
-      final boolean debug = true;
+      final boolean debug = false;
 
       if (trainingMemory.size() == 0 || testMemory.size() == 0) {
          System.err.println("Insufficient memory for training!");
@@ -57,9 +57,11 @@ public class NetworkTrainer implements Serializable {
             network.parameters.getParameterValue(Parameters.kStaleThreshold);
 
       // Teach the network until the error is acceptable.
-      // Loop is broken when conditions are met.
-      while (testError > acceptableTestError ||
-            percentCorrect < acceptablePercentCorrect) {
+      // Loop is broken when conditions are met or when we
+      //   pass the iteration cap.
+      while (++masterCounter < iterationCap &&
+            (testError > acceptableTestError ||
+            percentCorrect < acceptablePercentCorrect)) {
          // Teach the network using the tests.
          for (int i = 0; i < trainingMemory.size(); ++i) {
             network.neuronGraph.backpropagate(trainingMemory.get(i));
@@ -84,23 +86,28 @@ public class NetworkTrainer implements Serializable {
          // Reset if stale
          if (Double.compare(prevError, testError) == 0 &&
                Double.compare(prevPercent, percentCorrect) == 0) {
+            System.out.print(".");
             if (++staleCounter == staleThreshold) {
                staleCounter = 0;
-               //network.neuronGraph = bestGraph;
                network.neuronGraph.reset();
-               if (debug) System.out.println("RESET");
+               testError = calcTotalTestError(testMemory);
+               percentCorrect = calcPercentCorrect(testMemory);
+               System.out.println("\n===RESET");
             }
+         } else if (Double.compare(prevPercent, percentCorrect) > 0) {
+            System.out.print("\n- ");
+            System.out.printf("%f", percentCorrect);
+         } else if (Double.compare(prevPercent, percentCorrect) < 0) {
+            System.out.print("\n+ ");
+            System.out.printf("%f", percentCorrect);
          }
 
          if (debug) System.out.printf("Percent Correct: %.6f%%  |  ", percentCorrect);
          if (debug) System.out.printf("Test error: %.6f\n", testError);
+      }
 
-         if (++masterCounter > iterationCap) {
-            if (debug) System.out.printf("Passed %d iterations...\n", iterationCap);
-            break;
-         } else if (masterCounter % 10000 == 0) {
-            //if (debug) System.out.print(".");
-         }
+      if (masterCounter > iterationCap) {
+         if (debug) System.out.printf("Passed %d iterations...\n", iterationCap);
       }
 
       network.neuronGraph = bestGraph;
