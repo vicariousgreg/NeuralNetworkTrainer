@@ -1,7 +1,6 @@
 package model.network;
 
 import model.network.memory.Memory;
-import model.network.schema.Schema;
 
 import java.io.*;
 import java.util.List;
@@ -10,43 +9,35 @@ import java.util.List;
  * Neural network trainer.
  */
 public class NetworkTrainer implements Serializable {
-   private NeuronGraph neuronGraph;
-   private Schema schema;
-   private Parameters parameters;
+   private Network network;
 
-   public NetworkTrainer(NeuronGraph neuronGraph, Schema schema, Parameters params) {
-      this.neuronGraph = neuronGraph;
-      this.schema = schema;
-      this.parameters = params;
-   }
-
-   public void setParameters(Parameters params) {
-      this.parameters = params;
+   public NetworkTrainer(Network network) {
+      this.network = network;
    }
 
    /**
     * Trains the network with its memories.
     */
-   public boolean train(List<Memory> trainingMemory, List<Memory> testMemory) throws Exception {
-      final boolean debug = false;
+   public void train(List<Memory> trainingMemory, List<Memory> testMemory) throws Exception {
+      final boolean debug = true;
 
       if (trainingMemory.size() == 0 || testMemory.size() == 0) {
          System.err.println("Insufficient memory for training!");
-         return true;
+         return;
       }
+
+      NeuronGraph bestGraph = network.neuronGraph.clone();
 
       // Counter for master reset.
       int masterCounter = 0;
-
-      // Counter for stale networks.
       int staleCounter = 0;
 
-      // Test Errors.
-      double prevTestError;
+      // Test Error.
+      double prevError;
       double testError = calcTotalTestError(testMemory);
 
       // Percentage of tests passed.
-      double prevPercentCorrect;
+      double prevPercent;
       double percentCorrect = calcPercentCorrect(testMemory);
       double bestPercent = percentCorrect;
 
@@ -57,81 +48,68 @@ public class NetworkTrainer implements Serializable {
 
       // Extract relevant parameters
       Double acceptableTestError = (Double)
-            parameters.getParameterValue(Parameters.kAcceptableTestError);
+            network.parameters.getParameterValue(Parameters.kAcceptableTestError);
       Double acceptablePercentCorrect = (Double)
-            parameters.getParameterValue(Parameters.kAcceptablePercentCorrect);
-      Double regressionThreshold = (Double)
-            parameters.getParameterValue(Parameters.kRegressionThreshold);
-      Integer staleThreshold = (Integer)
-            parameters.getParameterValue(Parameters.kStaleThreshold);
+            network.parameters.getParameterValue(Parameters.kAcceptablePercentCorrect);
       Integer iterationCap = (Integer)
-            parameters.getParameterValue(Parameters.kIterationCap);
+            network.parameters.getParameterValue(Parameters.kIterationCap);
+      Integer staleThreshold = (Integer)
+            network.parameters.getParameterValue(Parameters.kStaleThreshold);
 
       // Teach the network until the error is acceptable.
       // Loop is broken when conditions are met.
       while (testError > acceptableTestError ||
             percentCorrect < acceptablePercentCorrect) {
-         // Set up previous values.
-         prevTestError = testError;
-         prevPercentCorrect = percentCorrect;
-
          // Teach the network using the tests.
          for (int i = 0; i < trainingMemory.size(); ++i) {
-            neuronGraph.backpropagate(trainingMemory.get(i));
+            network.neuronGraph.backpropagate(trainingMemory.get(i));
          }
 
          // Calculate error and percentage correct.
+         prevError = testError;
+         prevPercent = percentCorrect;
+
          testError = calcTotalTestError(testMemory);
          percentCorrect = calcPercentCorrect(testMemory);
+
+         // Keep track of best.
          if (percentCorrect > bestPercent) {
             bestPercent = percentCorrect;
+            bestGraph = network.neuronGraph.clone();
             if (debug) System.out.println("Best: " + bestPercent);
+         } else if (Double.compare(bestPercent, percentCorrect) != 0) {
+            //if (debug) System.out.print(".");
          }
 
-
-         // Determine if the network needs to be reset.
-         // If it is unacceptable, and is either stale or has regressed
-         //   significantly in error, it should be reset.
-         if (staleCounter > staleThreshold ||
-               testError - prevTestError > regressionThreshold) {
-            return false;
-
-            /*
-            if (debug && staleCounter > staleThreshold) System.out.println("STALE");
-            neuronGraph.reset();
-            staleCounter = 0;
-            if (debug) System.out.println("====================");
-            if (debug) System.out.println("Resetting network...");
-            if (debug) System.out.println("====================");
-            */
-            // If the error and percentage correct have not changed significantly,
-            //   increase the stale counter.
-         } else if ((Double.compare(testError, 100) != 0 &&
-               Double.compare(testError, prevTestError) == 0) ||
-               Double.compare(percentCorrect, prevPercentCorrect) == 0) {
-            if (debug) System.out.print(".");
-            ++staleCounter;
-         } else {
-            if (debug) System.out.printf("Percent Correct: %.6f%%  |  ", percentCorrect);
-            if (debug) System.out.printf("Test error: %.6f\n", testError);
-            staleCounter = 0;
+         // Reset if stale
+         if (Double.compare(prevError, testError) == 0 &&
+               Double.compare(prevPercent, percentCorrect) == 0) {
+            if (++staleCounter == staleThreshold) {
+               staleCounter = 0;
+               //network.neuronGraph = bestGraph;
+               network.neuronGraph.reset();
+               if (debug) System.out.println("RESET");
+            }
          }
 
-         if(++masterCounter > iterationCap) {
-            if (debug) System.out.printf("Passed %d iterations.  Reshuffling memories...\n", iterationCap);
-            return false;
+         if (debug) System.out.printf("Percent Correct: %.6f%%  |  ", percentCorrect);
+         if (debug) System.out.printf("Test error: %.6f\n", testError);
+
+         if (++masterCounter > iterationCap) {
+            if (debug) System.out.printf("Passed %d iterations...\n", iterationCap);
+            break;
          } else if (masterCounter % 10000 == 0) {
-            if (debug) System.out.print(".");
+            //if (debug) System.out.print(".");
          }
       }
+
+      network.neuronGraph = bestGraph;
 
       if (debug) System.out.println("Total test error after learning: " +
             calcTotalTestError(testMemory));
       if (debug) System.out.println("Passing percentage: %" +
             calcPercentCorrect(testMemory));
       if (debug) System.out.println();
-
-      return true;
    }
 
    /**
@@ -158,7 +136,7 @@ public class NetworkTrainer implements Serializable {
       double totalError = 0.0;
       try {
          // Get quadratic deviations for each output neuron
-         double[] errors = calcError(neuronGraph.fire(test.inputVector),
+         double[] errors = calcError(network.neuronGraph.fire(test.inputVector),
                test.output);
 
          // Total deviations.
@@ -181,7 +159,7 @@ public class NetworkTrainer implements Serializable {
     */
    private double[] calcError(double[] actual, Object expected) throws Exception {
       double[] errors = new double[actual.length];
-      double[] expectedVector = schema.encodeOutput(expected);
+      double[] expectedVector = network.schema.encodeOutput(expected);
 
       // Calculate test error for each output neuron.
       for (int i = 0; i < actual.length; ++i) {
@@ -204,9 +182,9 @@ public class NetworkTrainer implements Serializable {
       for (int i = 0; i < tests.size(); ++i) {
          try {
             Memory test = tests.get(i);
-            double[] outVector = neuronGraph.fire(test.inputVector);
+            double[] outVector = network.neuronGraph.fire(test.inputVector);
 
-            Object out = schema.translateOutput(outVector);
+            Object out = network.schema.translateOutput(outVector);
             if (out.equals(test.output)) ++correct;
          } catch (Exception e) { e.printStackTrace(); }
       }

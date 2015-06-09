@@ -6,10 +6,7 @@ import model.network.memory.BasicMemoryModule;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Neural network parameters.
@@ -24,18 +21,6 @@ public class Parameters implements Serializable {
    public static final String kIterationCap = "Training iteration cap";
    public static final String kMemoryModule = "Memory Module";
 
-   public static final List<String> parametersList = new ArrayList<String>();
-   static {
-      parametersList.add(kLearningConstant);
-      parametersList.add(kHiddenLayerDepths);
-      parametersList.add(kRegressionThreshold);
-      parametersList.add(kStaleThreshold);
-      parametersList.add(kAcceptableTestError);
-      parametersList.add(kAcceptablePercentCorrect);
-      parametersList.add(kIterationCap);
-      parametersList.add(kMemoryModule);
-   }
-
    /** Neuron activation function. */
    private ActivationFunction activationFunction;
 
@@ -46,7 +31,7 @@ public class Parameters implements Serializable {
     * Default constructor.
     */
    public Parameters() {
-      parameters = new HashMap<String, Parameter>();
+      parameters = new LinkedHashMap<String, Parameter>();
       /** Learning constant. */
       parameters.put(kLearningConstant,
             new Parameter<Double>(kLearningConstant, 0.1, 0.0, 1.0));
@@ -90,12 +75,16 @@ public class Parameters implements Serializable {
     * @param map map to clone
     */
    private Parameters(Map<String, Parameter> map, ActivationFunction activ) {
-      this.parameters = new HashMap<String, Parameter>();
+      this.parameters = new LinkedHashMap<String, Parameter>();
       this.activationFunction = activ;
 
       for (String key : map.keySet()) {
          this.parameters.put(key, map.get(key).clone());
       }
+   }
+
+   public Set<String> getParametersList() {
+      return parameters.keySet();
    }
 
    /**
@@ -125,8 +114,9 @@ public class Parameters implements Serializable {
     * @return whether the set was successful
     */
    public boolean setParameter(String key, Object value) {
-      if (parametersList.contains(key)) {
-         return parameters.get(key).setValue(value);
+      Parameter param = parameters.get(key);
+      if (param != null) {
+         return param.setValue(value);
       }
       return false;
    }
@@ -137,10 +127,7 @@ public class Parameters implements Serializable {
     * @return parameter object
     */
    public Parameter getParameter(String key) {
-      if (parametersList.contains(key)) {
-         return parameters.get(key);
-      }
-      return null;
+      return parameters.get(key);
    }
 
    /**
@@ -149,8 +136,9 @@ public class Parameters implements Serializable {
     * @return parameter value
     */
    public Object getParameterValue(String key){
-      if (parametersList.contains(key)) {
-         return parameters.get(key).getValue();
+      Parameter param = parameters.get(key);
+      if (param != null) {
+         return param.getValue();
       }
       return null;
    }
@@ -158,7 +146,7 @@ public class Parameters implements Serializable {
    @Override
    public String toString() {
       StringBuilder sb = new StringBuilder("Parameters:\n");
-      for (String key : parametersList) {
+      for (String key : parameters.keySet()) {
          sb.append(String.format("  { %s: %s }\n",
                key, parameters.get(key).getValueString()));
       }

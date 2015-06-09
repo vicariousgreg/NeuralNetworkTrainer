@@ -243,6 +243,27 @@ public class NeuronGraph implements Serializable {
       }
    }
 
+   /**
+    * Clones this network.
+    * @return cloned network
+    */
+   public NeuronGraph clone() {
+      try {
+         ByteArrayOutputStream baos = new ByteArrayOutputStream();
+         ObjectOutputStream oos = new ObjectOutputStream(baos);
+         oos.writeObject(this);
+
+         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+         ObjectInputStream ois = new ObjectInputStream(bais);
+         return (NeuronGraph) ois.readObject();
+      } catch (IOException e) {
+         return null;
+      } catch (ClassNotFoundException e) {
+         return null;
+      }
+   }
+
+
    @Override
    public String toString() {
       StringBuilder sb = new StringBuilder("Network\n");

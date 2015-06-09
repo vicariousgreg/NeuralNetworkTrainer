@@ -120,7 +120,7 @@ public class ParametersDialogController extends DialogController implements Init
       int ctr = 0;
 
       // Set up standard parameters.
-      for (String key : Parameters.parametersList) {
+      for (String key : params.getParametersList()) {
          Object value = params.getParameter(key).getValue();
          Object[] enumerations = params.getParameter(key).getEnumerations();
          Label paramLabel = new Label(key);

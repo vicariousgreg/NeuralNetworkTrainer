@@ -22,8 +22,8 @@ import java.util.List;
 public class Main extends Application {
    @Override
    public void start(Stage primaryStage) throws Exception {
-      genAlgTest();
-      /*
+      //genAlgTest();
+
       // Load networks.
       WorkSpace.instance.loadNetworks();
 
@@ -44,7 +44,6 @@ public class Main extends Application {
       } catch (Exception e) {
          e.printStackTrace();
       }
-      */
    }
 
    public static void genAlgTest() throws Exception{
@@ -61,21 +60,22 @@ public class Main extends Application {
             "Purple"
       });
       model.network.Parameters params = new model.network.Parameters();
-      if (!params.setParameter(model.network.Parameters.kAcceptablePercentCorrect, new Double(80.0)))
+      if (!params.setParameter(model.network.Parameters.kAcceptablePercentCorrect, new Double(90.0)))
          return;
       if (!params.setParameter(model.network.Parameters.kIterationCap, new Integer(100)))
          return;
-      if (!params.setParameter(model.network.Parameters.kLearningConstant, new Double(0.25)))
+      if (!params.setParameter(model.network.Parameters.kLearningConstant, new Double(0.35)))
          return;
 
       NetworkGeneticAdapter adapter = new NetworkGeneticAdapter(
             schema, params, training, test, fitness);
       GeneticAlgorithm<Network> algorithm = new GeneticAlgorithm(adapter);
-      //algorithm.setGenerationCap(15);
+      //algorithm.setGenerationCap(1);
       algorithm.setPopulationSize(50);
       algorithm.setAcceptableFitness(.90);
 
-      System.out.println(algorithm.run().getParameters().getParameterValue(model.network.Parameters.kAcceptablePercentCorrect));
+      algorithm.run();
+      System.exit(0);
    }
 
    public static void main(String[] args) {

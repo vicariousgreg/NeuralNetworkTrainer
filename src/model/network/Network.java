@@ -12,19 +12,16 @@ import java.util.List;
  */
 public class Network implements Serializable {
    /** Network neuron graph. */
-   private NeuronGraph neuronGraph;
+   NeuronGraph neuronGraph;
 
    /** Network schema. */
    public final Schema schema;
 
    /** Network learning parameters. */
-   private Parameters parameters;
+   Parameters parameters;
 
    /** Memory of inputs and output test cases. */
-   private MemoryModule memoryModule;
-
-   /** Network trainer. */
-   private NetworkTrainer networkTrainer;
+   MemoryModule memoryModule;
 
    /** Network name; */
    public String name;
@@ -49,7 +46,6 @@ public class Network implements Serializable {
       this.schema = schema;
       this.parameters = params;
       this.neuronGraph = new NeuronGraph(schema, params);
-      this.networkTrainer = new NetworkTrainer(neuronGraph, schema, params);
 
       buildMemoryModule((Class)
             params.getParameterValue(Parameters.kMemoryModule));
@@ -69,7 +65,6 @@ public class Network implements Serializable {
     */
    public void setParameters(Parameters params) {
       this.parameters = params;
-      this.networkTrainer.setParameters(params);
       this.neuronGraph.build(schema, params);
       buildMemoryModule((Class)
             params.getParameterValue(Parameters.kMemoryModule));
@@ -160,17 +155,11 @@ public class Network implements Serializable {
     */
    public void train() {
       try {
-         List<Memory> trainingMemory;
-         List<Memory> testMemory;
-
-         do {
-            // Split memory.
-            List<List<Memory>> split = memoryModule.splitMemories();
-            trainingMemory = split.get(0);
-            testMemory = split.get(1);
-         } while (!networkTrainer.train(trainingMemory, testMemory));
-
-         memoryModule.onTrain();
+         // Split memory.
+         List<List<Memory>> split = memoryModule.splitMemories();
+         List<Memory> trainingMemory = split.get(0);
+         List<Memory> testMemory = split.get(1);
+         this.train(trainingMemory, testMemory);
       } catch (Exception e) {
          System.err.println("Network has corrupt memories!");
       }
@@ -182,7 +171,12 @@ public class Network implements Serializable {
     * @param testSet test set
     */
    public void train(List<Memory> trainingSet, List<Memory> testSet) throws Exception {
-      networkTrainer.train(trainingSet, testSet);
+      try {
+         new NetworkTrainer(this).train(trainingSet, testSet);
+         memoryModule.onTrain();
+      } catch (Exception e) {
+         System.err.println("Network has corrupt memories!");
+      }
    }
 
    /**

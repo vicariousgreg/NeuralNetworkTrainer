@@ -131,8 +131,10 @@ public class MemoryController extends NetworkController implements Initializable
     */
    public void importMemory() {
       try {
-         FileManager.loadMemories(
+         List<Memory> newMemories = FileManager.loadMemories(
                DialogFactory.displayTextDialog("Enter memory set name:"));
+         network.addMemories(newMemories);
+         display();
       } catch (Exception e) {
          DialogFactory.displayErrorDialog("Could not load memories!");
       }

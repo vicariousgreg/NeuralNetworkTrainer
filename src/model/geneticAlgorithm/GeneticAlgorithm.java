@@ -65,7 +65,6 @@ public class GeneticAlgorithm<T> {
       int generationCounter = 0;
 
       while (!terminate) {
-         System.out.println(bestFitness);
          List<T> newPopulation = new ArrayList<T>();
 
          // Generate a new population using tournament and crossover.
@@ -96,6 +95,8 @@ public class GeneticAlgorithm<T> {
          ++generationCounter;
          terminate = generationCounter == generationCap ||
                Double.compare(bestFitness, acceptableFitness) == 0;
+
+         System.out.println("GenAlg best fitness: " + bestFitness);
       }
 
       return best;
