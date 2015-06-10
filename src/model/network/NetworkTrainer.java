@@ -1,6 +1,7 @@
 package model.network;
 
 import model.network.memory.Memory;
+import model.network.parameters.Parameters;
 
 import java.io.*;
 import java.util.List;
@@ -48,13 +49,13 @@ public class NetworkTrainer implements Serializable {
 
       // Extract relevant parameters
       Double acceptableTestError = (Double)
-            network.parameters.getParameterValue(Parameters.kAcceptableTestError);
+            network.parameters.getParameter(Parameters.kAcceptableTestError).getValue();
       Double acceptablePercentCorrect = (Double)
-            network.parameters.getParameterValue(Parameters.kAcceptablePercentCorrect);
+            network.parameters.getParameter(Parameters.kAcceptablePercentCorrect).getValue();
       Integer iterationCap = (Integer)
-            network.parameters.getParameterValue(Parameters.kIterationCap);
+            network.parameters.getParameter(Parameters.kIterationCap).getValue();
       Integer staleThreshold = (Integer)
-            network.parameters.getParameterValue(Parameters.kStaleThreshold);
+            network.parameters.getParameter(Parameters.kStaleThreshold).getValue();
 
       // Teach the network until the error is acceptable.
       // Loop is broken when conditions are met or when we

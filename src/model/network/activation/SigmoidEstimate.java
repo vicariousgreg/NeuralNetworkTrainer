@@ -1,5 +1,8 @@
 package model.network.activation;
 
+import model.network.parameters.BoundedParameter;
+import model.network.parameters.Parameter;
+
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -15,6 +18,17 @@ public class SigmoidEstimate extends Sigmoid {
    /** Estimation bounds. */
    private int estimationBounds;
 
+   private static String kSlopeParameter = "Slope Parameter";
+   private static String kGranularity = "Granularity";
+   public static Map<String, Parameter> defaultParameters;
+   static {
+      defaultParameters = new LinkedHashMap<String, Parameter>();
+      defaultParameters.put(kSlopeParameter,
+            new BoundedParameter<Integer>(kSlopeParameter, 1, 1, null));
+      defaultParameters.put(kGranularity,
+            new BoundedParameter<Integer>(kGranularity, 1000, 1, null));
+   }
+
    /**
     * Map of values to Sigmoid outputs.
     * Inputs are multiplied by granularity so they are discrete.
@@ -22,28 +36,12 @@ public class SigmoidEstimate extends Sigmoid {
    private HashMap<Integer, Double> precalculated;
 
    /**
-    * Default constructor.
-    */
-   public SigmoidEstimate() {
-      this(1, 1000);
-   }
-
-   /**
     * Constructor.
-    * @param slopeParameter slope parameter
+    * @param params function parameters
     */
-   public SigmoidEstimate(int slopeParameter) {
-      this(slopeParameter, 1000);
-   }
-
-   /**
-    * Constructor.
-    * @param slopeParameter slope parameter
-    * @param granularity granularity of estimation
-    */
-   public SigmoidEstimate(int slopeParameter, int granularity) {
-      super(slopeParameter);
-      this.granularity = granularity;
+   public SigmoidEstimate(Map<String, Parameter> params) {
+      super(params);
+      this.granularity = (Integer) params.get(kGranularity).getValue();
       this.estimationBounds = (int) Math.ceil((double) 7 / slopeParameter);
       initializeEstimations();
    }
@@ -58,32 +56,6 @@ public class SigmoidEstimate extends Sigmoid {
                super.calculate((double) i + (double)tick / granularity));
          }
       }
-   }
-
-   @Override
-   public String getValue(String param) {
-      if (param.equals("Granularity"))
-         return Integer.toString(granularity);
-      else return super.getValue(param);
-   }
-
-   @Override
-   public void setValue(String param, String value) throws Exception {
-      if (param.equals("Granularity")) {
-         int val = Integer.parseInt(value);
-         if (val < 1) throw new Exception(String.format("Invalid %s: %s!", param, value));
-         granularity = Integer.parseInt(value);
-      } else {
-         super.setValue(param, value);
-      }
-
-      initializeEstimations();
-   }
-
-   public static List<String> getParameters() {
-      List<String> params = Sigmoid.getParameters();
-      params.add("Granularity");
-      return params;
    }
 
    /**

@@ -1,6 +1,7 @@
 package model.network;
 
 import model.network.memory.Memory;
+import model.network.parameters.Parameters;
 import model.network.schema.Schema;
 
 import java.io.*;
@@ -53,7 +54,7 @@ public class NeuronGraph implements Serializable {
       Neuron[] prevLayer = inputLayer;
 
       Integer[] hiddenLayerDepths = (Integer[])
-            parameters.getParameterValue(Parameters.kHiddenLayerDepths);
+            parameters.getParameter(Parameters.kHiddenLayerDepths).getValue();
 
       // Build hidden layers.
       for (int layerIndex = 0; layerIndex < hiddenLayerDepths.length; ++layerIndex) {

@@ -1,40 +1,31 @@
 package gui.controller.dialog;
 
 import application.DialogFactory;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.util.StringConverter;
-import model.Registry;
-import model.network.Parameters;
-import model.network.activation.ActivationFunction;
+import model.network.parameters.ClassParameter;
+import model.network.parameters.EnumeratedParameter;
+import model.network.parameters.Parameter;
+import model.network.parameters.Parameters;
 
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.*;
 
 public class ParametersDialogController extends DialogController implements Initializable {
    @FXML GridPane grid;
-   @FXML ComboBox activationFunctionsField;
-   @FXML GridPane activationParametersGrid;
 
-   private ArrayList<TextField> parameterTextFields;
-   private ActivationFunction currentActivationFunction;
-   private Map<String, Label> labels;
-   private Map<String, Control> controls;
+   private Map<Parameter, Control> controls;
 
    private Parameters params = new Parameters();
 
    public void initialize(URL location, ResourceBundle resources) {
-      labels = new HashMap<String, Label>();
-      controls = new HashMap<String, Control>();
-      parameterTextFields = new ArrayList<TextField>();
-
-      // Set up activation functions dropdown.
-      for (Class function : Registry.activationFunctionClasses) {
-         activationFunctionsField.getItems().add(function.getSimpleName());
-      }
+      controls = new HashMap<Parameter, Control>();
    }
 
    public void setParameters(Parameters params) {
@@ -49,10 +40,6 @@ public class ParametersDialogController extends DialogController implements Init
          else if (control instanceof ComboBox)
             ((ComboBox) control).getSelectionModel().select(null);
       }
-
-      for (TextField field : parameterTextFields)  {
-         field.clear();
-      }
    }
 
    public void reset() {
@@ -65,23 +52,30 @@ public class ParametersDialogController extends DialogController implements Init
       Parameters newParams = new Parameters();
 
       try {
-         // Instantiate activation function.
-         ActivationFunction activ;
-         try {
-            activ = buildActivationFunction();
-         } catch (Exception e) {
-            DialogFactory.displayErrorDialog(e.getMessage());
-            return;
-         }
+         // Set up standard parameters.
+         for (String key : params.getParametersList()) {
+            Parameter param = params.getParameter(key);
+            Object value = extractField(param);
 
-         /* Extract regular parameters. */
-         for (String key : controls.keySet()) {
-            Object value = extractField(key);
-            if (value == null || !newParams.setParameter(key, value))
-               DialogFactory.displayErrorDialog(params.getParameter(key).toString());
-         }
+            try {
+               if (param instanceof ClassParameter) {
+                  ClassParameter classParam = (ClassParameter) param;
+                  Map<String, Parameter> newSubParams = new LinkedHashMap<String, Parameter>();
 
-         newParams.setActivationFunction(activ);
+                  for (Parameter subParam : classParam.getSubParameters().values()) {
+                     Parameter newSubParam = subParam.clone();
+                     newSubParam.setValue(extractField(subParam));
+                     newSubParams.put(subParam.name, newSubParam);
+                  }
+
+                  (classParam).setValue((Class)value, newSubParams);
+               } else {
+                  newParams.getParameter(key).setValue(value);
+               }
+            } catch (Exception e) {
+               DialogFactory.displayErrorDialog(param.toString());
+            }
+         }
 
          setResponseValue(newParams);
          close();
@@ -91,128 +85,101 @@ public class ParametersDialogController extends DialogController implements Init
       }
    }
 
-   private ActivationFunction buildActivationFunction() throws Exception {
-      /* Identify activation function. */
-      Class functionClass = null;
-
-      // Identify class and extract parameter list.
-      String functionName = (String) activationFunctionsField.getValue();
-      for (Class clazz : Registry.activationFunctionClasses) {
-         if (clazz.getSimpleName().equals(functionName)) {
-            functionClass = clazz;
-         }
-      }
-
-      ActivationFunction activ = (ActivationFunction) functionClass.newInstance();
-
-      // Set activation function parameters.
-      for (TextField text : parameterTextFields) {
-         activ.setValue(text.getPromptText(), text.getText());
-      }
-      return activ;
-   }
-
    private void setFields() {
-      labels.clear();
       controls.clear();
-
       grid.getChildren().clear();
-      int ctr = 0;
 
       // Set up standard parameters.
       for (String key : params.getParametersList()) {
-         Object value = params.getParameter(key).getValue();
-         Object[] enumerations = params.getParameter(key).getEnumerations();
-         Label paramLabel = new Label(key);
-         labels.put(key, paramLabel);
+         addParameter(grid, params.getParameter(key));
+      }
+   }
 
-         Control paramControl;
+   private void addParameter(GridPane gridPane, Parameter param) {
+      Object value = param.getValue();
+      Label paramLabel = new Label(param.name);
 
-         // Create combo boxes for enumerations, and text fields for all else.
-         if (enumerations != null) {
-            paramControl = new ComboBox();
-            ((ComboBox)paramControl).setConverter(new StringConverter() {
-               @Override
-               public String toString(Object o) {
-                  if (o == null) {
-                     return null;
-                  } else if (o instanceof Class) {
-                     return ((Class)o).getSimpleName();
-                  } else {
-                     return o.toString();
-                  }
-               }
+      Parent parent;
 
-               @Override
-               public Object fromString(String string) {
+      // Create combo boxes for enumerations, and text fields for all else.
+      if (param instanceof EnumeratedParameter) {
+         Object[] enumerations = ((EnumeratedParameter)param).getEnumerations();
+         final ComboBox comboBox = new ComboBox();
+         comboBox.setConverter(new StringConverter() {
+            @Override
+            public String toString(Object o) {
+               if (o == null) {
                   return null;
+               } else if (o instanceof Class) {
+                  return ((Class)o).getSimpleName();
+               } else {
+                  return o.toString();
+               }
+            }
+
+            @Override
+            public Object fromString(String string) {
+               return null;
+            }
+         });
+
+         // Populate combo box with enumerated values.
+         for (Object poss : enumerations) {
+            (comboBox).getItems().add(poss);
+         }
+         comboBox.getSelectionModel().select(value);
+
+         controls.put(param, comboBox);
+
+         // Recursively handle class parameters with sub parameters.
+         if (param instanceof ClassParameter) {
+            final ClassParameter classParam = (ClassParameter) param;
+            final GridPane subGrid = new GridPane();
+            subGrid.add(comboBox, 0, 0, 2, 1);
+
+            // Handle sub parameters.
+            Map<String, Parameter> subParams = classParam.getSubParameters();
+            for (Parameter subParam : subParams.values()) {
+               addParameter(subGrid, subParam);
+            }
+
+            // Set up combo box listener to change sub parameter controls.
+            comboBox.setOnAction(new EventHandler<ActionEvent>() {
+               @Override
+               public void handle(ActionEvent event) {
+                  // Remove old sub parameters...
+                  subGrid.getChildren().remove(1, subGrid.getChildren().size());
+                  for (Parameter subParam : classParam.getSubParameters().values()) {
+                     controls.remove(subParam);
+                  }
+
+                  // Change class parameter value...
+                  classParam.setValue((Class)comboBox.getValue());
+
+                  // Add new sub parameters...
+                  for (Parameter subParam : classParam.getSubParameters().values()) {
+                     addParameter(subGrid, subParam);
+                  }
                }
             });
 
-            for (Object poss : enumerations) {
-               ((ComboBox) paramControl).getItems().add(poss);
-            }
-            ((ComboBox) paramControl).getSelectionModel().select(value);
+            parent = subGrid;
          } else {
-            paramControl = new TextField(params.getParameter(key).getValueString());
+            parent = comboBox;
          }
-
-         controls.put(key, paramControl);
-         grid.addRow(ctr++, paramLabel, paramControl);
+      } else {
+         TextField textField = new TextField(param.getValueString());
+         controls.put(param, textField);
+         parent = textField;
       }
 
-      currentActivationFunction = params.getActivationFunction();
-
-      // Set up activation function dropdown.
-      activationFunctionsField.setValue(
-            params.getActivationFunction().getClass().getSimpleName());
-
-      // Set up activation function parameters.
-      try {
-         initializeActivationParameters();
-      } catch (Exception e) {
-         e.printStackTrace();
-      }
+      gridPane.addRow(gridPane.getChildren().size(), paramLabel, parent);
    }
 
-   public void initializeActivationParameters() throws Exception{
-      parameterTextFields = new ArrayList<TextField>();
-      activationParametersGrid.getChildren().clear();
-
-      // Get list of parameter names.
-      List<String> activationFunctionParameters = null;
-      String functionName = (String) activationFunctionsField.getValue();
-      for (Class clazz : Registry.activationFunctionClasses) {
-         if (clazz.getSimpleName().equals(functionName)) {
-            Method m = clazz.getMethod("getParameters");
-            activationFunctionParameters = (List<String>) m.invoke(new Object[0]);
-         }
-      }
-
-      // Create labels and text boxes for each parameter.
-      int i = 0;
-      for (String param : activationFunctionParameters) {
-         Label label = new Label(param + ":");
-         TextField input = new TextField();
-         input.setPromptText(param);
-
-         // For the currently selected activation function in the
-         // network's parameters, set the values to the current ones.
-         if (currentActivationFunction != null &&
-               functionName.equals(
-                     currentActivationFunction.getClass().getSimpleName()))
-            input.setText(currentActivationFunction.getValue(param));
-
-         activationParametersGrid.addRow(i, label, input);
-         parameterTextFields.add(input);
-         ++i;
-      }
-   }
-
-   private Object extractField(String key) {
+   private Object extractField(Parameter param) {
       String valueString = "";
 
-      Control paramControl = controls.get(key);
+      Control paramControl = controls.get(param);
       if (paramControl instanceof TextField)
          valueString = ((TextField)paramControl).getText();
       else if (paramControl instanceof ComboBox) {
@@ -220,7 +187,7 @@ public class ParametersDialogController extends DialogController implements Init
       }
 
       Object value = null;
-      Class parameterClass = params.getParameter(key).getValue().getClass();
+      Class parameterClass = param.getValue().getClass();
       try {
          if (paramControl instanceof TextField) {
             if (parameterClass.equals(Integer.class)) {

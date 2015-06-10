@@ -1,52 +1,34 @@
 package model.network.activation;
 
+import model.network.parameters.BoundedParameter;
+import model.network.parameters.Parameter;
+
 import java.io.Serializable;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Models the Sigmoid function using precalculated values to speed up computation.
  */
 public class Sigmoid extends ActivationFunction {
    /** Sigmoid slope parameter. */
-   private int slopeParameter;
+   protected int slopeParameter;
+
+   public static String kSlopeParameter = "Slope Parameter";
+   public static Map<String, Parameter> defaultParameters;
+   static {
+      defaultParameters = new LinkedHashMap<String, Parameter>();
+      defaultParameters.put(kSlopeParameter,
+            new BoundedParameter<Integer>(kSlopeParameter, 1, 1, null));
+   }
 
    /**
     * Default constructor.
+    * @param params function parameters
     */
-   public Sigmoid() {
-      this(1);
-   }
-
-   /**
-    * Constructor.
-    * @param slopeParameter sigmoid slope parameter
-    */
-   public Sigmoid(int slopeParameter) {
-      this.slopeParameter = slopeParameter;
-   }
-
-   public static List<String> getParameters() {
-      List<String> params = ActivationFunction.getParameters();
-      params.add("Slope Parameter");
-      return params;
-   }
-
-   @Override
-   public String getValue(String param) {
-      if (param.equals("Slope Parameter"))
-         return Integer.toString(slopeParameter);
-      else return "";
-   }
-
-   @Override
-   public void setValue(String param, String value) throws Exception {
-      if (param.equals("Slope Parameter")) {
-         int val = Integer.parseInt(value);
-         if (val < 1) throw new Exception(String.format("Invalid %s: %s!", param, value));
-         slopeParameter = val;
-      } else {
-         throw new Exception("Unrecognized parameter!");
-      }
+   public Sigmoid(Map<String, Parameter> params) {
+      this.slopeParameter = (Integer) params.get(kSlopeParameter).getValue();
    }
 
    /**

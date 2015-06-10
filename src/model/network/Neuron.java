@@ -1,6 +1,8 @@
 package model.network;
 
 import model.network.activation.ActivationFunction;
+import model.network.parameters.ClassParameter;
+import model.network.parameters.Parameters;
 
 import java.io.Serializable;
 import java.util.*;
@@ -47,8 +49,9 @@ public class Neuron implements Serializable {
     */
    public Neuron(Parameters params) {
       this.numInputs = 0;
-      this.learningConstant = (Double)params.getParameterValue(Parameters.kLearningConstant);
-      this.activationFunction = params.getActivationFunction();
+      this.learningConstant = (Double)params.getParameter(Parameters.kLearningConstant).getValue();
+      this.activationFunction = (ActivationFunction)
+            ((ClassParameter)params.getParameter(Parameters.kActivationFunction)).instantiate();
       this.weights = new LinkedHashMap<Neuron, Double>();
       this.inputs = new LinkedHashMap<Neuron, Double>();
       this.outputNeurons = new ArrayList<Neuron>();

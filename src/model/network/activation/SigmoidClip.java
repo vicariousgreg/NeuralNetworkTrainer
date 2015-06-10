@@ -1,5 +1,11 @@
 package model.network.activation;
 
+import model.network.parameters.BoundedParameter;
+import model.network.parameters.Parameter;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
  * Models the Sigmoid function using a calculation cutoff.
  * Inputs outside of the range of the cutoff are simply returned
@@ -9,20 +15,21 @@ public class SigmoidClip extends Sigmoid {
    /** Calculation cutoff. */
    private final double cutoff;
 
-   /**
-    * Default constructor.
-    */
-   public SigmoidClip() {
-      this(1);
+   public static String kSlopeParameter = "Slope Parameter";
+   public static Map<String, Parameter> defaultParameters;
+   static {
+      defaultParameters = new LinkedHashMap<String, Parameter>();
+      defaultParameters.put(kSlopeParameter,
+            new BoundedParameter<Integer>(kSlopeParameter, 1, 1, null));
    }
 
    /**
     * Constructor.
-    * @param slopeParameter slope parameter
+    * @param params function parameters
     */
-   public SigmoidClip(int slopeParameter) {
-      super(slopeParameter);
-      this.cutoff = (double) 8 / slopeParameter;
+   public SigmoidClip(Map<String, Parameter> params) {
+      super(params);
+      this.cutoff = (double) 8 / (Integer) params.get(kSlopeParameter).getValue();
    }
 
    /**

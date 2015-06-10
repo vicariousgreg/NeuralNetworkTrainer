@@ -1,11 +1,7 @@
 package model.geneticAlgorithm;
 
 import model.network.Network;
-import model.network.Parameters;
-import model.network.memory.Memory;
-import model.network.schema.Schema;
 
-import java.util.List;
 import java.util.Random;
 
 /**

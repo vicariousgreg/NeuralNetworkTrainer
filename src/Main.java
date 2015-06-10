@@ -1,4 +1,3 @@
-import application.DialogFactory;
 import application.FileManager;
 import gui.controller.NetworkControllerStack;
 import gui.controller.component.NetworkSelectorController;
@@ -8,11 +7,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import model.WorkSpace;
-import model.geneticAlgorithm.GeneticAdapter;
 import model.geneticAlgorithm.GeneticAlgorithm;
 import model.geneticAlgorithm.NetworkGeneticAdapter;
 import model.network.Network;
-import model.network.Parameters;
 import model.network.memory.Memory;
 import model.network.schema.ColorInputAdapter;
 import model.network.schema.Schema;
@@ -59,12 +56,12 @@ public class Main extends Application {
             "Blue",
             "Purple"
       });
-      model.network.Parameters params = new model.network.Parameters();
-      if (!params.setParameter(model.network.Parameters.kAcceptablePercentCorrect, new Double(90.0)))
+      model.network.parameters.Parameters params = new model.network.parameters.Parameters();
+      if (!params.getParameter(model.network.parameters.Parameters.kAcceptablePercentCorrect).setValue(new Double(90.0)))
          return;
-      if (!params.setParameter(model.network.Parameters.kIterationCap, new Integer(100)))
+      if (!params.getParameter(model.network.parameters.Parameters.kIterationCap).setValue(new Integer(100)))
          return;
-      if (!params.setParameter(model.network.Parameters.kLearningConstant, new Double(0.35)))
+      if (!params.getParameter(model.network.parameters.Parameters.kLearningConstant).setValue(new Double(0.35)))
          return;
 
       NetworkGeneticAdapter adapter = new NetworkGeneticAdapter(

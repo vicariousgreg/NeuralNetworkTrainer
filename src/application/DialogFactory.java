@@ -10,6 +10,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import model.network.*;
+import model.network.parameters.Parameters;
 import model.network.schema.*;
 
 import java.io.*;

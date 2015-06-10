@@ -3,12 +3,10 @@ package gui.controller.dialog;
 import application.DialogFactory;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.Pane;
 import model.network.Network;
-import model.network.Parameters;
+import model.network.parameters.Parameters;
 import model.network.schema.ColorInputAdapter;
 import model.network.schema.Schema;
 

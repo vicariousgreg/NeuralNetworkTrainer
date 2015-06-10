@@ -12,7 +12,7 @@ import javafx.scene.Node;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Pane;
 import model.network.Network;
-import model.network.Parameters;
+import model.network.parameters.Parameters;
 
 import java.io.IOException;
 import java.net.URL;
