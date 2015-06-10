@@ -1,9 +1,7 @@
 package model.network.activation;
 
-import model.network.parameters.BoundedParameter;
 import model.network.parameters.Parameter;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -14,14 +12,6 @@ import java.util.Map;
 public class SigmoidClip extends Sigmoid {
    /** Calculation cutoff. */
    private final double cutoff;
-
-   public static String kSlopeParameter = "Slope Parameter";
-   public static Map<String, Parameter> defaultParameters;
-   static {
-      defaultParameters = new LinkedHashMap<String, Parameter>();
-      defaultParameters.put(kSlopeParameter,
-            new BoundedParameter<Integer>(kSlopeParameter, 1, 1, null));
-   }
 
    /**
     * Constructor.

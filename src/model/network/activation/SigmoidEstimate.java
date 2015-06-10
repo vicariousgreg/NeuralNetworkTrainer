@@ -18,13 +18,8 @@ public class SigmoidEstimate extends Sigmoid {
    /** Estimation bounds. */
    private int estimationBounds;
 
-   private static String kSlopeParameter = "Slope Parameter";
    private static String kGranularity = "Granularity";
-   public static Map<String, Parameter> defaultParameters;
    static {
-      defaultParameters = new LinkedHashMap<String, Parameter>();
-      defaultParameters.put(kSlopeParameter,
-            new BoundedParameter<Integer>(kSlopeParameter, 1, 1, null));
       defaultParameters.put(kGranularity,
             new BoundedParameter<Integer>(kGranularity, 1000, 1, null));
    }
@@ -46,6 +41,9 @@ public class SigmoidEstimate extends Sigmoid {
       initializeEstimations();
    }
 
+   /**
+    * Initializes sigmoid estimations.
+    */
    private void initializeEstimations() {
       this.precalculated = new HashMap<Integer, Double>();
 
@@ -95,7 +93,7 @@ public class SigmoidEstimate extends Sigmoid {
     * @return interpolated result
     */
    private double interpolate(double x, double y0, double y1,
-                                     double x0, double x1) {
+                              double x0, double x1) {
       return y0 + ((y1 - y0) * ((x - x0) / (x1 - x0)));
    }
 }
