@@ -72,6 +72,7 @@ public class Network implements Serializable {
     * @param params network parameters
     */
    public void setParameters(Parameters params) {
+      System.out.println("Params");
       this.parameters = params;
       this.neuronGraph.build(schema, params);
       buildMemoryModule((Class)

@@ -68,7 +68,7 @@ public class ParametersDialogController extends DialogController implements Init
                      newSubParams.put(subParam.name, newSubParam);
                   }
 
-                  (classParam).setValue((Class)value, newSubParams);
+                  ((ClassParameter)newParams.getParameter(key)).setValue((Class)value, newSubParams);
                } else {
                   newParams.getParameter(key).setValue(value);
                }
@@ -150,14 +150,18 @@ public class ParametersDialogController extends DialogController implements Init
                   // Remove old sub parameters...
                   subGrid.getChildren().remove(1, subGrid.getChildren().size());
                   for (Parameter subParam : classParam.getSubParameters().values()) {
+                     System.out.println("REMOVING: " + subParam.name);
                      controls.remove(subParam);
                   }
 
                   // Change class parameter value...
-                  classParam.setValue((Class)comboBox.getValue());
+                  if(!classParam.setValue((Class)comboBox.getValue()))
+                     System.out.println("NOPE");
+                  System.out.println("Handling... " + classParam.getValueString());
 
                   // Add new sub parameters...
                   for (Parameter subParam : classParam.getSubParameters().values()) {
+                     System.out.println("ADDING: " + subParam.name);
                      addParameter(subGrid, subParam);
                   }
                }

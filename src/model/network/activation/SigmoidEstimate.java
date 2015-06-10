@@ -18,8 +18,13 @@ public class SigmoidEstimate extends Sigmoid {
    /** Estimation bounds. */
    private int estimationBounds;
 
+   public static String kSlopeParameter = "Slope Parameter";
    private static String kGranularity = "Granularity";
+   public static Map<String, Parameter> defaultParameters;
    static {
+      defaultParameters = new LinkedHashMap<String, Parameter>();
+      defaultParameters.put(kSlopeParameter,
+            new BoundedParameter<Integer>(kSlopeParameter, 1, 1, null));
       defaultParameters.put(kGranularity,
             new BoundedParameter<Integer>(kGranularity, 1000, 1, null));
    }
