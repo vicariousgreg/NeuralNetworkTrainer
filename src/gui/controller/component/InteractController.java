@@ -21,11 +21,11 @@ public class InteractController extends NetworkController implements Initializab
    @FXML ListView listView;
    @FXML Rectangle colorBox;
    @FXML ColorPicker colorPicker;
-   @FXML FlowPane shortTermMemoryPane;
+   @FXML FlowPane prototypesPane;
    @FXML Button memoryButton;
 
    private GenericList<Object> classificationList;
-   private MemoryBox shortTermMemoryBox;
+   private MemoryBox prototypesBox;
    private ColorRandomizer randomizer;
 
    /**
@@ -33,7 +33,7 @@ public class InteractController extends NetworkController implements Initializab
     * Sets up listeners for GUI.
     */
    public void initialize(URL location, ResourceBundle resources) {
-      shortTermMemoryBox = new MemoryBox(shortTermMemoryPane);
+      prototypesBox = new MemoryBox(prototypesPane);
       classificationList = new GenericList<Object>(listView);
       randomizer = new ColorRandomizer(colorBox, colorPicker);
 
@@ -58,7 +58,7 @@ public class InteractController extends NetworkController implements Initializab
    @Override
    public void display() {
       classificationList.clear();
-      loadMemory();
+      loadPrototypes();
       if (network != null) {
          classificationList.addAll(network.schema.getOutputClassifications());
          guess();
@@ -88,9 +88,7 @@ public class InteractController extends NetworkController implements Initializab
       Color color = randomizer.getValue();
 
       try {
-         Memory newMemory = new Memory(network.schema, color, classification);
-         network.addMemory(newMemory);
-         shortTermMemoryBox.add(network.schema, newMemory);
+         network.addMemory(new Memory(network.schema, color, classification));
       } catch (Exception e) {
          e.printStackTrace();
       }
@@ -115,13 +113,13 @@ public class InteractController extends NetworkController implements Initializab
    /**
     * Loads the network's memories.
     */
-   private void loadMemory() {
-      shortTermMemoryBox.clear();
+   private void loadPrototypes() {
+      prototypesBox.clear();
       if (network != null) {
          try {
-            // Populate memory box.
-            shortTermMemoryBox.add(network.schema,
-                  network.getAllMemories());
+            // Populate prototypes box.
+            prototypesBox.add(network.schema,
+                  network.getPrototypes());
          } catch (Exception e) {
             e.printStackTrace();
          }

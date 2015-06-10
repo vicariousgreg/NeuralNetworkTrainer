@@ -6,7 +6,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import model.WorkSpace;
 import model.geneticAlgorithm.GeneticAlgorithm;
 import model.geneticAlgorithm.NetworkGeneticAdapter;
 import model.network.Network;
@@ -21,9 +20,6 @@ public class Main extends Application {
    public void start(Stage primaryStage) throws Exception {
       //genAlgTest();
 
-      // Load networks.
-      WorkSpace.instance.loadNetworks();
-
       FXMLLoader loader = new FXMLLoader(
             Main.class.getResource("gui/view/main.fxml"));
 
@@ -35,6 +31,7 @@ public class Main extends Application {
       NetworkControllerStack.instance.push(
             Main.class.getResource("gui/view/networkSelector.fxml"));
 
+      // Add in interaction screen.
       NetworkSelectorController nsc = (NetworkSelectorController) NetworkControllerStack.instance.peekController();
       try {
          nsc.setChild(Main.class.getResource("gui/view/interact.fxml"));

@@ -1,6 +1,6 @@
 package gui.controller.dialog;
 
-import application.DialogFactory;
+import gui.controller.DialogFactory;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;

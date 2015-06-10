@@ -1,6 +1,6 @@
 package model.network.parameters;
 
-import model.Registry;
+import model.network.Registry;
 import model.network.activation.*;
 import model.network.memory.BasicMemoryModule;
 

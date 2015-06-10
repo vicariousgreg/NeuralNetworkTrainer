@@ -1,6 +1,6 @@
 package gui.controller.component;
 
-import application.DialogFactory;
+import gui.controller.DialogFactory;
 import application.FileManager;
 import application.NetworkManager;
 import gui.controller.widget.GenericHandler;

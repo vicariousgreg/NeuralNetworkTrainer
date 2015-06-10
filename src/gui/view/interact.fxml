@@ -16,9 +16,9 @@
                   <VBox spacing="5.0">
                      <children>
                         <Button mnemonicParsing="false" onAction="#correct" prefHeight="25.0" prefWidth="242.0" text="Correct!" textAlignment="CENTER" />
-                        <ScrollPane prefHeight="430.0" prefWidth="246.0">
+                        <ScrollPane prefHeight="538.0" prefWidth="246.0">
                            <content>
-                              <ListView fx:id="listView" prefHeight="426.0" prefWidth="237.0" />
+                              <ListView fx:id="listView" prefHeight="523.0" prefWidth="230.0" />
                            </content>
                         </ScrollPane>
                      </children>
@@ -26,25 +26,25 @@
                   <VBox alignment="TOP_CENTER" prefHeight="458.0" prefWidth="381.0" spacing="5.0">
                      <children>
                         <ColorPicker fx:id="colorPicker" prefHeight="25.0" prefWidth="390.0" />
-                        <Rectangle fx:id="colorBox" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="428.0" stroke="BLACK" strokeType="INSIDE" width="379.0" />
+                        <Rectangle fx:id="colorBox" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="537.0" stroke="BLACK" strokeType="INSIDE" width="379.0" />
                      </children>
                   </VBox>
                </children>
             </HBox>
-            <VBox alignment="CENTER" prefHeight="167.0" prefWidth="624.0" spacing="2.0">
+            <VBox alignment="CENTER" prefHeight="72.0" prefWidth="630.0" spacing="2.0">
                <children>
                   <HBox spacing="300.0">
                      <children>
-                        <Label prefHeight="25.0" prefWidth="141.0" text="Short Term Memory:" />
+                        <Label prefHeight="25.0" prefWidth="141.0" text="Prototypes:" />
                         <Button fx:id="memoryButton" mnemonicParsing="false" onAction="#viewMemory" prefHeight="25.0" prefWidth="178.0" text="View Memory" textAlignment="CENTER" />
                      </children>
                      <VBox.margin>
                         <Insets left="5.0" />
                      </VBox.margin>
                   </HBox>
-                  <ScrollPane prefHeight="124.0" prefViewportHeight="159.0" prefViewportWidth="624.0" prefWidth="630.0">
+                  <ScrollPane prefHeight="22.0" prefViewportHeight="159.0" prefViewportWidth="624.0" prefWidth="630.0">
                      <content>
-                        <FlowPane fx:id="shortTermMemoryPane" prefHeight="117.0" prefWidth="605.0" />
+                        <FlowPane fx:id="prototypesPane" prefHeight="25.0" prefWidth="605.0" />
                      </content>
                   </ScrollPane>
                </children>

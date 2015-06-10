@@ -1,6 +1,6 @@
 package gui.controller.component;
 
-import application.DialogFactory;
+import gui.controller.DialogFactory;
 import application.FileManager;
 import gui.controller.widget.GenericHandler;
 import gui.controller.widget.GenericList;
@@ -18,10 +18,10 @@ import java.util.*;
 
 public class MemoryController extends NetworkController implements Initializable {
    @FXML ListView listView;
-   @FXML FlowPane shortTermPane;
+   @FXML FlowPane prototypesPane;
    @FXML FlowPane longTermPane;
 
-   private MemoryBox shortTermMemoryBox;
+   private MemoryBox prototypesBox;
    private MemoryBox longTermMemoryBox;
    private GenericList<Object> classificationList;
 
@@ -30,7 +30,7 @@ public class MemoryController extends NetworkController implements Initializable
     * Sets up listeners for GUI.
     */
    public void initialize(URL location, ResourceBundle resources) {
-      shortTermMemoryBox = new MemoryBox(shortTermPane);
+      prototypesBox = new MemoryBox(prototypesPane);
       longTermMemoryBox = new MemoryBox(longTermPane);
       classificationList = new GenericList<Object>(listView);
 
@@ -59,6 +59,7 @@ public class MemoryController extends NetworkController implements Initializable
          classificationList.clear();
          classificationList.addAll(network.schema.getOutputClassifications());
          loadMemory(GenericList.kAll);
+         loadPrototypes();
          classificationList.setSelectedItem(GenericList.kAll);
       } catch (Exception e) {
          e.printStackTrace();
@@ -68,23 +69,28 @@ public class MemoryController extends NetworkController implements Initializable
    /**
     * Loads the network's memories for the given classification.
     * @param classification classification of memories to load
-    * @throws Exception
     */
    private void loadMemory(Object classification) {
       try {
-         // Populate short term memory box.
-         shortTermMemoryBox.clear();
-         if (classification == GenericList.kAll)
-            shortTermMemoryBox.add(network.schema, network.getPrototypes());
-         else
-            shortTermMemoryBox.add(network.schema, network.getMemories(classification));
-
          // Populate long term memory box.
          longTermMemoryBox.clear();
          if (classification == GenericList.kAll)
             longTermMemoryBox.add(network.schema, network.getAllMemories());
          else
             longTermMemoryBox.add(network.schema, network.getMemories(classification));
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+   }
+
+   /**
+    * Loads the network's prototypes.
+    */
+   private void loadPrototypes() {
+      try {
+         // Populate prototypes box.
+         prototypesBox.clear();
+         prototypesBox.add(network.schema, network.getPrototypes());
       } catch (Exception e) {
          e.printStackTrace();
       }
@@ -129,10 +135,14 @@ public class MemoryController extends NetworkController implements Initializable
     */
    public void importMemory() {
       try {
-         List<Memory> newMemories = FileManager.loadMemories(
-               DialogFactory.displayTextDialog("Enter memory set name:"));
-         network.addMemories(newMemories);
-         display();
+         String setName = (String) DialogFactory.displayEnumerationDialog(
+               "Select a memory set:", FileManager.getMemoryList());
+
+         if (setName != null) {
+            List<Memory> newMemories = FileManager.loadMemories(setName);
+            network.addMemories(newMemories);
+            display();
+         }
       } catch (Exception e) {
          DialogFactory.displayErrorDialog("Could not load memories!");
       }

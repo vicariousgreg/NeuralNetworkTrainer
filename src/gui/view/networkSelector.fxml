@@ -23,6 +23,6 @@
             <Insets bottom="5.0" top="5.0" />
          </HBox.margin>
       </VBox>
-      <Pane fx:id="subControllerPane" />
+      <Pane fx:id="subControllerPane" prefHeight="598.0" prefWidth="627.0" />
    </children>
 </HBox>

@@ -15,14 +15,20 @@ public class FileManager {
    /** Path to network files. */
    public static final String kNetworkPath = "src/application/data/networks/";
 
+   /** Path to schema files. */
+   public static final String kSchemaPath = "src/application/data/schemas/";
+
    /** Path to memory files. */
    public static final String kMemoryPath = "src/application/data/memories/";
 
-   /** Path to memory files. */
-   public static final String kSchemaPath = "src/application/data/schemas/";
+
+   //////////////
+   // NETWORKS //
+   //////////////
 
    /**
-    * Loads the network with the given name.
+    * Loads up all networks in storage.
+    * @return list of networks loaded from storage
     * @throws Exception if networks could not be loaded
     */
    public static List<Network> loadNetworks() throws Exception {
@@ -41,8 +47,29 @@ public class FileManager {
    }
 
    /**
-    * Loads the network with the given name.
-    * @throws Exception if networks could not be loaded
+    * Gets a list of networks in storage.
+    * @return list of networks
+    */
+   public static String[] getNetworkList() {
+      final File dataFile = new File(kNetworkPath);
+      final File[] networkFiles = dataFile.listFiles();
+      String[] networkNames = new String[networkFiles.length];
+
+      for (int i = 0; i < networkNames.length; ++i) {
+         networkNames[i] = networkFiles[i].getName();
+      }
+
+      return networkNames;
+   }
+
+   /////////////
+   // SCHEMAS //
+   /////////////
+
+   /**
+    * Loads up all schemas in storage.
+    * @return list of schemas loaded from storage
+    * @throws Exception if schemas could not be loaded
     */
    public static List<Schema> loadSchemas() throws Exception {
       final File dataFile = new File(kSchemaPath);
@@ -58,6 +85,26 @@ public class FileManager {
       }
       return schemas;
    }
+
+   /**
+    * Gets a list of schemas in storage.
+    * @return list of schemas
+    */
+   public static String[] getSchemaList() {
+      final File dataFile = new File(kMemoryPath);
+      final File[] schemaFiles = dataFile.listFiles();
+      String[] schemaNames = new String[schemaFiles.length];
+
+      for (int i = 0; i < schemaNames.length; ++i) {
+         schemaNames[i] = schemaFiles[i].getName();
+      }
+
+      return schemaNames;
+   }
+
+   //////////////
+   // MEMORIES //
+   //////////////
 
    /**
     * Loads a list of memories to storage.
@@ -80,6 +127,51 @@ public class FileManager {
       }
       return memories;
    }
+
+   /**
+    * Saves a list of memories to storage.
+    * @param name name of memory set
+    * @param memories memories to save
+    */
+   public static void saveMemories(String name, List<Memory> memories) throws Exception {
+      if (!exists(kMemoryPath, name))
+         new File(kMemoryPath + name).mkdir();
+
+      String path = kMemoryPath + name + "/";
+
+      for (Memory mem : memories) {
+         // Create classification subdirectory if necessary.
+         if (!exists(path, mem.output.toString()))
+            new File(path + mem.output.toString()).mkdir();
+
+         String memPath = path + mem.output.toString() + "/" + mem.hashCode();
+
+         FileOutputStream fos = new FileOutputStream(new File(memPath));
+         ObjectOutputStream out = new ObjectOutputStream(fos);
+         out.writeObject(mem);
+         out.close();
+      }
+   }
+
+   /**
+    * Gets a list of memory sets in storage.
+    * @return list of memory set names
+    */
+   public static String[] getMemoryList() {
+      final File dataFile = new File(kMemoryPath);
+      final File[] memorySets = dataFile.listFiles();
+      String[] setNames = new String[memorySets.length];
+
+      for (int i = 0; i < setNames.length; ++i) {
+         setNames[i] = memorySets[i].getName();
+      }
+
+      return setNames;
+   }
+
+   /////////////
+   // OBJECTS //
+   /////////////
 
    /**
     * Loads a file.
@@ -119,28 +211,14 @@ public class FileManager {
    }
 
    /**
-    * Saves a list of memories to storage.
-    * @param name name of memory set
-    * @param memories memories to save
+    * Deletes an object from storage with the given name.
+    * @param name object name
+    * @throws Exception if object could not be deleted
     */
-   public static void saveMemories(String name, List<Memory> memories) throws Exception {
-      if (!exists(kMemoryPath, name))
-         new File(kMemoryPath + name).mkdir();
-
-      String path = kMemoryPath + name + "/";
-
-      for (Memory mem : memories) {
-         // Create classification subdirectory if necessary.
-         if (!exists(path, mem.output.toString()))
-            new File(path + mem.output.toString()).mkdir();
-
-         String memPath = path + mem.output.toString() + "/" + mem.hashCode();
-
-         FileOutputStream fos = new FileOutputStream(new File(memPath));
-         ObjectOutputStream out = new ObjectOutputStream(fos);
-         out.writeObject(mem);
-         out.close();
-      }
+   public static void deleteObject(String path, String name) throws Exception {
+      if (!exists(path, name))
+         throw new Exception ("File does not exist!");
+      new File(kNetworkPath + name).delete();
    }
 
    /**
@@ -151,16 +229,5 @@ public class FileManager {
     */
    public static boolean exists(String path, String name) {
       return new File(path + name).exists();
-   }
-
-   /**
-    * Deletes a network from storage with the given name.
-    * @param name network file name
-    * @throws Exception if network could not be deleted
-    */
-   public static void delete(String path, String name) throws Exception {
-      if (!exists(path, name))
-         throw new Exception ("File does not exist!");
-      new File(kNetworkPath + name).delete();
    }
 }

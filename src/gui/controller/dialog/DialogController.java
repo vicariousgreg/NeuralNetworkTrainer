@@ -1,6 +1,6 @@
 package gui.controller.dialog;
 
-import application.DialogFactory.Response;
+import gui.controller.DialogFactory.Response;
 import javafx.fxml.FXML;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;

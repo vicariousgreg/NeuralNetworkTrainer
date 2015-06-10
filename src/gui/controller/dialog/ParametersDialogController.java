@@ -1,6 +1,6 @@
 package gui.controller.dialog;
 
-import application.DialogFactory;
+import gui.controller.DialogFactory;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -167,7 +167,7 @@ public class ParametersDialogController extends DialogController implements Init
       } else if (param instanceof BooleanParameter) {
          CheckBox checkBox = new CheckBox();
          controls.put(param, checkBox);
-         checkBox.setSelected(((BooleanParameter)param).getValue());
+         checkBox.setSelected(((BooleanParameter) param).getValue());
          parent = checkBox;
       } else {
          TextField textField = new TextField(param.getValueString());

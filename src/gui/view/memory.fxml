@@ -7,15 +7,15 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.controller.component.MemoryController">
+<VBox prefHeight="699.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.controller.component.MemoryController">
    <children>
-      <HBox>
+      <HBox prefHeight="581.0" prefWidth="900.0">
          <children>
             <VBox>
                <children>
-                  <ScrollPane layoutX="3.0" layoutY="-3.0" prefHeight="455.0" prefViewportHeight="398.0" prefViewportWidth="174.0" prefWidth="264.0">
+                  <ScrollPane layoutX="3.0" layoutY="-3.0" prefHeight="525.0" prefViewportHeight="398.0" prefViewportWidth="174.0" prefWidth="264.0">
                      <content>
-                        <ListView fx:id="listView" layoutX="3.0" layoutY="-3.0" prefHeight="452.0" prefWidth="261.0" />
+                        <ListView fx:id="listView" layoutX="3.0" layoutY="-3.0" prefHeight="516.0" prefWidth="249.0" />
                      </content>
                   </ScrollPane>
                   <Button mnemonicParsing="false" onAction="#exportMemory" prefHeight="25.0" prefWidth="261.0" text="Export..." />
@@ -24,24 +24,24 @@
             </VBox>
             <ScrollPane prefHeight="495.0" prefViewportHeight="159.0" prefViewportWidth="624.0" prefWidth="631.0">
                <content>
-                  <FlowPane fx:id="longTermPane" prefHeight="489.0" prefWidth="626.0" />
+                  <FlowPane fx:id="longTermPane" prefHeight="576.0" prefWidth="602.0" />
                </content>
             </ScrollPane>
          </children>
       </HBox>
-      <HBox alignment="CENTER" layoutX="7.0" prefHeight="197.0" prefWidth="900.0" spacing="50.0">
+      <HBox alignment="CENTER" layoutX="7.0" prefHeight="92.0" prefWidth="900.0" spacing="50.0">
          <children>
             <VBox layoutX="23.0" prefHeight="174.0" prefWidth="601.0">
                <children>
-                  <Label prefHeight="25.0" prefWidth="141.0" text="Short Term Memory:" />
-                  <ScrollPane prefHeight="145.0" prefViewportHeight="159.0" prefViewportWidth="624.0" prefWidth="624.0">
+                  <Label prefHeight="25.0" prefWidth="141.0" text="Prototypes:" />
+                  <ScrollPane prefHeight="52.0" prefViewportHeight="159.0" prefViewportWidth="624.0" prefWidth="601.0">
                      <content>
-                        <FlowPane fx:id="shortTermPane" prefHeight="137.0" prefWidth="590.0" />
+                        <FlowPane fx:id="prototypesPane" prefHeight="47.0" prefWidth="590.0" />
                      </content>
                   </ScrollPane>
                </children>
             </VBox>
-            <Button alignment="CENTER" mnemonicParsing="false" onAction="#consolidate" prefHeight="109.0" prefWidth="153.0" text="Consolidate" />
+            <Button alignment="CENTER" mnemonicParsing="false" onAction="#consolidate" prefHeight="46.0" prefWidth="153.0" text="Consolidate" />
          </children>
          <padding>
             <Insets top="10.0" />
