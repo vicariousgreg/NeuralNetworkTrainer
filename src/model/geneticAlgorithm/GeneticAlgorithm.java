@@ -56,9 +56,14 @@ public class GeneticAlgorithm<T> {
     * @return winner
     */
    public T run() {
-      System.out.println("RUNNING");
+      final boolean debug = false;
+
+      if (debug) System.out.println("RUNNING");
+
       List<T> population = adapter.generatePopulation(populationSize);
-      System.out.println("Generated population...");
+
+      if (debug) System.out.println("Generated population...");
+
       T best = adapter.getBest(population);
       double bestFitness = adapter.calcFitness(best);
       boolean terminate = Double.compare(bestFitness, acceptableFitness) == 0;
@@ -96,8 +101,10 @@ public class GeneticAlgorithm<T> {
          terminate = generationCounter == generationCap ||
                Double.compare(bestFitness, acceptableFitness) >= 0;
 
-         System.out.println("GenAlg best fitness: " + bestFitness);
+         if (debug) System.out.println("GenAlg best fitness: " + bestFitness);
       }
+
+      System.out.println("Best fitness: " + bestFitness);
 
       return best;
    }

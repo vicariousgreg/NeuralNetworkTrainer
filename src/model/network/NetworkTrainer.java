@@ -4,22 +4,35 @@ import model.network.memory.Memory;
 import model.network.parameters.Parameters;
 
 import java.io.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Neural network trainer.
  */
 public class NetworkTrainer implements Serializable {
    private Network network;
+   private List<Memory> trainingMemory;
+   private List<Memory> testMemory;
+   private Map<Object, double[]> outputVectors;
 
-   public NetworkTrainer(Network network) {
+   public NetworkTrainer(Network network, List<Memory> trainingMemory,
+                         List<Memory> testMemory) throws Exception {
+      this.trainingMemory = trainingMemory;
+      this.testMemory = testMemory;
       this.network = network;
+
+      this.outputVectors = new HashMap<Object, double[]>();
+
+      for (Object classification : network.schema.getOutputClassifications())
+         outputVectors.put(classification, network.schema.encodeOutput(classification));
    }
 
    /**
     * Trains the network with its memories.
     */
-   public void train(List<Memory> trainingMemory, List<Memory> testMemory) throws Exception {
+   public void train() throws Exception {
       final boolean debug = false;
 
       if (trainingMemory.size() == 0 || testMemory.size() == 0) {
@@ -42,10 +55,12 @@ public class NetworkTrainer implements Serializable {
       double percentCorrect = calcPercentCorrect(testMemory);
       double bestPercent = percentCorrect;
 
-      if (debug) System.out.println("Total test error before learning: " + testError);
-      if (debug) System.out.println("Passing percentage: %" + percentCorrect);
-      if (debug) System.out.println("Training memory size: " + trainingMemory.size());
-      if (debug) System.out.println("Test memory size: " + testMemory.size());
+      if (true) {
+         System.out.println("Total test error before learning: " + testError);
+         System.out.println("Passing percentage: %" + percentCorrect);
+         System.out.println("Training memory size: " + trainingMemory.size());
+         System.out.println("Test memory size: " + testMemory.size());
+      }
 
       // Extract relevant parameters
       Double acceptableTestError = (Double)
@@ -87,18 +102,19 @@ public class NetworkTrainer implements Serializable {
          // Reset if stale
          if (Double.compare(prevError, testError) == 0 &&
                Double.compare(prevPercent, percentCorrect) == 0) {
-            System.out.print(".");
+            if (debug) System.out.print(".");
+
             if (++staleCounter == staleThreshold) {
                staleCounter = 0;
                network.neuronGraph.reset();
                testError = calcTotalTestError(testMemory);
                percentCorrect = calcPercentCorrect(testMemory);
-               System.out.println("\n===RESET");
+               if (debug) System.out.println("\n===RESET");
             }
-         } else if (Double.compare(prevPercent, percentCorrect) > 0) {
+         } else if (debug && Double.compare(prevPercent, percentCorrect) > 0) {
             System.out.print("\n- ");
             System.out.printf("%f", percentCorrect);
-         } else if (Double.compare(prevPercent, percentCorrect) < 0) {
+         } else if (debug && Double.compare(prevPercent, percentCorrect) < 0) {
             System.out.print("\n+ ");
             System.out.printf("%f", percentCorrect);
          }
@@ -113,11 +129,13 @@ public class NetworkTrainer implements Serializable {
 
       network.neuronGraph = bestGraph;
 
-      if (debug) System.out.println("Total test error after learning: " +
-            calcTotalTestError(testMemory));
-      if (debug) System.out.println("Passing percentage: %" +
-            calcPercentCorrect(testMemory));
-      if (debug) System.out.println();
+      if (true) {
+         System.out.println("Total test error after learning: " +
+               calcTotalTestError(testMemory));
+         System.out.println("Passing percentage: %" +
+               calcPercentCorrect(testMemory));
+         System.out.println();
+      }
    }
 
    /**
@@ -167,7 +185,7 @@ public class NetworkTrainer implements Serializable {
     */
    private double[] calcError(double[] actual, Object expected) throws Exception {
       double[] errors = new double[actual.length];
-      double[] expectedVector = network.schema.encodeOutput(expected);
+      double[] expectedVector = outputVectors.get(expected);
 
       // Calculate test error for each output neuron.
       for (int i = 0; i < actual.length; ++i) {

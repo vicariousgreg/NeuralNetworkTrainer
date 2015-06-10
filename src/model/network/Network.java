@@ -73,7 +73,6 @@ public class Network implements Serializable {
     * @param params network parameters
     */
    public void setParameters(Parameters params) {
-      System.out.println("Params");
       this.parameters = params;
       this.neuronGraph.build(schema, params);
       buildMemoryModule((Class)
@@ -185,7 +184,7 @@ public class Network implements Serializable {
     */
    public void train(List<Memory> trainingSet, List<Memory> testSet) throws Exception {
       try {
-         new NetworkTrainer(this).train(trainingSet, testSet);
+         new NetworkTrainer(this, trainingSet, testSet).train();
          memoryModule.onTrain();
          generatePrototypes();
       } catch (Exception e) {
