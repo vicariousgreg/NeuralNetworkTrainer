@@ -9,10 +9,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.util.StringConverter;
-import model.network.parameters.ClassParameter;
-import model.network.parameters.EnumeratedParameter;
-import model.network.parameters.Parameter;
-import model.network.parameters.Parameters;
+import model.network.parameters.*;
 
 import java.net.URL;
 import java.util.*;
@@ -68,7 +65,7 @@ public class ParametersDialogController extends DialogController implements Init
                      newSubParams.put(subParam.name, newSubParam);
                   }
 
-                  ((ClassParameter)newParams.getParameter(key)).setValue((Class)value, newSubParams);
+                  ((ClassParameter)newParams.getParameter(key)).setValue((Class) value, newSubParams);
                } else {
                   newParams.getParameter(key).setValue(value);
                }
@@ -167,6 +164,11 @@ public class ParametersDialogController extends DialogController implements Init
          } else {
             parent = comboBox;
          }
+      } else if (param instanceof BooleanParameter) {
+         CheckBox checkBox = new CheckBox();
+         controls.put(param, checkBox);
+         checkBox.setSelected(((BooleanParameter)param).getValue());
+         parent = checkBox;
       } else {
          TextField textField = new TextField(param.getValueString());
          controls.put(param, textField);
@@ -209,6 +211,8 @@ public class ParametersDialogController extends DialogController implements Init
                }
                value = arr;
             }
+         } else if (paramControl instanceof CheckBox) {
+            value = ((CheckBox) paramControl).isSelected();
          } else if (paramControl instanceof ComboBox) {
             value = ((ComboBox) paramControl).getValue();
          }

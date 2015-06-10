@@ -3,6 +3,7 @@ package model.network;
 import model.geneticAlgorithm.GeneticAlgorithm;
 import model.geneticAlgorithm.PrototypeGeneticAdapter;
 import model.network.memory.*;
+import model.network.parameters.BooleanParameter;
 import model.network.parameters.Parameters;
 import model.network.schema.*;
 
@@ -130,6 +131,8 @@ public class Network implements Serializable {
     */
    public void addMemory(Object in, Object result) throws Exception {
       memoryModule.add(schema.createMemory(in, result));
+      if (((BooleanParameter) parameters.getParameter(Parameters.kLiveTraining)).getValue())
+         train();
    }
 
    /**
@@ -138,6 +141,8 @@ public class Network implements Serializable {
     */
    public void addMemory(Memory mem) throws Exception {
       memoryModule.add(mem);
+      if (((BooleanParameter) parameters.getParameter(Parameters.kLiveTraining)).getValue())
+         train();
    }
 
    /**
@@ -184,6 +189,7 @@ public class Network implements Serializable {
          memoryModule.onTrain();
          generatePrototypes();
       } catch (Exception e) {
+         e.printStackTrace();
          System.err.println("Network has corrupt memories!");
       }
    }
@@ -199,6 +205,8 @@ public class Network implements Serializable {
                   new PrototypeGeneticAdapter(this, classification));
             alg.setPopulationSize(1000);
             alg.setGenerationCap(25);
+            alg.setMutationRate(0.1);
+            alg.setAcceptableFitness(-0.001);
             prototypes.put(classification, schema.createMemory(alg.run(), classification));
          } catch (Exception e) {
             e.printStackTrace();

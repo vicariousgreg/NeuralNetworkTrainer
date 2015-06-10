@@ -5,7 +5,6 @@ import model.network.memory.Memory;
 import model.network.schema.Schema;
 
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Created by gpdavis on 6/5/15.

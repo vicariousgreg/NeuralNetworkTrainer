@@ -94,7 +94,7 @@ public class GeneticAlgorithm<T> {
          // the population cap.
          ++generationCounter;
          terminate = generationCounter == generationCap ||
-               Double.compare(bestFitness, acceptableFitness) == 0;
+               Double.compare(bestFitness, acceptableFitness) >= 0;
 
          System.out.println("GenAlg best fitness: " + bestFitness);
       }

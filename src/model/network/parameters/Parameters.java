@@ -5,7 +5,6 @@ import model.network.activation.*;
 import model.network.memory.BasicMemoryModule;
 
 import java.io.Serializable;
-import java.lang.reflect.Method;
 import java.util.*;
 
 /**
@@ -19,6 +18,7 @@ public class Parameters implements Serializable {
    public static final String kAcceptableTestError = "Acceptable Test Error";
    public static final String kAcceptablePercentCorrect = "Acceptable Test Percentage Correct";
    public static final String kIterationCap = "Training iteration cap";
+   public static final String kLiveTraining = "Live Training";
    public static final String kMemoryModule = "Memory Module";
    public static final String kActivationFunction = "Activation Function";
 
@@ -59,13 +59,16 @@ public class Parameters implements Serializable {
       /** Acceptable percentage correct for learning termination. */
       parameters.put(kIterationCap,
             new BoundedParameter<Integer>(kIterationCap, 20000, 1, 1000000));
+      /** Live training flag. */
+      parameters.put(kLiveTraining,
+            new BooleanParameter(kLiveTraining, true));
 
-      /** Memory module type. */
+      /** Memory Module. */
       parameters.put(kMemoryModule,
             new ClassParameter(kAcceptablePercentCorrect,
                   BasicMemoryModule.class, Registry.memoryModuleClasses));
 
-      /** Memory module type. */
+      /** Activation Function. */
       parameters.put(kActivationFunction,
             new ClassParameter(kActivationFunction,
                   SigmoidEstimate.class, Registry.activationFunctionClasses));
